@@ -1,9 +1,0 @@
-
-AuthType Basic
-
-AuthName "install"
-
-AuthUserFile "/home/tribestr/.htpasswds/install/passwd"
-
-
-require valid-user
