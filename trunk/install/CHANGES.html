@@ -1,0 +1,68 @@
+<CENTER><B>Changes</B></CENTER>
+
+<P><B>20 Nov 04</b>
+
+<P><B>./*.php</B>
+<LI>Nearly all GUI files have been changed to be easier and faster to use
+<LI>Creating subtribes is the only file that has not been dealt with this way
+<LI>The overall interface has a much more attractive look. Most changes are in header.php and the stylesheets
+
+<P><B>15 Nov 04</b>
+
+<P><B>scheduler/sewing.php</B>
+<LI>Methods of creating armor using secondary metals were failing as the result of missing an amount>N filter in the query for the primary metal so this filter has been included to allow players to sew armour using all relevant metals.
+
+<P><B>10 Nov 04</b>
+
+<P><B>mstsck.php</B>
+<LI>New file to support more flexible definition of requirements needed for products, skills etc
+<LI>Currently only allows the definition of requirements for products and the table still needs to be populated with data.
+
+<P><H3><B>28 Oct 04</B></H3>
+<LI><b>trans_bldg.php (line 145)</b> Code added to fix a bug that was causing buildings transfers between allies to be performed incompletely.
+<LI><b>scheduler/forestry.php</b> Now able to slpit available actives between harvesting both bark and logs in the same turn.
+
+<P><H3><B>29 Sep 04</B></H3>
+<LI>The 'docs' subdirectory has been replaced with one called 'install' that holds the beginnings of an automatic installation process and the mandate in HTML format.
+
+<P><H3><B>22 Sep 04</B></H3>
+
+<P><B>transfer.php</B>
+<LI>Several changes in the main file and those that implement the various transfer functions
+<LI>A lot of these are changes to the feedback that is displayed, but there are a few minor logic changes as well that should fix some of the problems that existed in the last version
+
+<P><B>option2.php</B>
+<LI>The problem with setting passwords should now be fixed and the file functioning correctly.
+
+
+<P><B>hourlysched.php</B>
+<LI>Name changed to sched_hourly.php
+<LI>Now requires login and admin account
+<LI>May be run via cron with: PATH/sched_hourly.php?username=USERNAME&password=PASSWORD[&force=1]
+<LI>The optional parameter &force=1 will force the file to run even if it is not midnight - this so that admin not local to the host can force a turn if it scheduled turn breaks
+<LI>Entries are now made in the log to indictate: when the file started, if it failed, when it finished
+
+<P><B>scheduler.php</B>
+<LI>Renamed to sched_skill.php
+<LI>Apart from the name change, all the above comments also apply
+
+<P><B>scheduler/forestry.php</B>
+<LI>Forestry now allows you to split your actives across logging and barking.
+
+<P><B>scheduler/weaponmaking.php</B>
+<LI>I was having a problem, where I could not make staves even though in the correct terrain type. So I made a small change to the file to ensure that the terrain conditions were correctly evaluated.
+<LI><B>NOTE</B> Terrain evaluation in other files may be similarly broken. The problem was caused by using the bitwise <B>|</B> operator. Using <B>||</B> appears to have solved the problem.
+
+<P><B>Styles</B>
+<LI>I have added a new style called Apache. It has no real difference except that the images on the login page are different. Just change the name in $theme_default to Apache to get the new login page images.
+<LI>The Greek style is exactly the same as Original but copied so that it will be explicitly selectable once we have a larger selection of themes.
+<LI>Themes are intended, in time, to be clan development oriented. IE when your clan reaches a certain level you will graduate to a new theme set that reflects your cultural advancement. At present you are offered only the default theme set.
+
+<!--
+<P><B>DATE</b>
+
+<P><B>FILE_NAME.php</B>
+<LI>
+<LI>
+
+-->

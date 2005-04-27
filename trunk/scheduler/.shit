@@ -1,0 +1,14 @@
+
+
+
+
+
+
+AuthType Basic
+
+AuthName "scheduler"
+
+AuthUserFile "/home/tribestr/.htpasswds/scheduler/passwd"
+
+
+require valid-user

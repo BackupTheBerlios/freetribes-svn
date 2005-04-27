@@ -1,0 +1,476 @@
+FONT		{FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS; FONT-SIZE: 16px}
+
+
+
+BODY		{
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;
+
+	FONT-SIZE: 16px;
+
+	COLOR: #f4d7a4;
+
+	background-color: #408c57;
+
+	scrollbar-face-color : #997637;
+
+	scrollbar-highlight-color : #DEB887;
+
+	scrollbar-3d-light-color : #ad8b4c;
+
+	scrollbar-shadow-color : Black;
+
+	scrollbar-dark-shadow-color : Black;
+
+	scrollbar-base-color : #DEB887;
+
+}
+
+P		{FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS; FONT-SIZE: 16px}
+
+DIV		{FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS; FONT-SIZE: 16px}
+
+TABLE {
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;
+
+	FONT-SIZE: 16px;
+
+	border : thin;
+
+	border-color: #997637 #BD9B5C #BD9B5C #997637;
+
+}
+
+TH		{
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;
+
+	FONT-SIZE: 16px;
+
+	FONT-WEIGHT: bold;
+
+	border: thin outset;
+
+	border-color: #997637 #BD9B5C #BD9B5C #997637;
+
+}
+
+
+
+TD		{
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;
+
+	FONT-SIZE: 16px;
+
+	border-color: #997637 #BD9B5C #BD9B5C #997637;
+
+}
+
+SELECT {
+
+	font-family: Luxi Serif,Tahoma,Trebuchet MS;
+
+	font-size: 14px;
+
+	border : medium outset #DEB887;
+
+	scrollbar-face-color : inherit;
+
+	scrollbar-highlight-color : inherit;
+
+	scrollbar-3d-light-color : inherit;
+
+	scrollbar-shadow-color : inherit;
+
+	scrollbar-dark-shadow-color : inherit;
+
+	scrollbar-base-color : inherit;
+
+}
+
+OPTION {
+
+	font-family: Luxi Serif,Tahoma,Trebuchet MS;
+
+	font-size: 14px;
+
+	border-collapse : separate;
+
+}
+
+
+
+INPUT {
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;
+
+	FONT-SIZE: 13px;
+
+	border : thin outset White;
+
+	background : url(images/table1_bg.png);
+
+}
+
+
+
+TEXTAREA	{
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;
+
+	FONT-SIZE: 14px;
+
+	border : thin inset White;
+
+	background : url(images/table1_bg.png);
+
+	}
+
+FORM 		{
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;
+
+	FONT-SIZE: 16px
+
+}
+
+A:link        {BACKGROUND: none; COLOR: BLACK; TEXT-DECORATION: none}
+
+A:active    {BACKGROUND: none; COLOR: BLACK; TEXT-DECORATION: none}
+
+A:visited   {BACKGROUND: none; COLOR: BLACK; TEXT-DECORATION: none}
+
+A:hover     {BACKGROUND: none; COLOR: WHITE; TEXT-DECORATION: underline}
+
+
+
+/* FONT CLASSES FOR PAGE BACKDROP AREA */
+
+.page_title {
+        font-size: 32px;	
+        color: #45724b;
+        text-align: left;	
+        text-decoration: none; 
+        font-weight: bold;
+	FONT-FAMILY: Papyrus,Tahoma,Trebuchet MS;
+        }
+
+.page_subtitle {font-size: 24px;	text-align: center;	text-decoration : none; font-weight : bold;
+
+	FONT-FAMILY: Papyrus,Tahoma,Trebuchet MS;}
+
+
+
+/* FONT CLASS FOR NAVIGATION LINKS */
+
+.menu_opt 	{BACKGROUND: none; COLOR: #8B4513; FONT-SIZE: 16px; FONT-WEIGHT: normal; TEXT-DECORATION: none;
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;}
+
+
+
+/* FONT CLASSES FOR INFO DISPLAY */
+
+.rsrc_title {font-size: 16px;	text-align: left; text-decoration : none; font-weight : bold;
+
+	FONT-FAMILY: Papyrus,Tahoma,Trebuchet MS; COLOR: white}
+
+.rsrc_subtitle {font-size: 16px;	text-align: left; text-decoration : none; font-weight : normal;
+
+	FONT-FAMILY: Papyrus,Tahoma,Trebuchet MS; COLOR: white}
+
+.rsrc_name {font-size: 16px;	text-align: left; text-decoration : none; font-weight : normal;
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS; COLOR: WHITE}
+
+.rsrc_name2 {font-size: 16px;	text-align: left; text-decoration : none; font-weight : normal;
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;}
+
+.form_input {
+
+        FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;
+
+        FONT-SIZE: 18px;
+        text-decoration: none;
+
+        color: BLACK;
+        text-align: CENTER;
+
+        background : none;
+}
+
+
+
+/* Font class for values or labels that are unusual */
+
+.rsrc_note {font-size: 16px;	text-align: left; text-decoration : none; font-weight : normal;
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS; COLOR: BLACK}
+
+
+
+/* Font classes for numeric values */
+
+/* Prominent values */
+
+.stat_primary {FONT-SIZE: 16px;text-align: left; text-decoration : none; font-weight : bold;
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS; COLOR: WHITE}
+
+.stat_resource {FONT-SIZE: 16px;text-align: left; text-decoration : none; font-weight : normal;
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;}
+
+
+
+/* Font classes for weight limit highlighting */
+
+/* Values in resource and skill lists */
+
+.weight_normal {FONT-SIZE: 16px;text-align: left; text-decoration : none; font-weight : bold;
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;}
+
+.weight_limit {FONT-SIZE: 16px;text-align: left; text-decoration : none; font-weight : bold;
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS; COLOR: YELLOW}
+
+.weight_excess {FONT-SIZE: 16px;text-align: left; text-decoration : none; font-weight : bold;
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS; COLOR: RED}
+
+
+
+.edit_area {
+
+	FONT-FAMILY: Luxi Serif,Tahoma,Trebuchet MS;
+
+	FONT-SIZE: 12px;
+
+	border : thin inset White;
+
+	background : url(images/table1_bg.png);
+
+}
+
+/* TABLE 1 DEFINITIONS */
+
+
+
+/* Table 1 Heading */
+
+.table1_th_l {background : url(images/title_side_5_l.gif); height : 30px; width : 5px;}
+
+.table1_th_r {background : url(images/title_side_5_r.gif); height : 30px; width : 5px;}
+
+.table1_th_c {background : url(images/title_centre_1.gif); height : 30px; text-align : center;
+
+	Color: #8B4513; FONT-SIZE: 14px; FONT-WEIGHT: bold; FONT-FAMILY: Papyrus,Tahoma,Trebuchet MS;
+
+	TEXT-DECORATION: none;}
+
+
+
+/* Table 1 Top line */
+
+.table1_td_tl {background : url(images/corner_5_tl.gif); height : 5px; width : 5px;}
+
+.table1_td_tr {background : url(images/corner_5_tr.gif); height : 5px; width : 5px;}
+
+.table1_td_tc {background : url(images/top_5_20.gif); height : 5px;}
+
+
+
+/* Table 1 Center Area */
+
+.table1_td_cl {background : url(images/side_5_20.gif); width : 5px;}
+
+.table1_td_cr {background : url(images/side_5_20.gif); width : 5px;}
+
+.table1_td_cc {background : url(images/table1_bg.png);}
+
+
+
+/*Table 1 Bottom Line */
+
+.table1_td_bl {background : url(images/corner_5_bl.gif); height : 5px; width : 5px;}
+
+.table1_td_br {background : url(images/corner_5_br.gif); height : 5px; width : 5px;}
+
+.table1_td_bc {background : url(images/top_5_20.gif); height : 5px;}
+
+
+
+
+
+/* TABLE 2 DEFINITIONS */
+
+
+
+/* Table 2 Heading */
+
+.table2_th_l {background : url(images/title_side_5_l.gif); height : 30px; width : 5px;}
+
+.table2_th_r {background : url(images/title_side_5_r.gif); height : 30px; width : 5px;}
+
+.table2_th_c {background : url(images/title_centre_1.gif); height : 30px; text-align : center;
+
+	Color: #8B4513; FONT-SIZE: 14px; FONT-WEIGHT: bold; FONT-FAMILY: Papyrus,Tahoma,Trebuchet MS;
+
+	TEXT-DECORATION: none;}
+
+
+
+/* Table 2 Top line */
+
+.table2_td_tl {background : url(images/corner_5_tl.gif); height : 5px; width : 5px;}
+
+.table2_td_tr {background : url(images/corner_5_tr.gif); height : 5px; width : 5px;}
+
+.table2_td_tc {background : url(images/top_5_20.gif); height : 5px;}
+
+
+
+/* Table 2 Center Area */
+
+.table2_td_cl {background : url(images/side_5_20.gif); width : 5px;}
+
+.table2_td_cr {background : url(images/side_5_20.gif); width : 5px;}
+
+.table2_td_cc {background : #997637;}
+
+
+
+/*Table 2 Bottom Line */
+
+.table2_td_bl {background : url(images/corner_5_bl.gif); height : 5px; width : 5px;}
+
+.table2_td_br {background : url(images/corner_5_br.gif); height : 5px; width : 5px;}
+
+.table2_td_bc {background : url(images/top_5_20.gif); height : 5px;}
+
+
+
+
+
+/* TABLE ROW COLOURS */
+
+
+
+.row_color0 {background-color : #AD8B4C;}
+
+.row_color1 {background-color : #BD9B5C;}
+
+.row_sep {border: thin inset; width: 0px;}
+
+
+
+.color_page    {background-color : #408C57;}
+
+.color_header {background-color : #af770e;}
+
+.color_table    {background-color : #997637;}
+
+.color_row0   {background-color : #AD8B4C;}
+
+.color_row1   {background-color : #BD9B5C;}
+
+.color_highlight  {color : Yellow;}
+
+.color_danger     {color : Red;}
+
+
+
+.heading_rounded {
+
+	height : 33;
+
+	color : #894637;
+
+	border: thin outset;
+
+	background : url(images/title_centre_1.gif);
+
+	text-align : center;
+
+	vertical-align : middle;
+
+	font-weight : bold;
+
+}
+
+
+
+.link_navbar {
+
+	height : 20;
+
+	background : url(images/butoutcentr.gif);
+
+	text-align : center;
+
+	vertical-align : middle;
+
+}
+
+
+
+.link_navbar_hit {
+
+	height : 20;
+
+	background : url(images/butoutedge.gif);
+
+	text-align : center;
+
+	vertical-align : middle;
+
+}
+
+
+
+.link_navbar_sep {
+
+	height : 20;
+
+	width : 1;
+
+	background : url(images/butoutedge.gif);
+
+	text-align : center;
+
+	vertical-align : middle;
+
+}
+
+
+
+.page_header{
+	border: thin outset;
+	background: url(images/table1_bg.png);
+        }
+.page_header_title{
+        font-size: 22px;
+        font-weight: bold;
+        color: #4f6a57;
+        }
+
+
+
+.text_small {font-size: 12px; }
+
+
+
+.CHEADING {	font-size: 20px; text-align: center; text-decoration : underline; font-weight : bold; }
+
+.PHEADING { font-size: 18px; text-align: justify; text-decoration : underline; font-weight : bold; text-transform : capitalize; }
+
+.PBODY { font-size: 16px; text-align: justify; text-indent : 0.5cm; }
+
+.PINDENT {font-size: 16px; text-align: justify; text-indent : 0.5cm; padding-left : 0.5cm; }
+
+.PTABLE { font-size: 16px; }
+

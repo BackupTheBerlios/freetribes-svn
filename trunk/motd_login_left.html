@@ -1,0 +1,12 @@
+<?
+global $db, $dbtables;
+
+connectdb();                 // Get last reset info
+$reset = $db->Execute("SELECT * FROM $dbtables[reset_date]");
+$resinfo = $reset->fields;
+?>
+<STRONG>The game was last reset on </STRONG><BR>
+<FONT COLOR=BLACK>
+<? echo "$resinfo[date]" ?>
+</FONT>
+<BR>Please create a new clan if you have not logged in since then.

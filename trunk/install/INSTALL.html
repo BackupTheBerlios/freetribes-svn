@@ -1,0 +1,112 @@
+<H3><CENTER><B>Install Guide</B></CENTER></H3>
+
+<ol>
+<li>Untar the entire tarball into the directory you will be using<p><b>tar -zxvf filename.tar.gz</b><p>... known from now as <b>WEB_ROOT/tribe/</b>
+
+<P><li>Point your browser at EWB_ROOT/tribe/install_script.php, enter the username and password of the administrator account, and it will basically blow away the existing game and completely install a new instance of the game with an admin account using the credentials you just gave it. 
+<P>This picks up any game settings from config.php and config_local.php so you'll need to make sure those files are correctly edited for your environment.
+<P><b>or</b> use the old, slow method ...
+<ul>
+<P><li>Create a database for your tribe tables.<br><i>I've been using a combination of the mysql command line and myphpadmin depending on what I've been doing.</i>
+
+<P><li>Import the WEB_ROOT/tribe/schema.sql into the newly created database.
+
+<P><li>Modify CONFIG.PHP as appropriate
+
+<P><li>Modify CONFIG_LOCAL.PHP as appropriate
+
+<p><li>In the directories 'admin' and 'scheduler', modify the .htaccess files as appropriate.<BR><B>Note:</B> You may have to add additional permitted IP's/domains to the .htaccess files, especially the one in 'admin', if you want people from places other than your own server to be able to access the admin functions.
+
+<P><li>Point your browser to http://localhost/TRIBES_PATH/hexfill.php to create your world
+
+<P><li>Point your browser at http://localhost/TRIBES_PATH/ and create a new account<BR>It is important that you do actually do this.
+</ul>
+<P><li>In the database, edit the table 'chiefs' and set the 'admin' level for your new account to 100. (The install_script may already do this)
+
+<P><li>Enter these two entries into your crontab, modifying as appropriate
+
+<P><FONT SIZE=1>05 * * * * /usr/bin/lynx --dump http://localhost/tribe/scheduler/sched_time.php?username=ADMIN_USERNAME&password=ADMIN_PASSWORD &gt;/dev/null
+<BR>00 00 * * * /usr/bin/lynx --dump http://localhost/tribe/scheduler/sched_skill.php?username=ADMIN_USERNAME&password=ADMIN_PASSWORD &gt;/dev/null</FONT>
+
+<P><li>Edit the motd*.html files in 'local' to display info and messages that are appropriate to your server.
+</ol>
+
+<P>That *SHOULD* be all that's needed. If not, you can <A HREF="mailto:jarmaug@rocketmail.com?subject=Please help me setup Tribe Strive&body=Please type in a clear and concise description of the problem(s) that you are having.">email me</A> at  and I'll see what answers I can come up with.
+<P>Currently running on slackware, apache, mysql. Nothing else is supported at this time.
+
+<P><b>phpBB2 Setup</b>
+
+<P>This is still a work in progress. The following instructions are fallible and might not work. If they do not, it is your decision whether to persist until you have a working board, or not.
+
+<ol><li>Edit the file WEB_ROOT/tribe/phpbb2/config.php to reflect your local settings. By default, the settings in this file are ...<pre>$dbms = 'mysql4';        // If your MySQL version is less than 4, delete the numeral 4 at the end of 'mysql4'
+
+$dbhost = 'localhost'; // Set this to your database host name
+$dbname = 'tribe_bb'; // Set this to the name of the database that will hold your bb tables
+$dbuser = 'root';    // Set the appropriate user name, one with all priveleges
+$dbpasswd = '';     // Set the password for that user
+
+$table_prefix = 'tribe_bb_';        // Leave this unchanged
+
+define('PHPBB_INSTALLED', true);  // Leave this unchanged</pre>
+
+<p><li><b>NB:</b> I have not tried it, but you should be able to have the tribe game tables and the tribe bb tables inside the same database. In that case, the value above for $dbname should be the same as it is in your WEB_ROOT/tribe/config_local.php file.
+
+<p><li>Run<p><b>ipconfig</b><p>and write down the value given as the IP Address
+
+<p><li>Replacing IP_ADDRESS with thevalue you just got from ipconfig, run<p><b>nslookup IP_ADRESS</b><p>and write down the value given as Server 
+
+<p><li>Then, replacing SERVER with the value you just got from nslookup, run this query ..<P><PRE>UPDATE `tribe_bb_config` SET config_value='SERVER' WHERE config_name='server_name';</pre><b>NOTE:</b> If you have extracted the source into WEB_ROOT/tribe, then the value for <b>$gamedomain</b> in the file  <b>WEB_ROOT/tribe/config_local.php</b> should normally be <b>SERVER/tribe</b>. 
+
+<P>EG.<i>prowler.net.tufts.edu/tribe</i>
+
+<p><li>Use your MySQL admin function to run the following query<pre>UPDATE `tribe_bb_users` SET user_email='MY_TRIBES_ADMIN_EMAIL' WHERE 2;</pre>or use the BB admin to set it correctly
+
+<p><li>Once you have done that, you should point your browser to <a href ="http://localhost/tribe/phpbb2/" target=ts_bb_config>http://localhost/tribe/phpbb2/</a> and <b><u>Log in</u></b>.
+
+<p><li>Now go to the bottom of the page and click the <b><u>Go to Administration Panel</u></b> link.
+
+<p><li>In the panel on the left, scroll down until you see <b>User Admin</b> and click the <b><u>Management</u></b> link.
+
+<P><li>Beside <b>Look up user</b> type in <i>tribe</i> and then on the next page set your personal options as you choose.
+
+<p><li>Now go to the option on the left under <b>Forum Admin::Management</b> and set your forums up as you like.
+
+</ol>
+
+<P><FORM METHOD=POST ACTION="install_cfg.php">
+<RIGHT><INPUT TYPE=SUBMIT VALUE="Install Now!"></RIGHT>
+</FORM>
+<P>Start the automatic installation process in a new window.
+<BR><b>Note that this is not implemented yet.</b>
+<P><H3><b>Troubleshooting</b></H3>
+
+<ul>
+<P><li><b>After you login you get the error:</b> <i>"Cannot connect to the database"</i>
+<P><ol>
+	<li>Make sure that the value for $ADOdbpath in the file ./local/config_local.php is correct. The default sets it to a sub directory in the game folder and this should normally work fine.
+	<li>Make sure that the variable $game_root in the file ./config.php is correct. This should have the full path on your filesystem to the file. eg
+		<ul>
+		<li>C:/web_root/tribe/ <b>or</b>
+		<li>/var/www/htdocs/tribedev/
+		</ul>
+	The "/" at the end of those is required!
+	<li>Make sure that the variable $use_local in the file config.php is set <b>true</b>. At time of writing, any other value for this may fail.
+	<li>Make sure that the variables $dbhost, $dbport, $dbname, $dbuname, $dbpass, $db_type, $db_persistent, $db_prefix are set correctly in the file local/config.php. If these are incorrect, the game will be unable to connect to the database so it will display zero's or blank values instead of information.
+	<li>Make sure that the database actually exists
+	<BR>If you are running your own server, you should be able to create the database with any name you like and the default will probably work fine but, if you are running the game using a service provided by an ISP, you may have to use the name for the database that your ISP provides.
+	<li>Make sure that the tables for the game have been created. See the file <a href="TABLES.html">TABLES.html</a> for a full list of the tables that the game needs in order to be able to run. <i>(These may exist but have been prefixed with the value set in $db_prefix)</i>
+	</ol>
+
+<P><li><b>You can't get past the login screen</b>
+
+<P>In the file <i>local/config_local.php</i> make sure that the variable $gamedomain is correctly set. You cannot set this to "localhost", "127.0.0.1" or to another numeric IP address.
+<P>Simply setting this to "/" seems to be a useful default.
+
+<P><li><b>You get to the main page, but see no information about your tribes</b>
+<ul>
+<li>Ensure that you have checked all the above
+<li>Contact jarmaug@rockemail.com and ask for help in setting up your game
+</ul>
+
+</ul>
+</FORM>

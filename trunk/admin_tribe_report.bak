@@ -1,0 +1,123 @@
+<?
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the
+// Free Software Foundation; either version 2 of the License, or (at your
+// option) any later version.
+//
+// File: adminreport.php
+session_start();
+header("Cache-control: private");
+include("config.php");
+
+page_header("Admin - Logs");
+
+connectdb();
+
+
+$result = $db->Execute("SELECT * FROM $dbtables[chiefs] WHERE username='$_SESSION[username]'");
+$playerinfo=$result->fields;
+
+if($playerinfo[admin] < $privilege['adm_accounts'])
+{
+	echo "You need to be an admin to view this page.<BR>";
+	page_footer();
+}
+
+$gm = $db->Execute("SELECT * FROM $dbtables[game_date] WHERE type = 'month'");
+$month = $gm->fields;
+$gy = $db->Execute("SELECT * FROM $dbtables[game_date] WHERE type = 'year'");
+$year = $gy->fields;
+
+$ty = $db->Execute("SELECT DISTINCT year FROM $dbtables[logs] WHERE clanid = '0000'");
+
+$viewmonth = $month[count];
+echo "<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH=\"100%\">";
+echo "<TR BGCOLOR=\"$color_header\"><TD ALIGN=CENTER COLSPAN=3><FORM ACTION=adminreport.php METHOD=POST>";
+echo "<SELECT NAME=month>";
+echo "<OPTION VALUE=$viewmonth SELECTED>$viewmonth</OPTION>";
+echo "<OPTION VALUE=1>1</OPTION>";
+echo "<OPTION VALUE=2>2</OPTION>";
+echo "<OPTION VALUE=3>3</OPTION>";
+echo "<OPTION VALUE=4>4</OPTION>";
+echo "<OPTION VALUE=5>5</OPTION>";
+echo "<OPTION VALUE=6>6</OPTION>";
+echo "<OPTION VALUE=7>7</OPTION>";
+echo "<OPTION VALUE=8>8</OPTION>";
+echo "<OPTION VALUE=9>9</OPTION>";
+echo "<OPTION VALUE=10>10</OPTION>";
+echo "<OPTION VALUE=11>11</OPTION>";
+echo "<OPTION VALUE=12>12</OPTION>";
+if(ISSET($_REQUEST[year]))
+{
+	$display_year = $_REQUEST[year];
+}
+else
+{
+	$display_year = $year[count];
+}
+echo "</SELECT><SELECT NAME=year>";
+echo "<OPTION VALUE=$display_year SELECTED>$display_year</OPTION>";
+while(!$ty->EOF)
+{
+	$tribe_year = $ty->fields;
+	echo "<OPTION VALUE=$tribe_year[year]>$tribe_year[year]</OPTION>";
+	$ty->MoveNext();
+}
+echo "</SELECT>&nbsp;<INPUT TYPE=SUBMIT VALUE=VIEW>";
+echo "</FORM></TD></TR>";
+
+if(ISSET($_REQUEST[month]))
+{
+	$display_month = $_REQUEST[month];
+	$display_year = $_REQUEST[year];
+}
+else
+{
+	$display_month = $month[count];
+	$display_year = $year[count];
+}
+
+echo "<TR BGCOLOR=\"$color_header\"><TD ALIGN=CENTER><B>Chief: $playerinfo[chiefname]</B></TD><TD ALIGN=CENTER>Turn: $display_month / $display_year</TD><TD ALIGN=CENTER><B>Clan: Administrator Logs</B></TD></TR>";
+echo "</TABLE>";
+echo "<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH=\"100%\">";
+
+
+if(!ISSET($_REQUEST[month]) & !ISSET($_REQUEST[year]))
+{
+	$result2 = $db->Execute("SELECT * FROM $dbtables[logs] WHERE clanid = '0000' AND month = '$month[count]' AND year = '$year[count]' ORDER BY logid desc");
+}
+else
+{
+	$result2 = $db->Execute("SELECT * FROM $dbtables[logs] WHERE clanid = '0000' AND month = '$_REQUEST[month]' AND year = '$_REQUEST[year]' ORDER BY logid desc");
+}
+if($result2->RecordCount() < 1)
+{
+	echo "<TABLE WIDTH=\"100%\" BGCOLOR=$color_line1><TR><TD>Nothing to report so far this month, sire.</TD></TR></TABLE><BR><BR><P>";
+	page_footer();
+}
+else
+{
+	echo "<TR BGCOLOR=\"$color_header\"><TD ALIGN=LEFT colspan=5><FONT COLOR=WHITE><B>News:</B></FONT></TD></TR>";
+	$line_color = $color_line1;
+	while(!$result2->EOF)
+	{
+		$newsinfo = $result2->fields;
+		echo "<TR BGCOLOR=\"$line_color\"><TD align=center>$newsinfo[time]</TD><TD align=right>$newsinfo[month]</TD><TD align=center>/</TD><TD align=left>$newsinfo[year]</TD><TD>$newsinfo[data]</TD></TR>";
+		$result2->MoveNext();
+		if($line_color == $color_line1)
+		{
+			$line_color = $color_line2;
+		}
+		else
+		{
+			$line_color = $color_line1;
+		}
+	}
+	echo "</TABLE>";
+}
+echo "<p align=center>";
+
+page_footer();
+
+?>
+

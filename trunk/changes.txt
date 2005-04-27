@@ -1,0 +1,72 @@
+TODO
+
+Modify all files in the main directory to use 'x_include' instead of 'include' (where appropriate)
+Check that it all works properly. It does seem to atm, but ;)
+
+
+CHANGES
+
+
+config.php
+----------
+added setting for default theme
+added flag '$use_local' to let people switch between default files and local versions, mostly to allow site specific settings and cosmetic changes in appearance of headers footers etc
+
+
+Global_funcs.php
+----------------
+Cut out the purely GUI related functions and put them in the file gui/global_funcs.php to make finding where functions are easier. The new file ins included by config.php
+Adde a function called 'x_include' that will include files from the 'local/' directory if they exist and the $use_local flag is set
+
+
+Options.php
+-----------
+Added theme selector
+
+
+AdminReimburse
+--------------
+sorted the lists alphabetically
+
+
+Bugtracker.php
+--------------
+Sorted skills and products alphabetically (should especially make it easier to select the product that is affected)
+
+
+GameReset & DB Convert
+----------------------
+Options avoided since I did not know if they prompted for confirmation
+
+
+
+all files in main directory
+---------------------------
+Added 'CLASS=edit_area' to all tags <INPUT TYPE=TEXT>
+
+
+local/config_local
+------------------
+Allows people to set local config settings without having them overwritten if they install a new release of the source
+
+
+local/game_vars
+---------------
+Another optional file that lets people running a separate server have their on game variables set
+
+
+local/motd_*.html
+-----------------
+These files are included by index.php and allow the various parts of the index page to have locally relevant messages from admin
+
+
+local/header.php & local/footer.php
+-----------------------------------
+Optional local header/footer files
+
+gui/helper.php
+--------------
+Bug fixed in the help_page_link() function
+
+
+ 

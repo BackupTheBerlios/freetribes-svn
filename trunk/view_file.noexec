@@ -1,0 +1,115 @@
+<?php
+error_reporting  (E_ERROR | E_WARNING | E_PARSE | !E_NOTICE);
+
+session_start();
+header("Cache-control: private");
+
+include("config.php");
+include("game_time.php");
+
+function text_parse ($s)
+{
+	global $use_local;
+
+	$t = $s;
+
+/*  THIS WAS FAILING BECAUSE EREG IS CHECKING FOR THE ; AT END OF LINE
+    THE ; IS NOT ALWAYS THERE eg where PHP is inserted directly into HTML
+	IT WAS SUPPOSED TO CREATE LINKS TO LET US LOOK AT THE INCLUDED FILES
+	
+	if ($use_local)
+	{
+		$dir = "local/";
+	}
+	else
+	{
+		$dir = "";
+	}
+
+	$fragment = explode ("include", $t);
+	$new_t = $fragment[0];
+	unset($fragment[0]);
+	foreach ($fragment as $frag)
+	{
+		$new_t .= ereg_replace ("([^\(]*\([^\"]*\")([^\"]*)([^\"]*\"[^\)]*\)[^;]*;)(.*)", "&epre;<XI>(\"$dir\\2\");&spre;\\4", $frag);
+	}
+	$t = $new_t;
+
+	$fragment = explode ("include", $t);
+	$new_t = $fragment[0];
+	unset($fragment[0]);
+	foreach ($fragment as $frag)
+	{
+		$new_t .= ereg_replace ("([^\(]*\([^\"]*\")([^\"]*)([^\"]*\"[^\)]*\)[^;]*;)(.*)", "&epre;include(\"\\2\");&spre;\\4", $frag);
+	}
+	$t = $new_t;
+
+
+	$fragment = explode ("<XI>", $t);
+	$new_t = $fragment[0];
+	unset($fragment[0]);
+	foreach ($fragment as $frag)
+	{
+		$new_t .= ereg_replace ("(.*)", "include\\1", $frag);
+	}
+	$t = $new_t;
+
+
+	$fragment2 = explode ("include", $t);
+	$new_t = $fragment2[0];
+	unset($fragment2[0]);
+	foreach ($fragment2 as $frag)
+	{
+		$new_t .= ereg_replace ("([^\(]*)(\()([^\"]*)(\")([^\"]*)(\")(.*)", "&epre;include(\"&sa; href=view_file.php?fname=\\5&ea;\\5&spre;\\6", $frag);
+	}
+	$t = $new_t;
+*/
+
+
+	$from =  array ("\"", "&lt;", "&gt;", "<", ">", "<\?", "\?>", "&epre;", "&spre;", "&sa;", "&ea", "&eea;");
+	$to = array ("&quot;", "&amp;lt;", "&amp;gt;", "&lt;", "&gt;", "&lt;?", "?&gt;", "</pre>", "<pre>", "<a", ">", "</a>");
+
+	for ($i = 0; $i < count($from); $i++)
+	{
+		$t = ereg_replace($from[$i], $to[$i], $t);
+	}
+
+
+	return $t;
+}
+
+
+
+if (ISSET($_REQUEST['fname']))
+{
+		ereg("([^/]*)php", $_REQUEST['fname'], $fname); // get the name of the file being viewed
+		$fname = $fname[0];
+        $file_content = x_file_get_contents($fname);
+        $file_content = text_parse($file_content);
+}
+else
+{
+	$file_content = "No file content!";
+}
+
+page_header("Source for $fname");
+echo "<P ALIGN=CENTER><TABLE WIDTH=\"99%\" BORDER=1 BORDERCOLOUR=BLACK BGCOLOR=WHITE CELLPADDING=4>"
+	."<TR>"
+	."<TD>";
+
+if ($fname=="config.php")
+{
+	echo "No, no, no! You don't get to see this one ;)";
+}
+else
+{
+	highlight_file ($fname);
+}
+
+echo "</TD>"
+	."</TR>"
+	."</TABLE>";
+
+
+include("footer.php");
+?>

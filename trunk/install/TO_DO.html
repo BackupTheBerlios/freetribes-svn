@@ -1,0 +1,33 @@
+<CENTER><B>To Do</B></CENTER>
+
+<P>This are my (Aerig's) notes on possible additions or improvements to the game
+
+<P><B>Skills</B>
+<ol>
+<li><a name=milling>Milling 1: (Grind)</a><BR>A subactivity to manually grind grain into flour. A <a href=mortar>mortar</a> would be required for each active assigned to this task. The result of this task should be flour, from which more provs should be gained than when Baking unground grain.
+</ol>
+
+<P><B>Products</B>
+<ol>
+<li><a name=mortar>Mortar: (Stonework 1)</a><br>This is a stone with a hollow in the centre in which grain can be ground to make flour.
+</ol>
+
+
+<P><B>Structures</B>
+<ol>
+<li><a name=vault>Vault: (Engineering 4 Stonework 3)</a><br>The ability to store your goods without encumbering your tribes. Please read the <a href="MANDATE.html#vault" target=mandate>mandate</a> for more info.
+</ol>
+
+<li><a name=>: ()</a><br>
+
+<P><B>Admin Code</B>
+<UL>
+<li><b>admin_map_edit.php</b>Looks like this file is breaking because it is still partially using the previous variable organisation (something I altered when I edited the file to try to get a bit more functionality / ease of use out of it).
+<li><b>admin_upload.php</b> This appears to be breaking because of the difference between Unix and DOS file path slashes. As well as fixing that, it should be modified never to allow upload to a directory higher than $game_root/dev and to automatically untar uploaded files called SOURCE.TAR.GZ or SOURCE.TGZ to  a folder called Tribe_NNN where NNN is an incremented upload number.
+<li><b>upload.php</b> The original upload file. Hopefully to be replaced by the above.
+<li><b>Admin Privs</b> Add privilege administration and ensure that enabling the game admin privilege allows admins to run the turn from their own machine, ie add their IP on to the end of the .htaccess file.
+</UL>
+
+<P><B>Schedule Code</B>
+<UL>
+<LI>Add code to each file to get it to track its progress so that if the turn breaks then it can be resumed from where it left off.

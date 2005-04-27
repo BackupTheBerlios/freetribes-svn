@@ -1,0 +1,60 @@
+<CENTER><H2><B>Known Bugs</B></H2></CENTER>
+
+<P><H3><B>29 Oct 04</B></H3>
+<ol><li><B>sched_*.php</B> Queries to optimise tables corrected to ensure that prefixes are included
+<li><b>transfer.php</b> Bug caused by omitting table prefix has been fixed
+<li><b>trans_bldg.php</b> Bug caused by failure to update structure's clanid when transferring between allies has been fixed
+<li><b>seeking.php</b> The bug which caused loss of livestock when out seeking may have been fixed
+</ol>
+
+<P><H3><B>22 Oct 04</B></H3>
+<ol><li><B>Possible bug</B> In MSTSCK if the local configuration defines a value for <b>$db_prefix</b>, the tables may fail to be updated correctly. Have attempted to circumvent this possibility, but that aspect of the code has not been checked.
+</ol>
+
+<P><H3><B>10 Oct 04</B></H3>
+<ol><li>The admin Map Edit function is currently borken. It looks like I have inadvertently rolled back from the working version to a dev version when I recently reorganised my source tree.
+</ol>
+
+
+<P><H3><B>02 Oct 04</B></H3>
+<ol><li>There may still be a bug in the way the config files work that prevents the game from working correctly if the $use_local flag is set to <b>true</b>
+<li>The <b>admin files</b> may have bugs resulting from their renaming. I checked these to some extent right after I renamed them, but just found a bug in the reimbursement file caused by html forms being directed to a file that no longer existed. That file now fixed.
+<li><b>forestry.php</b> is doing what it is supposed to but is not reporting its activities to the logs.
+</ol>
+
+<P><H3><B>30 Sep 04</B></H3>
+<ol><li>There is a potential problem with the header and possibly also the footer file, where the variable $gamepath is being used to create links and to find the theme file.
+<li>This problem partially arises from the probability that my config does not conform exactly to what it is meant to.
+<li>In order to solve this problem, I think that we need to have clearer definitions of what context the variables used to locate the game root, files and paths on the physical server are being used in.
+<li>In particular, I think we need to specify how each of the following variables is used
+<ol><li><b>$gamedomain</b> I think that this is largely used for setting the cookie domain(?) and should be renamed to $cookie_domain to make it explicit that that is what this variable will be used for. Note that, in the case where more than one game might run on the same server that simply specifying the server domain possibly is not enough to geteach game to run correctly(?).<P>At the same time, I think that we should still have a variable that explicitly defines the root of the game as it will be accessed on the web and I suggest that we create variables called $url_domain to hold the root url of the server on which the game will run and $url_game to specify the path from there to the game root.
+<li><b>$gamepath</b> I am unsure exactly what this would normally be used for, though the definition of its content is clear enough, and feel that, given the additional variables suggested above, that this variable would be better replaced with one called $file_path, ie duplication and hence removal of the $game_root, variable to hold the physical location of the game files on the server's hard disks.
+<li><b>$game_root</b> Made redundant by the previous suggestion</ol>
+<li>Although these variable name/content changes leave us with basically the same data as we already have, they do have the advantage of making what data each is supposed to contain and what use that data will be put to more explicit, and so easier to understand when we see them in the code.
+<li>At present my new header file works but is difficult to follow easily because I have used a cludge of the existing variables to achieve the desired result. I would much prefer it if our variable names and content were more clearly named and defined so that the code would not be so obscure.
+<li>I have not changed any of these variables or added in the new ones since I am unsure exactly where in the code the existing variables are used and dont want to spend another day or two tracking them down.
+<li>If you let me know where they are, though, I will make the necessary changes.
+</ol>
+
+<P><H3><B>29 Sep 04</B></H3>
+<li>Always check that the header and footer files that you receive are dated and timestamped the same in both the main game directory and in the sub-directory 'local'. I try to ensure that you get these files sent appropriately the same, but I test different settings of the $use_local flag and might possibly omit to save the same version to both directories.
+
+<P><H3><B>22 Sep 04</B></H3>
+
+
+<P><B>admin_upload.php</B>
+<LI>Currently broken
+
+
+<P><B>All files in the main directory</B>
+<BR>Possibly bugged with a problem that will result in an error like:
+<BR><I>Could not send headers. Headers already sent by ...</I>
+<P>This problem is consistently and, as far as I can make out, invariably caused by a line like:
+<BR><I>header("location:<B>activities.php?job=$job</B>");</I>
+<P>Any such error can, so far, be very easily fixed by replacing lines like the one above with a line that does the same thing and looks like:
+<BR><I>echo &quot;&lt;META HTTP-EQUIV=\&quot;Refresh\&quot; CONTENT=\&quot;0;URL=<B>activities.php?job=$job</B>\&quot;&gt&quot;;</I>
+<P>Note that the bit <I><B>activities.php?job=$job</B></I> is the same in each line, but that different header() calls will point to different locations and that the  &lt;META&gt; tag should be altered to make sure that it points to the appropriate location.
+<P>With a regexp enabled editor, you can correctly replace all occurrences of this problem using the following find and replace lines:
+<BR><B>find:</B> header..location:([^&quot;]*)..
+<BR><B>replace</B> echo &quot;&lt;META HTTP-EQUIV=\&quot;Refresh\&quot; CONTENT=\&quot;0;URL=\1\&quot;&gt;&quot;
+<P><I>This bug might be the result of having <b>output_buffering=Off</b> in the php.ini file</i>

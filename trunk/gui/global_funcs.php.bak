@@ -1,0 +1,86 @@
+<?php
+// Globally useful functions in the GUI
+
+function help_page_link ()
+{
+	ereg("([^/]*)php", $_SERVER['PHP_SELF'], $fname);
+
+	echo "<a href=\"helper.php?query=1&type=page&value=$fname[0]\" target=ts_helper>Help For This Page</a>";
+}
+
+
+function help_link ($link_text, $id, $type, $value, $title)
+{
+	$help_refs="";
+
+	if ($id<>"")
+	{
+		$help_refs.="&id=$id";
+	}
+	if ($type<>"")
+	{
+		$help_refs.="&type=$type";
+	}
+	if ($value<>"")
+	{
+		$help_refs.="&value=$value";
+	}
+	if ($id<>"")
+	{
+		$help_refs.="&htitle=$title";
+	}
+
+	echo "<a href=\"helper.php?query=1$help_refs\" target=ts_helper>$link_text</a>";
+}
+
+
+function bigtitle()
+{
+  global $title;
+
+}
+
+
+function page_header($t)
+{
+	global $page_title;
+
+	$page_title = $t;
+	$_GLOBAL['page_title'] = $t;
+	x_include("header.php");
+}
+
+function page_footer()
+{
+	x_include("footer.php");
+}
+
+function TEXT_GOTOMAIN()
+{
+  echo "Click <a href=main.php>here</A> to return to the main menu.";
+}
+
+function TEXT_GOTOLOGIN()
+{
+  echo "Click <a href=index.php>here</a> to log in.";
+}
+
+function TEXT_JAVASCRIPT_BEGIN()
+{
+  echo "\n<SCRIPT LANGUAGE=\"JavaScript\">\n";
+  echo "<!--\n";
+}
+
+function TEXT_JAVASCRIPT_END()
+{
+  echo "\n// -->\n";
+  echo "</SCRIPT>\n";
+}
+
+function COMBAT($target)
+{
+   header("location:combat.php?target=$target");
+}
+
+
+?>
