@@ -3,11 +3,11 @@ require_once("../config.php");
 $time_start = getmicrotime();
 include("game_time.php");
 connectdb();
-$res = $db->Execute("SELECT * FROM $dbtables[tribes]");
-  db_op_result($res,__LINE__,__FILE__);
-while( !$res->EOF )
+$reslt = $db->Execute("SELECT * FROM $dbtables[tribes]");
+  db_op_result($reslt,__LINE__,__FILE__);
+while( !$reslt->EOF )
 {
-    $tribe = $res->fields;
+    $tribe = $reslt->fields;
 
 
     if( $month[count] == '4' | $month[count] == '10' )
@@ -401,7 +401,7 @@ $admin_logs = '';
 }
 
 
-$res->MoveNext();
+$reslt->MoveNext();
 }
 $time_end = getmicrotime();
 $time = $time_end - $time_start;

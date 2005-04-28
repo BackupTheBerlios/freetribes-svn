@@ -1,11 +1,20 @@
 TODO
+$Id$
 
-Modify all files in the main directory to use 'x_include' instead of 'include' (where appropriate)
-Check that it all works properly. It does seem to atm, but ;)
+Scheduler needs extensive cleanup and optimization work.. currently it may have a tendency to time out...
+Signup process needs some work and error trapping- a new user signed up and immediately got -1 totems
+this was temporarily fixed by setting the database field type property to 'unsigned' 
+
+
+tables need indexes and optimizations
 
 
 CHANGES
+data field for logs was changed from varchar(255) to text
+db_op_result function borrowed from TKI and worked into all scheduler DB calls. this resulted in several scheduler file 
+fixes. - this will be an ongoing process
 
+admin_log function edited and tweaked to work with db_op_result
 
 config.php
 ----------

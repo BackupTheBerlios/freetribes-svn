@@ -22,7 +22,7 @@ while( !$res->EOF )
                     ."'$tribe[tribeid]',"
                     ."'REPORT',"
                     ."'$stamp',"
-                    ."'$tribe[tribeid] has been detected with a negative number in it's inventory!')");
+                    ."'$tribe[tribeid] has been detected with a negative number in its inventory!')");
             db_op_result($query,__LINE__,__FILE__);
         $tattletale = true;
     }

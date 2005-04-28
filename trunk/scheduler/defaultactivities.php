@@ -51,10 +51,12 @@ $default_activity = 0;
 if($total_herders > $tribe[curam]){
 $total_herders = $tribe[curam];
 }
-$res = $db->Execute("INSERT INTO $dbtables[activities] VALUES('','$tribe[tribeid]','hunt','provs','$default_activity')");
- db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("INSERT INTO $dbtables[activities] VALUES('','$tribe[tribeid]','herd','livestock','$total_herders')");
-db_op_result($res,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[activities] 
+VALUES('','$tribe[tribeid]','hunt','provs','$default_activity')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[activities] 
+VALUES('','$tribe[tribeid]','herd','livestock','$total_herders')");
+db_op_result($query,__LINE__,__FILE__);
 $act = $db->Execute("SELECT * FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]'");
 db_op_result($act,__LINE__,__FILE__);
 }

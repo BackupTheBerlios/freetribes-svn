@@ -1,6 +1,6 @@
 <?php
-error_reporting  (E_ERROR | E_WARNING | E_PARSE | !E_NOTICE);
-require_once("../config.php");
+error_reporting  (E_ALL);
+include_once('../config.php');
 $time_start = getmicrotime();
 include("game_time.php");
 connectdb();
@@ -368,5 +368,6 @@ $res = $db->Execute("INSERT INTO $dbtables[logs] "
             ."'$stamp',"
             ."'$page_name completed in $time seconds.')");
 db_op_result($res,__LINE__,__FILE__);
+echo "DONE!";
 ?>
 

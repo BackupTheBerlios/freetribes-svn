@@ -1,5 +1,5 @@
-<?
-session_start();
+<?php
+//session_start();
 header("Cache-control: private");
 
 $_SESSION['theme'] = $theme_default;  // This must be set on this page before the header is included
@@ -241,8 +241,8 @@ if( $flag == 0 )
         $from = "From: $admin_mail\r\n";
         $replyto = "Reply-To: $admin_mail\r\n";
         $xmailer = "X-Mailer: PHP/";
-        mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from$replyto$xmailer" . phpversion());
-
+       // mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from");
+mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from\r\n");
 // Now, populate the rest of the tables needed for now...
         if( $startitem1 == 1 )
         {

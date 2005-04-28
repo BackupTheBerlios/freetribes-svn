@@ -1,9 +1,9 @@
-<?
+<?php
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2 of the License, or (at your
 // option) any later version.
-//
+//$Id$
 // File: credits.php
 
 session_start();
@@ -35,8 +35,8 @@ echo "<BR><BR>";
 echo "<DT><FONT COLOR=WHITE>BlackNova Traders</FONT>:</DT>";
 echo "<DD><A HREF=mailto:%77%65%62%6D%61%73%74%65%72%40%62%6C%61%63%6B%6E%6F%76%61%2E%6E%65%74>Ron Harwood</a> - Copyright Owner</DD>";
 echo "<DD>Entire BlackNova Developer's Crew</DD>";
-
-
+echo "<DO><a href=\"http://www.crazybri.net/\">Brian Gustin</a> - Developer/Maintainer - Stable Package</DO>";
+echo "<DO><a href='http://kabal-invasion.com'>Kabal Invasion</a> - Development team. Certain functions borrowed from TKI code.</DO>";
 
 echo "</TD></TR></TABLE><BR>";
 
