@@ -39,17 +39,17 @@ while( !$res->EOF )
                               ."WHERE tribeid = '$tribe[DeVA]'");
               db_op_result($sg,__LINE__,__FILE__);
             $sginfo = $sg->fields;
-            $res = $db->Execute("DELETE FROM $dbtables[activities] "
+            $query = $db->Execute("DELETE FROM $dbtables[activities] "
                         ."WHERE tribeid = '$tribe[tribeid]'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("DELETE FROM $dbtables[farm_activities] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("DELETE FROM $dbtables[farm_activities] "
                         ."WHERE tribeid = '$tribe[tribeid]'");
-             db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[tribes] "
+             db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[tribes] "
                         ."SET morale = morale - .001 "
                         ."WHERE tribeid = '$tribe[tribeid]'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -61,8 +61,8 @@ while( !$res->EOF )
                         ."'War Activity: We are still "
                         ."under seige by $tribe[DeVA]! "
                         ."We were unable to complete any activities!')");
-             db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+             db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -74,7 +74,7 @@ while( !$res->EOF )
                         ."'War Activity: We are still "
                         ."maintaining a seige of $tribe[tribeid]. "
                         ."We have denied them the ability to conduct extra activities!')");
-             db_op_result($res,__LINE__,__FILE__);
+             db_op_result($query,__LINE__,__FILE__);
         }
         elseif( $defenders > $seigers )
         {
@@ -82,12 +82,12 @@ while( !$res->EOF )
                               ."WHERE tribeid = '$tribe[DeVA]'");
               db_op_result($sg,__LINE__,__FILE__);
             $sginfo = $sg->fields;
-            $res = $db->Execute("UPDATE $dbtables[tribes] "
+            $query = $db->Execute("UPDATE $dbtables[tribes] "
                         ."SET DeVA = '0000.00', "
                         ."morale = morale + .002 "
                         ."WHERE tribeid = '$tribe[tribeid]'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -97,8 +97,8 @@ while( !$res->EOF )
                         ."'WAR','$stamp','War Activity: We have broken "
                         ."the seige layed by $tribe[DeVA]! "
                         ."We may now begin to conduct village activities once again!')");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -110,7 +110,7 @@ while( !$res->EOF )
                         ."'War Activity: We were unable "
                         ."to continue the seige on $tribe[tribeid]. "
                         ."They are now conducting village activities again.')");
-             db_op_result($res,__LINE__,__FILE__);
+             db_op_result($query,__LINE__,__FILE__);
         }
     }
     $res->MoveNext();

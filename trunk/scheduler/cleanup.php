@@ -14,51 +14,51 @@ $res = $db->Execute("SELECT * FROM $dbtables[tribes] "
 while( !$res->EOF )
 {
     $tribe = $res->fields;
-    $res = $db->Execute("DELETE FROM $dbtables[livestock] "
+    $query = $db->Execute("DELETE FROM $dbtables[livestock] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
-       db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("DELETE FROM $dbtables[products] "
+       db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("DELETE FROM $dbtables[products] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
-       db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("DELETE FROM $dbtables[resources] "
+       db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("DELETE FROM $dbtables[resources] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
-      db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("DELETE FROM $dbtables[scouts] "
+      db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("DELETE FROM $dbtables[scouts] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
-      db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("DELETE FROM $dbtables[seeking] "
+      db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("DELETE FROM $dbtables[seeking] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
-        db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("DELETE FROM $dbtables[activities] "
+        db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("DELETE FROM $dbtables[activities] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
-         db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("DELETE FROM $dbtables[farm_activities] "
+         db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("DELETE FROM $dbtables[farm_activities] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
-        db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("DELETE FROM $dbtables[fair_tribe] "
+        db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("DELETE FROM $dbtables[fair_tribe] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
-        db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("DELETE FROM $dbtables[garrisons] "
+        db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("DELETE FROM $dbtables[garrisons] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
-         db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("DELETE FROM $dbtables[tribes] "
+         db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("DELETE FROM $dbtables[tribes] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
-          db_op_result($res,__LINE__,__FILE__);
+          db_op_result($query,__LINE__,__FILE__);
     if( $tribe[tribeid] == $tribe[clanid] )
     {
-        $res = $db->Execute("DELETE FROM $dbtables[chiefs] "
+        $query = $db->Execute("DELETE FROM $dbtables[chiefs] "
                     ."WHERE clanid = '$tribe[clanid]'");
-            db_op_result($res,__LINE__,__FILE__);
-        $res = $db->Execute("DELETE FROM $dbtables[clans] "
+            db_op_result($query,__LINE__,__FILE__);
+        $query = $db->Execute("DELETE FROM $dbtables[clans] "
                     ."WHERE clanid = '$tribe[clanid]'");
-            db_op_result($res,__LINE__,__FILE__);
-        $res = $db->Execute("DELETE FROM $dbtables[religions] "
+            db_op_result($query,__LINE__,__FILE__);
+        $query = $db->Execute("DELETE FROM $dbtables[religions] "
                     ."WHERE clanid = '$tribe[clanid]'");
-           db_op_result($res,__LINE__,__FILE__);
-        $res = $db->Execute("ALTER TABLE $dbtables[mapping] "
+           db_op_result($query,__LINE__,__FILE__);
+        $query = $db->Execute("ALTER TABLE $dbtables[mapping] "
                     ."DROP `$tribe[clanid]`");
-           db_op_result($res,__LINE__,__FILE__);
-        $res = $db->Execute("INSERT INTO $dbtables[logs] "
+           db_op_result($query,__LINE__,__FILE__);
+        $query = $db->Execute("INSERT INTO $dbtables[logs] "
                     ."VALUES("
                     ."'',"
                     ."'$month[count]',"
@@ -68,14 +68,14 @@ while( !$res->EOF )
                     ."'CLEANUP',"
                     ."'$stamp',"
                     ."'Clan Cleanup: $tribe[clanid] has been removed.')");
-          db_op_result($res,__LINE__,__FILE__);
+          db_op_result($query,__LINE__,__FILE__);
     }
     $res->MoveNext();
 }
 
 
-$res = $db->Execute("DELETE FROM $dbtables[garrisons] WHERE `force` < 3");
- db_op_result($res,__LINE__,__FILE__);
+$query = $db->Execute("DELETE FROM $dbtables[garrisons] WHERE `force` < 3");
+ db_op_result($query,__LINE__,__FILE__);
 $time_end = getmicrotime();
 $time = $time_end - $time_start;
 $page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed

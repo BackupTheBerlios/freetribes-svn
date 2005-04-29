@@ -76,9 +76,9 @@ $result = $db->Execute ("select email, username from $dbtables[users] "
                        ."WHERE username='$username' "
                        ."OR email='$email'");
 $flag=0;
-if( $username=='' | $character=='' | $email=='' | $email2 == '' ) 
-{ 
-    echo "Email, Username, or Chiefname may not be left blank.<BR>"; 
+if( $username=='' | $character=='' | $email=='' | $email2 == '' )
+{
+    echo "Email, Username, or Chiefname may not be left blank.<BR>";
     $flag=1;
 }
 if( !$email == $email2 )
@@ -93,29 +93,29 @@ if( $result > 0 )
     while( !$result->EOF )
     {
         $row = $result->fields;
-        if( strtolower($row[email]) == strtolower($email) ) 
-        { 
+        if( strtolower($row[email]) == strtolower($email) )
+        {
             echo "E-mail address is already in use.  ";
             echo "If you have forgotten your password, please ";
-            echo "contact the admins to have it reset for you.<BR>"; 
+            echo "contact the admins to have it reset for you.<BR>";
             $flag=1;
         }
 
-        if( strtolower($row[chiefname]) == strtolower($character) ) 
-        { 
-            echo "Chiefname is already in use!<BR>"; 
+        if( strtolower($row[chiefname]) == strtolower($character) )
+        {
+            echo "Chiefname is already in use!<BR>";
             $flag=1;
         }
 
-		if( strtolower($row[clanname]) == strtolower($clanname) ) 
-        { 
-            echo "Clan name is already in use!<BR>"; 
+        if( strtolower($row[clanname]) == strtolower($clanname) )
+        {
+            echo "Clan name is already in use!<BR>";
             $flag=1;
         }
 
-		if( strtolower($row[username]) == strtolower($username) ) 
-        { 
-            echo "Username is already in use!<br>"; 
+        if( strtolower($row[username]) == strtolower($username) )
+        {
+            echo "Username is already in use!<br>";
             $flag=1;
         }
         $result->MoveNext();
@@ -131,7 +131,7 @@ $pointsused = $pointsused + ($_REQUEST[economics] * 3 );
 if( $pointsused > 50 )
 {
     echo "You have allocated more than 50 points. ($pointsused) points used.<BR>";
-	$flag=1;
+    $flag=1;
 }
 
 if( $flag == 0 )
@@ -147,16 +147,16 @@ if( $flag == 0 )
     $syllables .= 'brb,pri,dee,kay,en,be,se';
     $syllable_array=explode(",", $syllables);
     srand( ( double ) microtime() * 1000000 );
-    for( $count = 1 ; $count <= 4 ; $count++ ) 
+    for( $count = 1 ; $count <= 4 ; $count++ )
     {
-        if( rand()%10 == 1 ) 
+        if( rand()%10 == 1 )
         {
             $makepass .= sprintf( "%0.0f", ( rand()%50 ) +1 );
-	} 
-	else 
+    }
+    else
         {
             $makepass .= sprintf( "%s", $syllable_array[rand()%62] );
-	}
+    }
 
     }
     $hashed_pass = md5($makepass);
@@ -167,17 +167,17 @@ if( $flag == 0 )
     while( $safehex < 1 )
     {
         $safeinfo = $safe->fields;
-	if( $safeinfo[safe] == 'N' )
-        { 
+    if( $safeinfo[safe] == 'N' )
+        {
             $curr_hex = rand(1,4096);
             $safe = $db->Execute("SELECT * FROM $dbtables[hexes] "
                                 ."WHERE hex_id = '$curr_hex'");
             $safehex = 0;
         }
-	else
+    else
         {
-	    $safehex++;
-	}
+        $safehex++;
+    }
     }
     $time = time();
     $result2 = $db->Execute("INSERT INTO $dbtables[chiefs] "
@@ -196,21 +196,21 @@ if( $flag == 0 )
                            ."'1',"
                            ."'',"
                            ."'$time',"
-			   ."'',"
+               ."'',"
                            ."'1')");
-    if( !$result2 ) 
+    if( !$result2 )
     {
         echo $db->ErrorMsg() . "<br>";
-    } 
-    else 
+    }
+    else
     {
         $resultid = $db->Execute("SELECT clanid FROM $dbtables[chiefs] "
                                 ."WHERE username='$username'");
         $clanid = $resultid->fields;
-	$db->Execute("UPDATE $dbtables[chiefs] "
+    $db->Execute("UPDATE $dbtables[chiefs] "
                     ."SET current_unit = clanid "
                     ."WHERE username = '$username'");
-	$db->Execute("INSERT INTO $dbtables[logs] "
+    $db->Execute("INSERT INTO $dbtables[logs] "
                     ."VALUES("
                     ."'',"
                     ."'$month[count]',"
@@ -292,12 +292,12 @@ mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from
                     ."'$clanname',"
                     ."'None',"
                     ."'1')");
-	$tribeid = $clanid[clanid];
+    $tribeid = $clanid[clanid];
         if( $slaver )
         {
             $slavehave = $slaves + rand(1,100);
             if( $slavehave > 85 )
-            { 
+            {
                 $slavepop = $slaves + rand(1,100);
             }
         }
@@ -307,21 +307,21 @@ mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from
         }
         $startpopmin = ($pointsleft * 2) + 7000;
         $startpopmax = ($pointsleft * 5) + 9000;
-	$activepop = rand($startpopmin, $startpopmax);
+    $activepop = rand($startpopmin, $startpopmax);
         $activepop = $activepop * .65;
-	$warpop = 500;
-	$inactivepop = $activepop * .35;
-	$totalpop = $activepop + $warpop + $inactivepop + $slavepop;
-	$maxam = $activepop + $slavepop;
-	$curam = $activepop + $slavepop;
-	$morale = '1.0';
+    $warpop = 500;
+    $inactivepop = $activepop * .35;
+    $totalpop = $activepop + $warpop + $inactivepop + $slavepop;
+    $maxam = $activepop + $slavepop;
+    $curam = $activepop + $slavepop;
+    $morale = '1.0';
         $horse = $horse + rand(100,700);
-	$elephant = rand(10,200);
-	$goat = rand(5000,7000);
-	$cattle = rand(100,400);
-	$maxweight = ($active * 30)+($horse * 150)+($elephant * 250);
-	$goodstribe = $tribeid;
-	$db->Execute("INSERT INTO $dbtables[tribes] "
+    $elephant = rand(10,200);
+    $goat = rand(5000,7000);
+    $cattle = rand(100,400);
+    $maxweight = ($active * 30)+($horse * 150)+($elephant * 250);
+    $goodstribe = $tribeid;
+    $query = $db->Execute("INSERT INTO $dbtables[tribes] "
                     ."VALUES("
                     ."'$clanid[clanid]',"
                     ."'$tribeid',"
@@ -344,9 +344,9 @@ mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from
                     ."'',"
                     ."'18',"
                     ."'$goodstribe')");
-
+         db_op_result($query,__LINE__,__FILE__);
         $_SESSION['hex_id'] = $curr_hex;
-        $db->Execute("INSERT INTO $dbtables[garrisons] "
+        $query = $db->Execute("INSERT INTO $dbtables[garrisons] "
                     ."VALUES("
                     ."'',"
                     ."'$curr_hex',"
@@ -366,7 +366,7 @@ mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from
                     ."'',"
                     ."'',"
                     ."'I')");
-
+        db_op_result($query,__LINE__,__FILE__);
 /////////////////////////////////////////////begin productions//////////////////////////////////////////
 
         $products = $db->Execute("SELECT * FROM $dbtables[product_table] "
@@ -375,7 +375,7 @@ mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from
         while( !$products->EOF )
         {
             $productinfo = $products->fields;
-            $db->Execute("INSERT INTO $dbtables[products] "
+            $query = $db->Execute("INSERT INTO $dbtables[products] "
                         ."VALUES("
                         ."'$tribeid',"
                         ."'$productinfo[proper]',"
@@ -385,137 +385,261 @@ mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from
                         ."'$productinfo[armor]')");
             $products->MoveNext();
         }
-$db->Execute("UPDATE $dbtables[products] SET amount = amount -1 WHERE long_name = 'totem' and tribeid = '$tribeid'");
-$db->Execute("UPDATE $dbtables[products] SET amount = '$traps' WHERE long_name = 'traps' AND tribeid = '$tribeid'");
-$db->Execute("UPDATE $dbtables[products] SET amount = '$swords' WHERE long_name = 'ironsword' AND tribeid = '$tribeid'");
-$db->Execute("UPDATE $dbtables[products] SET amount = '$bows' WHERE long_name = 'bow' AND tribeid = '$tribeid'");
-$db->Execute("UPDATE $dbtables[products] SET amount = '$wagons' WHERE long_name = 'wagon' AND tribeid = '$tribeid'");
-$db->Execute("UPDATE $dbtables[products] SET amount = '$jerkins' WHERE long_name = 'jerkin' AND tribeid = '$tribeid'");
-$db->Execute("UPDATE $dbtables[products] SET amount = '$provs' WHERE long_name = 'provs' AND tribeid = '$tribeid'");
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = 0 WHERE long_name = 'totem' and tribeid = '$tribeid'");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$traps' WHERE long_name = 'traps' AND tribeid = '$tribeid'");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$swords' WHERE long_name = 'ironsword' AND tribeid = '$tribeid'");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$bows' WHERE long_name = 'bow' AND tribeid = '$tribeid'");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$wagons' WHERE long_name = 'wagon' AND tribeid = '$tribeid'");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$jerkins' WHERE long_name = 'jerkin' AND tribeid = '$tribeid'");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$provs' WHERE long_name = 'provs' AND tribeid = '$tribeid'");
+  db_op_result($query,__LINE__,__FILE__);
 ////////////////////////////////////////////////end productions//////////////////////////////////////////////
 //////////////////////////////////////////////begin resources////////////////////////////////////////////////
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Bronze','$bronze','bronze')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Iron','$iron','iron')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Coal','$coal','coal')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Copper','$copper','copper')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Zinc','$zinc','zinc')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Tin','$tin','tin')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Silver','$silver','silver')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Brass','$brass','brass')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Lead','$lead','lead')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Salt','$salt','salt')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Stones','$stones','stones')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Gold','$gold','gold')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Steel','$steel','steel')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Steel_1','$steel_1','steel_1')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Steel_2','$steel_2','steel_2')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Coke','$coke','coke')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Gems','$gems','gems')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Iron Ore','$iron_ore','iron.ore')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Copper Ore','$copper_ore','copper.ore')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Zinc Ore','$zinc_ore','zinc.ore')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Tin Ore','$tin_ore','tin.ore')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Silver Ore','$silver_ore','silver.ore')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Lead Ore','$lead_ore','lead.ore')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Gold Ore','$gold_ore','gold.ore')");
-$db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Raw Gems','$raw_gems','raw.gems')");
+
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Bronze','$bronze','bronze')");
+    db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Iron','$iron','iron')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Coal','$coal','coal')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Copper','$copper','copper')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Zinc','$zinc','zinc')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Tin','$tin','tin')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Silver','$silver','silver')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Brass','$brass','brass')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Lead','$lead','lead')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Salt','$salt','salt')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Stones','$stones','stones')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Gold','$gold','gold')");
+    db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Steel','$steel','steel')");
+     db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Steel_1','$steel_1','steel_1')");
+    db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Steel_2','$steel_2','steel_2')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Coke','$coke','coke')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Gems','$gems','gems')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Iron Ore','$iron_ore','iron.ore')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Copper Ore','$copper_ore','copper.ore')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Zinc Ore','$zinc_ore','zinc.ore')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Tin Ore','$tin_ore','tin.ore')");
+    db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Silver Ore','$silver_ore','silver.ore')");
+    db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Lead Ore','$lead_ore','lead.ore')");
+    db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Gold Ore','$gold_ore','gold.ore')");
+    db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[resources] VALUES('$tribeid','Raw Gems','$raw_gems','raw.gems')");
+    db_op_result($query,__LINE__,__FILE__);
 ///////////////////////////////////////////////end resources////////////////////////////////////////////////
 ///////////////////////////////////////////////begin livestock/////////////////////////////////////////////
-$db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Cattle','$cattle')");
-$db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Horses','$horse')");
-$db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Elephants','$elephant')");
-$db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Goats','$goat')");
-$db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Sheep','$sheep')");
-$db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Pigs','$pigs')");
-$db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Dogs','$dogs')");
+$query = $db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Cattle','$cattle')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Horses','$horse')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Elephants','$elephant')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Goats','$goat')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Sheep','$sheep')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Pigs','$pigs')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Dogs','$dogs')");
+ db_op_result($query,__LINE__,__FILE__);
 ////////////////////////////////////////////////end livestock////////////////////////////////////////////////
+
 /////////////////////////////////////////////////begin skills///////////////////////////////////////////////
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','arm','Armor','a','$tribeid','$armor','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','bnw','Bonework','a','$tribeid','$bonework','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','bon','Boning','a','$tribeid','$boning','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','cur','Curing','a','$tribeid','$curing','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','dre','Dressing','a','$tribeid','$dressing','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','fish','Fishing','a','$tribeid','$fishing','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','flet','Fletching','a','$tribeid','$fletching','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','for','Forestry','a','$tribeid','$forestry','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','fur','Furrier','a','$tribeid','$furrier','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','gut','Gutting','a','$tribeid','$gutting','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','herd','Herding','a','$tribeid','$herding','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','hunt','Hunting','a','$tribeid','$hunting','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','jew','Jewelry','a','$tribeid','$jewelry','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','ltr','Leatherwork','a','$tribeid','$leather','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','mtl','Metalwork','a','$tribeid','$metalwork','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','min','Mining','a','$tribeid','$mining','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','pot','Pottery','a','$tribeid','$pottery','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','qry','Quarrying','a','$tribeid','$quarry','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','salt','Salting','a','$tribeid','$salting','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','sew','Sewing','a','$tribeid','$sewing','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','seq','Siege Equipment','a','$tribeid','$siege','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','skn','Skinning','a','$tribeid','$skinning','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','tan','Tanning','a','$tribeid','$tanning','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','wax','Waxworking','a','$tribeid','$waxworking','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','wpn','Weapons','a','$tribeid','$weapons','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','wv','Weaving','a','$tribeid','$weaving','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','wha','Whaling','a','$tribeid','$whaling','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','wd','Woodwork','a','$tribeid','$woodwork','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','ldr','Leadership','b','$tribeid','$leadership','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','sct','Scouting','b','$tribeid','$scouting','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','adm','Administration','b','$tribeid','$administration','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','eco','Economics','b','$tribeid','$economics','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','arc','Archery','b','$tribeid','$archery','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','ath','Atheism','b','$tribeid','$atheism','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','capt','Captaincy','b','$tribeid','$captaincy','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','char','Chariotry','b','$tribeid','$chariotry','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','com','Combat','b','$tribeid','$combat','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','dip','Diplomacy','b','$tribeid','$diplomacy','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','heal','Healing','b','$tribeid','$healing','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','hvyw','Heavy Weapons','b','$tribeid','$heavy_weapons','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','hor','Horsemanship','b','$tribeid','$horsemanship','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','mar','Mariner','b','$tribeid','$mariner','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','nav','Navigation','b','$tribeid','$navigation','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','pol','Politics','b','$tribeid','$politics','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','rel','Religion','b','$tribeid','$religion','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','row','Rowing','b','$tribeid','$rowing','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','sail','Sailing','b','$tribeid','$sailing','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','sea','Seamanship','b','$tribeid','$seamanship','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','sec','Security','b','$tribeid','$security','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','shw','Shipwright','b','$tribeid','$shipwright','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','slv','Slavery','b','$tribeid','$slavery','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','spy','Spying','b','$tribeid','$spying','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','tac','Tactics','b','$tribeid','$tactics','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','tor','Torture','b','$tribeid','$torture','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','tri','Triball','b','$tribeid','$triball','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','alc','Alchemy','c','$tribeid','$alchemy','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','api','Apiarism','c','$tribeid','$apiarism','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','art','Art','c','$tribeid','$art','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','astr','Astronomy','c','$tribeid','$astronomy','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','bak','Baking','c','$tribeid','$baking','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','blub','Blubberwork','c','$tribeid','$blubberwork','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','brk','Brick Making','c','$tribeid','$brickmaking','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','cook','Cooking','c','$tribeid','$cooking','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','dan','Dance','c','$tribeid','$dance','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','dis','Distilling','c','$tribeid','$distilling','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','eng','Engineering','c','$tribeid','$engineering','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','farm','Farming','c','$tribeid','$farming','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','flen','Flensing','c','$tribeid','$flensing','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','lit','Literacy','c','$tribeid','$literacy','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','mtnb','Maintain Boats','c','$tribeid','$maintain_boats','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','mil','Milling','c','$tribeid','$milling','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','mus','Music','c','$tribeid','$music','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','peel','Peeling','c','$tribeid','$peeling','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','ref','Refining','c','$tribeid','$refining','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','res','Research','c','$tribeid','$research','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','san','Sanitation','c','$tribeid','$sanitation','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','seek','Seeking','c','$tribeid','$seeking','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','shb','Shipbuilding','c','$tribeid','$shipbuilding','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','stn','Stonework','c','$tribeid','$stonework','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','glss','Glasswork','c','$tribeid','$glasswork','')");
-$db->Execute("INSERT INTO $dbtables[skills] VALUES('','fctl','Fire Control','c','$tribeid','$fire_control','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','arm','Armor','a','$tribeid','$armor','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','bnw','Bonework','a','$tribeid','$bonework','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','bon','Boning','a','$tribeid','$boning','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','cur','Curing','a','$tribeid','$curing','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','dre','Dressing','a','$tribeid','$dressing','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','fish','Fishing','a','$tribeid','$fishing','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','flet','Fletching','a','$tribeid','$fletching','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','for','Forestry','a','$tribeid','$forestry','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','fur','Furrier','a','$tribeid','$furrier','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','gut','Gutting','a','$tribeid','$gutting','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','herd','Herding','a','$tribeid','$herding','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','hunt','Hunting','a','$tribeid','$hunting','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','jew','Jewelry','a','$tribeid','$jewelry','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','ltr','Leatherwork','a','$tribeid','$leather','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mtl','Metalwork','a','$tribeid','$metalwork','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','min','Mining','a','$tribeid','$mining','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','pot','Pottery','a','$tribeid','$pottery','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','qry','Quarrying','a','$tribeid','$quarry','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','salt','Salting','a','$tribeid','$salting','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sew','Sewing','a','$tribeid','$sewing','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','seq','Siege Equipment','a','$tribeid','$siege','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','skn','Skinning','a','$tribeid','$skinning','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tan','Tanning','a','$tribeid','$tanning','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','wax','Waxworking','a','$tribeid','$waxworking','')");
+      db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','wpn','Weapons','a','$tribeid','$weapons','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','wv','Weaving','a','$tribeid','$weaving','')");
+    db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','wha','Whaling','a','$tribeid','$whaling','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','wd','Woodwork','a','$tribeid','$woodwork','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','ldr','Leadership','b','$tribeid','$leadership','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sct','Scouting','b','$tribeid','$scouting','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','adm','Administration','b','$tribeid','$administration','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','eco','Economics','b','$tribeid','$economics','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','arc','Archery','b','$tribeid','$archery','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','ath','Atheism','b','$tribeid','$atheism','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','capt','Captaincy','b','$tribeid','$captaincy','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','char','Chariotry','b','$tribeid','$chariotry','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','com','Combat','b','$tribeid','$combat','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','dip','Diplomacy','b','$tribeid','$diplomacy','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','heal','Healing','b','$tribeid','$healing','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','hvyw','Heavy Weapons','b','$tribeid','$heavy_weapons','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','hor','Horsemanship','b','$tribeid','$horsemanship','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mar','Mariner','b','$tribeid','$mariner','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','nav','Navigation','b','$tribeid','$navigation','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','pol','Politics','b','$tribeid','$politics','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','rel','Religion','b','$tribeid','$religion','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','row','Rowing','b','$tribeid','$rowing','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sail','Sailing','b','$tribeid','$sailing','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sea','Seamanship','b','$tribeid','$seamanship','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sec','Security','b','$tribeid','$security','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','shw','Shipwright','b','$tribeid','$shipwright','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','slv','Slavery','b','$tribeid','$slavery','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','spy','Spying','b','$tribeid','$spying','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tac','Tactics','b','$tribeid','$tactics','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tor','Torture','b','$tribeid','$torture','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tri','Triball','b','$tribeid','$triball','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','alc','Alchemy','c','$tribeid','$alchemy','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','api','Apiarism','c','$tribeid','$apiarism','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','art','Art','c','$tribeid','$art','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','astr','Astronomy','c','$tribeid','$astronomy','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','bak','Baking','c','$tribeid','$baking','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','blub','Blubberwork','c','$tribeid','$blubberwork','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','brk','Brick Making','c','$tribeid','$brickmaking','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','cook','Cooking','c','$tribeid','$cooking','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','dan','Dance','c','$tribeid','$dance','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','dis','Distilling','c','$tribeid','$distilling','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','eng','Engineering','c','$tribeid','$engineering','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','farm','Farming','c','$tribeid','$farming','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','flen','Flensing','c','$tribeid','$flensing','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','lit','Literacy','c','$tribeid','$literacy','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mtnb','Maintain Boats','c','$tribeid','$maintain_boats','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mil','Milling','c','$tribeid','$milling','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mus','Music','c','$tribeid','$music','')");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','peel','Peeling','c','$tribeid','$peeling','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','ref','Refining','c','$tribeid','$refining','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','res','Research','c','$tribeid','$research','')");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','san','Sanitation','c','$tribeid','$sanitation','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','seek','Seeking','c','$tribeid','$seeking','')");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','shb','Shipbuilding','c','$tribeid','$shipbuilding','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','stn','Stonework','c','$tribeid','$stonework','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','glss','Glasswork','c','$tribeid','$glasswork','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','fctl','Fire Control','c','$tribeid','$fire_control','')");
+ db_op_result($query,__LINE__,__FILE__);
 ///////////////////////////////////////////////////////end skills///////////////////////////////////////////////
 ///////////////////////////////////////////////////////begin mapping////////////////////////////////////////////
-$db->Execute("ALTER TABLE $dbtables[mapping] "
+$query = $db->Execute("ALTER TABLE $dbtables[mapping] "
             ."ADD clanid_$tribeid smallint(2) DEFAULT '0' NOT NULL");
-$db->Execute("UPDATE $dbtables[mapping] SET clanid_$tribeid = '1' WHERE hex_id = '$curr_hex'");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $query = $db->Execute("UPDATE $dbtables[mapping] SET clanid_$tribeid = '1' WHERE hex_id = '$curr_hex'");
+db_op_result($query,__LINE__,__FILE__);
 include("weight.php");
 ///////////////////////////////////////////////////////end mapping//////////////////////////////////////////////
 
@@ -530,29 +654,30 @@ include("weight.php");
 if ($flag==0 && $link_forums==$game_url.$game_url_path."forums/")
 {
 echo "<FORM METHOD=POST ACTION=$link_forums/profile.php TARGET=_blank>"
-	."<INPUT TYPE=HIDDEN NAME=mode VALUE=register>"
-	."<INPUT TYPE=HIDDEN NAME=agreed VALUE=true>"
-	."<INPUT TYPE=HIDDEN NAME=coppa VALUE=0>"
-	."<INPUT TYPE=HIDDEN NAME=username VALUE=$username>"
-	."<INPUT TYPE=HIDDEN NAME=new_password VALUE=$makepass>"
-	."<INPUT TYPE=HIDDEN NAME=password_confirm VALUE=$makepass>"
-	."<INPUT TYPE=HIDDEN NAME=email VALUE=$email>"
-	."<INPUT TYPE=HIDDEN NAME=submit VALUE=Submit>"
-	."<INPUT TYPE=SUBMIT VALUE=\"Register Automatically on Forum\">"
-	."</FORM>"
-	."<P><B>Note:</B> The forum registration page will pop up and close again."
-	."<BR>It may do that so quickly that you do not see its content."
-	."<BR>However, your forum login should be created automatically"
-	."<BR>with the same <i>Name</i> and <i>Password</i> as your Tribe login."
-	."<P>You will be sent emails confirming the creation of both your Tribe"
-	."<BR>Strive account and, if your click the button above, your Tribe"
-	."<BR>Strive Forum account."
-	."<P>Trying to get automatic forum registration is a new feature."
-	."<BR>If it does not work, please register manually using the Forum link"
-	."<BR>and let us know that there is a problem.";   
+    ."<INPUT TYPE=HIDDEN NAME=mode VALUE=register>"
+    ."<INPUT TYPE=HIDDEN NAME=agreed VALUE=true>"
+    ."<INPUT TYPE=HIDDEN NAME=coppa VALUE=0>"
+    ."<INPUT TYPE=HIDDEN NAME=username VALUE=$username>"
+    ."<INPUT TYPE=HIDDEN NAME=new_password VALUE=$makepass>"
+    ."<INPUT TYPE=HIDDEN NAME=password_confirm VALUE=$makepass>"
+    ."<INPUT TYPE=HIDDEN NAME=email VALUE=$email>"
+    ."<INPUT TYPE=HIDDEN NAME=submit VALUE=Submit>"
+    ."<INPUT TYPE=SUBMIT VALUE=\"Register Automatically on Forum\">"
+    ."</FORM>"
+    ."<P><B>Note:</B> The forum registration page will pop up and close again."
+    ."<BR>It may do that so quickly that you do not see its content."
+    ."<BR>However, your forum login should be created automatically"
+    ."<BR>with the same <i>Name</i> and <i>Password</i> as your Tribe login."
+    ."<P>You will be sent emails confirming the creation of both your Tribe"
+    ."<BR>Strive account and, if your click the button above, your Tribe"
+    ."<BR>Strive Forum account."
+    ."<P>Trying to get automatic forum registration is a new feature."
+    ."<BR>If it does not work, please register manually using the Forum link"
+    ."<BR>and let us know that there is a problem.";
 }
 
 echo "<P>Click <A HREF=index.php>here</A> to go to the login screen.";
 
 page_footer();
+
 ?>

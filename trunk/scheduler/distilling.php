@@ -53,31 +53,31 @@ while( !$reslt->EOF )
             }
             $deltagrain = $startgrain - $grain[amount];
             $deltabarrel = $startbar - $barrel[amount];
-            $res = $db->Execute("UPDATE $dbtables[products] "
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $grog "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'ale'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltagrain "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'grain'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltabarrel "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'barrels'");
-                db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("DELETE FROM $dbtables[activities] "
+                db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("DELETE FROM $dbtables[activities] "
                         ."WHERE tribeid = '$tribe[tribeid]' "
                         ."AND skill_abbr = '$act_do[skill_abbr]' "
                         ."AND product = '$act_do[product]'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[structures] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[structures] "
                         ."SET used = 'Y' "
                         ."WHERE struct_id = '$distillery[struct_id]'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -87,7 +87,7 @@ while( !$reslt->EOF )
                         ."'DISTILL',"
                         ."'$stamp',"
                         ."'Distilling: $grog $act_do[product] distilled using $deltagrain grain, $deltabarrel barrels.')");
-             db_op_result($res,__LINE__,__FILE__);
+             db_op_result($query,__LINE__,__FILE__);
         }
 
 
@@ -120,31 +120,31 @@ while( !$reslt->EOF )
             }
             $deltahoney = $starthoney - $honey[amount];
             $deltabarrel = $startbar - $barrel[amount];
-            $res = $db->Execute("UPDATE $dbtables[products] "
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $grog "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'mead'");
-                db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+                db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltahoney "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'honey'");
-                db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+                db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltabarrel "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'barrels'");
-                db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[structures] "
+                db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[structures] "
                         ."SET used = 'Y' "
                         ."WHERE struct_id = '$distillery[struct_id]'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("DELETE FROM $dbtables[activities] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("DELETE FROM $dbtables[activities] "
                         ."WHERE tribeid = '$tribe[tribeid]' "
                         ."AND skill_abbr = '$act_do[skill_abbr]' "
                         ."AND product = '$act_do[product]'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -154,7 +154,7 @@ while( !$reslt->EOF )
                         ."'DISTILL',"
                         ."'$stamp',"
                         ."'Distilling: $grog $act_do[product] distilled using $deltahoney honey, $deltabarrel barrels.')");
-              db_op_result($res,__LINE__,__FILE__);
+              db_op_result($query,__LINE__,__FILE__);
         }
 
 
@@ -187,31 +187,31 @@ while( !$reslt->EOF )
             }
             $deltagrapes = $startgrapes - $grapes[amount];
             $deltabarrel = $startbar - $barrel[amount];
-            $res = $db->Execute("UPDATE $dbtables[products] "
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $grog "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'wine'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltagrapes "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'grapes'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltabarrel "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'barrels'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[structures] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[structures] "
                         ."SET used = 'Y' "
                         ."WHERE struct_id = '$distillery[struct_id]'");
-             db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("DELETE FROM $dbtables[activities] "
+             db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("DELETE FROM $dbtables[activities] "
                         ."WHERE tribeid = '$tribe[tribeid]' "
                         ."AND skill_abbr = '$act_do[skill_abbr]' "
                         ."AND product = '$act_do[product]'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -221,7 +221,7 @@ while( !$reslt->EOF )
                         ."'DISTILL',"
                         ."'$stamp',"
                         ."'Distilling: $grog $act_do[product] distilled using $deltagrapes grapes, $deltabarrel barrels.')");
-                  db_op_result($res,__LINE__,__FILE__);
+                  db_op_result($query,__LINE__,__FILE__);
         }
 
         if( $act_do[product] == 'rum' && !$still->EOF )
@@ -253,31 +253,31 @@ while( !$reslt->EOF )
             }
             $deltasugar = $startsugar - $sugar[amount];
             $deltabarrel = $startbar - $barrel[amount];
-            $res = $db->Execute("UPDATE $dbtables[products] "
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $grog "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'rum'");
-                db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+                db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltasugar "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'sugar'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltabarrel "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'barrels'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[structures] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[structures] "
                         ."SET used = 'Y' "
                         ."WHERE struct_id = '$distillery[struct_id]'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("DELETE FROM $dbtables[activities] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("DELETE FROM $dbtables[activities] "
                         ."WHERE tribeid = '$tribe[tribeid]' "
                         ."AND skill_abbr = '$act_do[skill_abbr]' "
                         ."AND product = '$act_do[product]'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -287,7 +287,7 @@ while( !$reslt->EOF )
                         ."'DISTILL',"
                         ."'$stamp',"
                         ."'Distilling: $grog $act_do[product] distilled using $deltasugar sugar, $deltabarrel barrels.')");
-           db_op_result($res,__LINE__,__FILE__);
+           db_op_result($query,__LINE__,__FILE__);
         }
 
 
@@ -328,36 +328,36 @@ while( !$reslt->EOF )
             $deltasugar = $startsugar - $sugar[amount];
             $deltabarrel = $startbar - $barrel[amount];
             $deltagrapes = $startgrapes - $grapes[amount];
-            $res = $db->Execute("UPDATE $dbtables[products] "
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $grog "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'brandy'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltasugar "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'sugar'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltagrapes "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'grapes'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltabarrel "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'barrels'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[structures] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[structures] "
                         ."SET used = 'Y' "
                         ."WHERE struct_id = '$distillery[struct_id]'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("DELETE FROM $dbtables[activities] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("DELETE FROM $dbtables[activities] "
                         ."WHERE tribeid = '$tribe[tribeid]' "
                         ."AND skill_abbr = '$act_do[skill_abbr]' "
                         ."AND product = '$act_do[product]'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -368,17 +368,17 @@ while( !$reslt->EOF )
                         ."'$stamp',"
                         ."'Distilling: $grog $act_do[product] distilled "
                         ."using $deltasugar sugar, $deltagrapes grapes, $deltabarrel barrels.')");
-            db_op_result($res,__LINE__,__FILE__);
+            db_op_result($query,__LINE__,__FILE__);
         }
 
 
         $act->MoveNext();
     }
 
-    $res = $db->Execute("delete FROM $dbtables[activities] "
+    $query = $db->Execute("delete FROM $dbtables[activities] "
                 ."WHERE tribeid = '$tribe[tribeid]' "
                 ."AND skill_abbr = 'dis'");
-     db_op_result($res,__LINE__,__FILE__);
+     db_op_result($query,__LINE__,__FILE__);
 
 
     $reslt->MoveNext();

@@ -41,19 +41,19 @@ while( !$res->EOF )
             $hives[amount] -= 1;
             $installed += 1;
         }
-        $res = $db->Execute("UPDATE $dbtables[structures] "
+        $query = $db->Execute("UPDATE $dbtables[structures] "
                     ."SET number = '$act_do[number]' "
                     ."WHERE struct_id = '$act_do[struct_id]' "
                     ."AND tribeid = '$act_do[tribeid]' "
                     ."AND hex_id = '$act_do[hex_id]' "
                     ."AND hex_id = '$tribe[hex_id]' "
                     ."LIMIT 1");
-        db_op_result($res,__LINE__,__FILE__);
-        $res = $db->Execute("UPDATE $dbtables[products] "
+        db_op_result($query,__LINE__,__FILE__);
+        $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount - $hives[amount] "
                     ."WHERE tribeid = '$tribe[goods_tribe]' "
                     ."AND long_name = '$hives[long_name]'");
-        db_op_result($res,__LINE__,__FILE__);
+        db_op_result($query,__LINE__,__FILE__);
     }
 ///////////////////////////////////////////////////////////////
 
@@ -81,10 +81,10 @@ while( !$res->EOF )
         {
             $apiary = $api->fields;
             $beekeepers += round($apiary[number] / 5 );
-            $res = $db->Execute("UPDATE $dbtables[structures] "
+            $query = $db->Execute("UPDATE $dbtables[structures] "
                         ."SET used = 'Y' "
                         ."WHERE struct_id = '$apiary[struct_id]'");
-            db_op_result($res,__LINE__,__FILE__);
+            db_op_result($query,__LINE__,__FILE__);
             $api->MoveNext();
         }
         $wax = 0;
@@ -95,21 +95,21 @@ while( !$res->EOF )
             $wax += rand(0, $skill[level]);
             $honey += rand(0, $skill[level]);
         }
-        $res = $db->Execute("DELETE FROM $dbtables[activities] "
+        $query = $db->Execute("DELETE FROM $dbtables[activities] "
                     ."WHERE tribeid = '$tribe[tribeid]' "
                     ."AND skill_abbr = 'api'");
-        db_op_result($res,__LINE__,__FILE__);
-        $res = $db->Execute("UPDATE $dbtables[products] "
+        db_op_result($query,__LINE__,__FILE__);
+        $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount + $wax "
                     ."WHERE tribeid = '$tribe[goods_tribe]' "
                     ."AND long_name = 'wax'");
-        db_op_result($res,__LINE__,__FILE__);
-        $res = $db->Execute("UPDATE $dbtables[products] "
+        db_op_result($query,__LINE__,__FILE__);
+        $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount + $honey "
                     ."WHERE long_name = 'honey' "
                     ."AND tribeid = '$tribe[goods_tribe]'");
-        db_op_result($res,__LINE__,__FILE__);
-        $res = $db->Execute("INSERT INTO $dbtables[logs] "
+        db_op_result($query,__LINE__,__FILE__);
+        $query = $db->Execute("INSERT INTO $dbtables[logs] "
                     ."VALUES("
                     ."'',"
                     ."'$month[count]',"
@@ -119,7 +119,7 @@ while( !$res->EOF )
                     ."'APIARY',"
                     ."'$stamp',"
                     ."'Apiarism: $wax wax, $honey honey collected from hives.')");
-        db_op_result($res,__LINE__,__FILE__);
+        db_op_result($query,__LINE__,__FILE__);
         $act->MoveNext();
     }
     $res->MoveNext();

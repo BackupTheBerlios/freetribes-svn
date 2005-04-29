@@ -37,18 +37,18 @@ $clubinfo[amount] -= 1;
 $leather[amount] -= 1;
 $boneaxe += 1;
 }
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = '$clubinfo[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Club'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = '$leather[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Leather'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = amount + '$boneaxe' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bone Axe'");
- db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'bnw' AND product = '$act_do[product]'");
- db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Bonework: $boneaxe Bone Axes made.')");
-db_op_result($res,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$clubinfo[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Club'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$leather[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Leather'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + '$boneaxe' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bone Axe'");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'bnw' AND product = '$act_do[product]'");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Bonework: $boneaxe Bone Axes made.')");
+db_op_result($query,__LINE__,__FILE__);
 }
 
 if($act_do[product] == 'bonespear'){
@@ -60,16 +60,16 @@ $shaftinfo[amount] -= 1;
 $bonespear += 1;
 }
 
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = '$shaftinfo[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Shaft'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = amount + '$bonespear' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bone Spear'");
- db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'bnw' AND product = '$act_do[product]'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Bonework: $bonespear Bone Spears made.')");
-db_op_result($res,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$shaftinfo[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Shaft'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + '$bonespear' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bone Spear'");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'bnw' AND product = '$act_do[product]'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Bonework: $bonespear Bone Spears made.')");
+db_op_result($query,__LINE__,__FILE__);
 }
 
 if($act_do[product] == 'boneframe'){
@@ -79,14 +79,14 @@ $bones[amount] -= 3;
 $act_do[actives] -= 2;
 $boneframe += 1;
 }
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = amount + '$boneframe' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bone Frame'");
- db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'bnw' AND product = '$act_do[product]'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Bonework: $boneframe Bone Frames made.')");
-db_op_result($res,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + '$boneframe' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bone Frame'");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'bnw' AND product = '$act_do[product]'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Bonework: $boneframe Bone Frames made.')");
+db_op_result($query,__LINE__,__FILE__);
 }
 
 if($act_do[product] == 'bonearmor'){
@@ -97,16 +97,16 @@ $act_do[actives] -= 4;
 $leather[amount] -= 2;
 $bonearmor += 1;
 }
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = amount + '$bonearmor' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bone Armor'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = '$leather[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Leather'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'bnw' AND product = '$act_do[product]'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Bonework: $bonearmor Bone Armor made.')");
-db_op_result($res,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + '$bonearmor' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bone Armor'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = '$leather[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Leather'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'bnw' AND product = '$act_do[product]'");
+db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Bonework: $bonearmor Bone Armor made.')");
+db_op_result($query,__LINE__,__FILE__);
 }
 
 
@@ -124,27 +124,27 @@ if( $act_do[product] == 'cuirboillibone' )
     }
     $deltabone = $startbone - $bones[amount];
     $deltaltr = $startltr - $leather[amount];
-    $res = $db->Execute("UPDATE $dbtables[products] "
+    $query = $db->Execute("UPDATE $dbtables[products] "
                 ."SET amount = amount - $deltabone "
                 ."WHERE tribeid = '$tribe[goods_tribe]' "
                 ."AND proper = 'Bones'");
-       db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("UPDATE $dbtables[products] "
+       db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("UPDATE $dbtables[products] "
                 ."SET amount = amount - $deltaltr "
                 ."WHERE tribeid = '$tribe[goods_tribe]' "
                 ."AND proper = 'Leather'");
-      db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("UPDATE $dbtables[products] "
+      db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("UPDATE $dbtables[products] "
                 ."SET amount = amount + $bonearmor "
                 ."WHERE tribeid = '$tribe[goods_tribe]' "
                 ."AND long_name = 'cuirboillibone'");
-      db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("DELETE FROM $dbtables[activities] "
+      db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("DELETE FROM $dbtables[activities] "
                 ."WHERE tribeid = '$tribe[tribeid]' "
                 ."AND skill_abbr = '$act_do[skill_abbr]' "
                 ."AND product = '$act_do[product]'");
-     db_op_result($res,__LINE__,__FILE__);
-    $res = $db->Execute("INSERT INTO $dbtables[logs] "
+     db_op_result($query,__LINE__,__FILE__);
+    $query = $db->Execute("INSERT INTO $dbtables[logs] "
                 ."VALUES("
                 ."'',"
                 ."'$month[count]',"
@@ -154,15 +154,15 @@ if( $act_do[product] == 'cuirboillibone' )
                 ."'UPDATE',"
                 ."'$stamp',"
                 ."'Bonework: $bonearmor Bone Cuirboilli made using $deltabone bones and $deltaltr leather.')");
-      db_op_result($res,__LINE__,__FILE__);
+      db_op_result($query,__LINE__,__FILE__);
 }
 
 
 
 
 
-$res = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'bnw' AND product = '$act_do[product]'");
-db_op_result($res,__LINE__,__FILE__);
+$query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'bnw' AND product = '$act_do[product]'");
+db_op_result($query,__LINE__,__FILE__);
 }
 
 

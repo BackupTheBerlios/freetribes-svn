@@ -74,17 +74,17 @@ while( !$res->EOF )
                 $provs += $prov_number;
             }
             $deltagrain = $startgrain - $ingredient[amount];
-            $res = $db->Execute("UPDATE $dbtables[products] "
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltagrain "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = '$ingredient[long_name]'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $provs "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'provs'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -94,15 +94,15 @@ while( !$res->EOF )
                         ."'BAKING',"
                         ."'$stamp',"
                         ."'Baking: $provs bread made (provs) using $deltagrain $ingredient[long_name].')");
-             db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[structures] "
+             db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[structures] "
                         ."SET used = 'Y' "
                         ."WHERE struct_id = '$ovens[struct_id]'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("DELETE FROM $dbtables[activities] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("DELETE FROM $dbtables[activities] "
                         ."WHERE tribeid = '$tribe[tribeid]' "
                         ."AND skill_abbr = 'bak'");
-              db_op_result($res,__LINE__,__FILE__);
+              db_op_result($query,__LINE__,__FILE__);
         }
 
         $act->MoveNext();

@@ -71,31 +71,31 @@ while( !$res->EOF )
                 $furinfo[amount] -= 4;
                 $leathermake += 4;
             }
-            $res = $db->Execute("UPDATE $dbtables[products] "
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + '$leathermake' "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'leather'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("DELETE FROM $dbtables[activities] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("DELETE FROM $dbtables[activities] "
                         ."WHERE tribeid = '$tribe[tribeid]' "
                         ."AND product = 'leather'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[resources] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[resources] "
                         ."SET amount = '$saltinfo[amount]' "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'Salt'");
-               db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+               db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = '$skininfo[amount]' "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'skins'");
-              db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("UPDATE $dbtables[products] "
+              db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = '$furinfo[amount]' "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
                         ."AND long_name = 'furs'");
-             db_op_result($res,__LINE__,__FILE__);
-            $res = $db->Execute("INSERT INTO $dbtables[logs] "
+             db_op_result($query,__LINE__,__FILE__);
+            $query = $db->Execute("INSERT INTO $dbtables[logs] "
                         ."VALUES("
                         ."'',"
                         ."'$month[count]',"
@@ -105,7 +105,7 @@ while( !$res->EOF )
                         ."'UPDATE',"
                         ."'$stamp',"
                         ."'Dressing: $leathermake Leather dressed.')");
-              db_op_result($res,__LINE__,__FILE__);
+              db_op_result($query,__LINE__,__FILE__);
 
         }
         $act->MoveNext();

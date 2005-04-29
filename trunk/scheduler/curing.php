@@ -57,18 +57,18 @@ $furs -= 2;
 }
 $deltafurs = $startfurs - $furs;
 $deltagut = $startgut - $gut;
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $leather WHERE proper = 'Leather' AND tribeid = '$tribe[goods_tribe]'");
-  db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = $skins WHERE proper = 'Skins' AND tribeid = '$tribe[goods_tribe]'");
- db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = $furs WHERE proper = 'Furs' AND tribeid = '$tribe[goods_tribe]'");
-  db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[products] SET amount = $gut WHERE proper = 'Gut' AND tribeid = '$tribe[goods_tribe]'");
-  db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Curing: $leather leather cured using $deltagut gut, $deltaskins skins, $deltafurs furs.')");
-  db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'cur'");
- db_op_result($res,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $leather WHERE proper = 'Leather' AND tribeid = '$tribe[goods_tribe]'");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = $skins WHERE proper = 'Skins' AND tribeid = '$tribe[goods_tribe]'");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = $furs WHERE proper = 'Furs' AND tribeid = '$tribe[goods_tribe]'");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("UPDATE $dbtables[products] SET amount = $gut WHERE proper = 'Gut' AND tribeid = '$tribe[goods_tribe]'");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Curing: $leather leather cured using $deltagut gut, $deltaskins skins, $deltafurs furs.')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]' AND skill_abbr = 'cur'");
+ db_op_result($query,__LINE__,__FILE__);
 }
 
 
