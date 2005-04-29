@@ -13,7 +13,7 @@ $res = $db->Execute("UPDATE $dbtables[products] SET amount = 0 WHERE amount < 0"
 db_op_result($res,__LINE__,__FILE__);
 $res = $db->Execute("OPTIMIZE TABLE $dbtables[chiefs] ,"
             ." $dbtables[clans],"
-            ." $dbtables[elements],"
+            //." $dbtables[elements],"
             ." $dbtables[game_date],"
             ." $dbtables[hexes],"
             ." $dbtables[livestock],"

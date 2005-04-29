@@ -375,7 +375,7 @@ while( !$reslt->EOF )
         $act->MoveNext();
     }
 
-    $res = $db->Execute("DELETE * FROM $dbtables[activities] "
+    $res = $db->Execute("delete FROM $dbtables[activities] "
                 ."WHERE tribeid = '$tribe[tribeid]' "
                 ."AND skill_abbr = 'dis'");
      db_op_result($res,__LINE__,__FILE__);

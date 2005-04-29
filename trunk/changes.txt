@@ -1,17 +1,50 @@
+2005-04-28 11 PM
+more scheduler fixes-
+table $dbtables[map_table] doesnt exist/isnt created by installer- I am not sure of the create table structure, so I copied movement_log, since it enters teh same identical data
+- will find out if and when a bug shows up that uses that table, or I get updated sql from jarmaug
+Fixed an error on scheduler.php - optimize table table "elements" doesnt exist
+
+fixed an error in scouting.php - created map_table
+
+fixed an error in garexp.php - where math is used to :quote: set exp = exp + .01
+The .01 is a decimal, *not* an integer, therefore, it *must* be single-quoted.
+
+Merged changes over to the slow game which should now work much better as well as in the fast game..
+
 TODO
 $Id$
 
 Scheduler needs extensive cleanup and optimization work.. currently it may have a tendency to time out...
+
 Signup process needs some work and error trapping- a new user signed up and immediately got -1 totems
-this was temporarily fixed by setting the database field type property to 'unsigned' 
+this was temporarily fixed by setting the database field type property to 'unsigned'
 
 
 tables need indexes and optimizations
 
 
 CHANGES
+tweaked global_funcs.php for log type='DBERROR' to find it easier in admin panel
+BUG: scheduler/cleanup.php  "force" is a mysql function, therefore teh field name must be enclosed in backtick quotes
+otherwise it breaks
+      $res = $db->Execute("DELETE FROM $dbtables[garrisons] WHERE `force` < 3");
+BUG scores.php clanid_ missing in sql query line 20 (selecting on mappng table )
+
+BUG distilling.php DELETE FROM .. not DELETE * FROM .. :) (line 378 approx)
+BUG scouting.php movement_log doesnt exist and this insert would be better done as a function log_move($tribeid,$clanid,$hex)
+
+  CREATE TABLE `tstr_movement_log` (
+  `move_id` bigint(20) unsigned NOT NULL auto_increment,
+  `tribe_id` int(4) unsigned NOT NULL default '0',
+  `clan_id` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+  `hex` int(11) unsigned NOT NULL default '0',
+  `stamp` datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`move_id`),
+  KEY `tribe_id` (`tribe_id`,`clan_id`)
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
+
 data field for logs was changed from varchar(255) to text
-db_op_result function borrowed from TKI and worked into all scheduler DB calls. this resulted in several scheduler file 
+db_op_result function borrowed from TKI and worked into all scheduler DB calls. this resulted in several scheduler file
 fixes. - this will be an ongoing process
 
 admin_log function edited and tweaked to work with db_op_result
@@ -78,4 +111,4 @@ gui/helper.php
 Bug fixed in the help_page_link() function
 
 
- 
+

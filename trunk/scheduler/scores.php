@@ -17,7 +17,7 @@ $resscore = 0;
 $prodscore = 0;
 $livscore = 0;
 $claninfo = $clan->fields;
-$map = $db->Execute("SELECT COUNT(*) as mapped FROM $dbtables[mapping] WHERE `$claninfo[clanid]` > 0");
+$map = $db->Execute("SELECT COUNT(*) as mapped FROM $dbtables[mapping] WHERE `clanid_{$claninfo[clanid]}` > 0");
  db_op_result($map,__LINE__,__FILE__);
 $mapinfo = $map->fields;
 $mapscore = $mapinfo[mapped] * 1000;

@@ -74,8 +74,7 @@ while( !$res->EOF )
 }
 
 
-$res = $db->Execute("DELETE FROM $dbtables[garrisons] "
-            ."WHERE force < 3");
+$res = $db->Execute("DELETE FROM $dbtables[garrisons] WHERE `force` < 3");
  db_op_result($res,__LINE__,__FILE__);
 $time_end = getmicrotime();
 $time = $time_end - $time_start;
