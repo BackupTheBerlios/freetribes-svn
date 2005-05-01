@@ -20,41 +20,41 @@ while( !$res->EOF )
         $expts = $exp->fields;
         if( $expts[experience] == 6 )
         {
-            $result = $db->Execute("UPDATE $dbtables[garrisons] SET exp = exp + '.01' WHERE garid = $exp[garid]");
+            $result = $db->Execute("UPDATE $dbtables[garrisons] SET exp = (exp + .01) WHERE garid = '$exp[garid]'");
               db_op_result($result,__LINE__,__FILE__);
         }
         elseif( $expts[experience] == 12 )
         {
             $result = $db->Execute("UPDATE $dbtables[garrisons] "
-                        ."SET exp = exp + '.01' "
+                        ."SET exp = (exp + .01)  "
                         ."WHERE garid = $exp[garid]");
              db_op_result($result,__LINE__,__FILE__);
         }
         elseif( $expts[experience] == 24 )
         {
             $result = $db->Execute("UPDATE $dbtables[garrisons] "
-                        ."SET exp = exp + '.01' "
+                        ."SET exp = (exp + .01)  "
                         ."WHERE garid = $exp[garid]");
               db_op_result($result,__LINE__,__FILE__);
         }
         elseif( $expts[experience] == 48 )
         {
             $result = $db->Execute("UPDATE $dbtables[garrisons] "
-                        ."SET exp = exp + '.01' "
+                        ."SET exp = (exp + .01)  "
                         ."WHERE garid = $exp[garid]");
              db_op_result($result,__LINE__,__FILE__);
         }
         elseif( $expts[experience] == 78 )
         {
             $result = $db->Execute("UPDATE $dbtables[garrisons] "
-                        ."SET exp = exp + '.01' "
+                        ."SET exp = (exp + .01)  "
                         ."WHERE garid = $exp[garid]");
             db_op_result($result,__LINE__,__FILE__);
         }
         elseif( $expts[experience] == 100 )
         {
             $result = $db->Execute("UPDATE $dbtables[garrisons] "
-                        ."SET exp = exp + '.01' "
+                        ."SET exp = (exp + .01)  "
                         ."WHERE garid = $exp[garid]");
             db_op_result($result,__LINE__,__FILE__);
         }

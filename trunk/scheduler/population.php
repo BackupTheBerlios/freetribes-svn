@@ -375,6 +375,7 @@ while( !$res->EOF )
         $slavepop = $tribe[slavepop] - $loginfoslavepop;
         $totalpop = $totalwar + $actives + $inactives + $slavepop;
         $maxam = $actives + $slavepop;
+
         $result = $db->Execute("UPDATE $dbtables[tribes] "
                     ."SET totalpop = '$totalpop', "
                     ."warpop = '$totalwar', "
@@ -382,7 +383,7 @@ while( !$res->EOF )
                     ."inactivepop = '$inactives', "
                     ."maxam = '$maxam', "
                     ."curam = '$maxam', "
-                    ."slavepop = '$slavepop' "
+                    ."slavepop = '$slavepop', "
                     ."morale = morale - .01 "
                     ."WHERE tribeid = '$tribe[tribeid]'");
           db_op_result($result,__LINE__,__FILE__);
