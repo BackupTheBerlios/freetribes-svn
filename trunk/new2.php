@@ -11,41 +11,6 @@ page_header("User Registration Submission");
 
 connectdb();
 
-$submit = $db->Execute("SELECT * FROM $dbtables[form_submits] "
-                      ."WHERE formid = '$_REQUEST[UNIQUE]'");
-$submitinfo = $submit->_numOfRows;
-if( $submitinfo > 0 )
-{
-    navbar_open();
-    navbar_link("heraldry.php", "", "Who's On?");
-    navbar_link("new.php", "", "Create Clan");
-    navbar_link("help.php", "", "Help");
-    navbar_link("webcal", "", "Web Calendar");
-    navbar_link("tickets", "", "Bug Reporting");
-    navbar_link($link_forums, "", "Forums");
-    navbar_close();
-    echo "You have already submitted this information. This error will now be logged.<BR>";
-    $db->Execute("INSERT INTO $dbtables[logs] "
-                ."VALUES("
-                ."'',"
-                ."'$month[count]',"
-                ."'$year[count]',"
-                ."'0000',"
-                ."'0000.00',"
-                ."'BUGABUSE',"
-                ."'$stamp',"
-                ."'BUGABUSE: $ip has attempted to use the back button to resubmit the create clan form ($email).')");
-    page_footer();
-    die();
-}
-else
-{
-    $db->Execute("INSERT INTO $dbtables[form_submits] "
-                ."VALUES("
-                ."'$_REQUEST[UNIQUE]')");
-}
-
-
 if($account_creation_closed)
 {
   echo "New accounts are disallowed right now.<BR>";
@@ -57,26 +22,12 @@ if($account_creation_closed)
 $character = $_POST['character'];
 $clanname = $_POST['clanname'];
 $username = $_POST['username'];
-$character=htmlspecialchars($character);
-$clanname=htmlspecialchars($clanname);
-$password=htmlspecialchars($password);
 $startore = $_POST['startore'];
 $email = $_POST['email'];
 $email2 = $_POST['email2'];
 
 
-if( !get_magic_quotes_gpc() )
-{
-    $username = addslashes( $username );
-    $character = addslashes($character);
-    $clanname = addslashes($clanname);
-}
-
-$result = $db->Execute ("select email, username from $dbtables[users] "
-                       ."WHERE username='$username' "
-                       ."OR email='$email'");
-$flag=0;
-if( $username=='' | $character=='' | $email=='' | $email2 == '' )
+if( empty($username) || empty($character) || empty($email) || empty($email2) )
 {
     echo "Email, Username, or Chiefname may not be left blank.<BR>";
     $flag=1;
@@ -86,14 +37,22 @@ if( !$email == $email2 )
     echo "Both email addresses must be the same. Please correct your email.<BR>";
     $flag=1;
 }
+$character=htmlspecialchars($character);
+$clanname=htmlspecialchars($clanname);
+$password=htmlspecialchars($password);
 
+$sql = $db->Prepare("select email, username from $dbtables[chiefs] WHERE username=? OR email=? LIMIT 1");
+$result = $db->Execute ($sql,array($username,$email));
+db_op_result($result,__LINE__,__FILE__);
+$flag=0;
 
-if( $result > 0 )
+if( $result )   //returns a boolean actually - true or false
 {
+
     while( !$result->EOF )
     {
         $row = $result->fields;
-        if( strtolower($row[email]) == strtolower($email) )
+        if( strtolower($row['email']) == strtolower($email) )
         {
             echo "E-mail address is already in use.  ";
             echo "If you have forgotten your password, please ";
@@ -101,19 +60,19 @@ if( $result > 0 )
             $flag=1;
         }
 
-        if( strtolower($row[chiefname]) == strtolower($character) )
+        if( strtolower($row['chiefname']) == strtolower($character) )
         {
             echo "Chiefname is already in use!<BR>";
             $flag=1;
         }
 
-        if( strtolower($row[clanname]) == strtolower($clanname) )
+        if( strtolower($row['clanname']) == strtolower($clanname) )
         {
             echo "Clan name is already in use!<BR>";
             $flag=1;
         }
 
-        if( strtolower($row[username]) == strtolower($username) )
+        if( strtolower($row['username']) == strtolower($username) )
         {
             echo "Username is already in use!<br>";
             $flag=1;
@@ -121,13 +80,13 @@ if( $result > 0 )
         $result->MoveNext();
     }
 }
-$pointsused = $_REQUEST[armor] + $_REQUEST[bonework] + $_REQUEST[boning] + $_REQUEST[curing] + $_REQUEST[dressing] + $_REQUEST[fishing];
-$pointsused = $pointsused + $_REQEUST[fletching] + $_REQUEST[forestry] + $_REQUEST[gutting] + $_REQUEST[herding] + $_REQUEST[hunting];
-$pointsused = $pointsused + $_REQUEST[jewelery] + $_REQUEST[leather] + $_REQUEST[metalwork] + $_REQUEST[mining] + $_REQUEST[pottery];
-$pointsused = $pointsused + $_REQUEST[quarry] + $_REQUEST[salting] + $_REQUEST[sewing] + $_REQUEST[siege] + $_REQUEST[skinning] + $_REQUEST[tanning];
-$pointsused = $pointsused + $_REQUEST[waxworking] + $_REQUEST[weapons] + $_REQUEST[weaving] + $_REQUEST[whaling] + $_REQUEST[woodwork];
-$pointsused = $pointsused + $_REQUEST[furrier] + ($_REQUEST[leadership] * 3) + ($_REQUEST[scouting] * 3) + ($_REQUEST[administration] * 3 );
-$pointsused = $pointsused + ($_REQUEST[economics] * 3 );
+$pointsused = $_POST['armor'] + $_POST['bonework'] + $_POST['boning'] + $_POST['curing'] + $_POST['dressing'] + $_POST['fishing'];
+$pointsused = $pointsused + $_POST['fletching'] + $_POST['forestry'] + $_POST['gutting'] + $_POST['herding'] + $_POST['hunting'];
+$pointsused = $pointsused + $_POST['jewelery'] + $_POST['leather'] + $_POST['metalwork'] + $_POST['mining'] + $_POST['pottery'];
+$pointsused = $pointsused + $_POST['quarry'] + $_POST['salting'] + $_POST['sewing'] + $_POST['siege'] + $_POST['skinning'] + $_POST['tanning'];
+$pointsused = $pointsused + $_POST['waxworking'] + $_POST['weapons'] + $_POST['weaving'] + $_POST['whaling'] + $_POST['woodwork'];
+$pointsused = $pointsused + $_POST['furrier'] + ($_POST['leadership'] * 3) + ($_POST['scouting'] * 3) + ($_POST['administration'] * 3 );
+$pointsused = $pointsused + ($_POST['economics'] * 3 );
 if( $pointsused > 50 )
 {
     echo "You have allocated more than 50 points. ($pointsused) points used.<BR>";
@@ -144,7 +103,7 @@ if( $flag == 0 )
     $syllables .= 'wh,at,the,he,ck,is,mam,bo,no,fi,ve,any,way,pol,';
     $syllables .= 'iti,cs,ra,dio,sou,rce,sea,rch,pa,per,com,bo,sp,';
     $syllables .= 'eak,st,fi,rst,gr,oup,boy,ea,gle,tr,ail,bi,ble,';
-    $syllables .= 'brb,pri,dee,kay,en,be,se';
+    $syllables .= 'brb,pri,dee,kay,en,be,se,lud,spr,bloy,oit,nid';
     $syllable_array=explode(",", $syllables);
     srand( ( double ) microtime() * 1000000 );
     for( $count = 1 ; $count <= 4 ; $count++ )
@@ -162,75 +121,45 @@ if( $flag == 0 )
     $hashed_pass = md5($makepass);
     $curr_hex = rand(1,4096);
     $safehex = 0;
-    $safe = $db->Execute("SELECT * FROM $dbtables[hexes] "
-                        ."WHERE hex_id = '$curr_hex'");
+    $safe = $db->Execute("SELECT safe,terrain FROM $dbtables[hexes] WHERE hex_id = '$curr_hex'");
+    db_op_result($safe,__LINE__,__FILE__);
     while( $safehex < 1 )
     {
         $safeinfo = $safe->fields;
-    if( $safeinfo[safe] == 'N' )
+    if( $safeinfo['safe'] == 'N' )
         {
             $curr_hex = rand(1,4096);
-            $safe = $db->Execute("SELECT * FROM $dbtables[hexes] "
-                                ."WHERE hex_id = '$curr_hex'");
+            $safe = $db->Execute("SELECT safe,terrain FROM $dbtables[hexes] WHERE hex_id = '$curr_hex'");
             $safehex = 0;
         }
     else
         {
-        $safehex++;
-    }
+            $safehex++;
+        }
     }
     $time = time();
-    $result2 = $db->Execute("INSERT INTO $dbtables[chiefs] "
-                           ."VALUES("
-                           ."'',"
-                           ."'$username',"
-                           ."'$hashed_pass',"
-                           ."'$character',"
-                           ."'$email',"
-                           ."'$month[count]',"
-                           ."'$year[count]',"
-                           ."'$ip',"
-                           ."'1',"
-                           ."'$tribeid',"
-                           ."'1',"
-                           ."'1',"
-                           ."'',"
-                           ."'$time',"
-               ."'',"
-                           ."'1')");
-    if( !$result2 )
-    {
-        echo $db->ErrorMsg() . "<br>";
-    }
-    else
-    {
-        $resultid = $db->Execute("SELECT clanid FROM $dbtables[chiefs] "
-                                ."WHERE username='$username'");
-        $clanid = $resultid->fields;
-    $db->Execute("UPDATE $dbtables[chiefs] "
-                    ."SET current_unit = clanid "
-                    ."WHERE username = '$username'");
-    $db->Execute("INSERT INTO $dbtables[logs] "
-                    ."VALUES("
-                    ."'',"
-                    ."'$month[count]',"
-                    ."'$year[count]',"
-                    ."'$clanid[clanid]',"
-                    ."'$clanid[clanid]',"
-                    ."'NEWCHIEF',"
-                    ."'$stamp',"
-                    ."'$clanid[clanid] has created a new clan from $ip $email')");
-        $db->Execute("INSERT INTO $dbtables[logs] "
-                    ."VALUES("
-                    ."'',"
-                    ."'$month[count]',"
-                    ."'$year[count]',"
-                    ."'0000',"
-                    ."'0000.00',"
-                    ."'NEWCHIEF',"
-                    ."'$stamp',"
-                    ."'Newchief: $clanid[clanid] has created a new clan from $ip ($email).')");
+    $insert_data = array("$username","$hashed_pass","$character","$email","$month[count]","$year[count]","$ip","$tribeid","$time");
+    $sql = $db->Prepare("INSERT INTO $dbtables[chiefs] VALUES('',?,?,?,?,?,?,?,'1',?,'1','1','',?,'','1')");
+     $result2 = $db->Execute($sql,$insert_data);
+     db_op_result($result2,__LINE__,__FILE__);
 
+
+        $sqlt = $db->Prepare("SELECT clanid FROM $dbtables[chiefs] WHERE username=?");
+        $resultid = $db->Execute($sqlt,array($username));
+        db_op_result($resultid,__LINE__,__FILE__);
+        $clanid = $resultid->fields;
+    $sqla = $db->Prepare("UPDATE $dbtables[chiefs] SET current_unit = clanid WHERE username = ?");
+    $update1 = $db->Execute($sqla,array($username));
+    db_op_result($update1,__LINE__,__FILE__);
+    $logdata = array($month['count'],$year['count'],$clanid['clanid'],$clanid['clanid'],"NEWCHIEF",$stamp,"$clanid[clanid] has created a new clan from $ip $email");
+    $logs = $db->Prepare("INSERT INTO $dbtables[logs] VALUES('',?,?,?,?,?,?,?)");
+    $loginsert = $db->Execute($logs,$logdata);
+    db_op_result($loginsert,__LINE__,__FILE__);
+
+    adminlog('NEWCHIEF',"Newchief: $clanid[clanid] has created a new clan from $ip $email");
+
+
+     //TODO: Port this into a mailer function using phpmailer class
         $l_new_message = "Greetings,\n\nSomeone from the IP address $ip \nrequested ";
         $l_new_message .= "that your password for TribeStrive be sent to you.\n\nYour ";
         $l_new_message .= "Username is: [user]\n\nYour password is: [pass]\n\nThank you\n\n";
@@ -242,7 +171,7 @@ if( $flag == 0 )
         $replyto = "Reply-To: $admin_mail\r\n";
         $xmailer = "X-Mailer: PHP/";
        // mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from");
-mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from\r\n");
+        mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from\r\n");
 // Now, populate the rest of the tables needed for now...
         if( $startitem1 == 1 )
         {
@@ -272,7 +201,7 @@ mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from
         $provs = rand(15000,22000);
 
         //// Give each new player a message that this is just a development server.
-        $db->Execute("INSERT INTO $dbtables[messages] "
+        $notice = $db->Execute("INSERT INTO $dbtables[messages] "
                     ."VALUES("
                     ."'',"
                     ."'0000',"
@@ -285,14 +214,11 @@ mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from
                     .""
                     ."Thank you for Playing at <a href=http://www.crazybri.net/tribe2/>Crazybri TribeStrive</A>',"
                     ."'N')");
-
-        $db->Execute("INSERT INTO $dbtables[clans] "
-                    ."VALUES("
-                    ."'$clanid[clanid]',"
-                    ."'$clanname',"
-                    ."'None',"
-                    ."'1')");
-    $tribeid = $clanid[clanid];
+        db_op_result($notice,__LINE__,__FILE__);
+        $insertarr = array($clanid['clanid'],$clanname);
+        $sqls = $db->Prepare("INSERT INTO $dbtables[clans] VALUES(?,?,'None','1')");
+        $final = $db->Execute($sqls,$insertarr);
+    $tribeid = $clanid['clanid'];
         if( $slaver )
         {
             $slavehave = $slaves + rand(1,100);
@@ -321,68 +247,28 @@ mail("$email", "$l_new_topic", "$l_new_message\r\n\r\nhttp://$gamedomain","$from
     $cattle = rand(100,400);
     $maxweight = ($active * 30)+($horse * 150)+($elephant * 250);
     $goodstribe = $tribeid;
-    $query = $db->Execute("INSERT INTO $dbtables[tribes] "
-                    ."VALUES("
-                    ."'$clanid[clanid]',"
-                    ."'$tribeid',"
-                    ."'',"
-                    ."'Y',"
-                    ."'$totalpop',"
-                    ."'$warpop',"
-                    ."'$activepop',"
-                    ."'$inactivepop',"
-                    ."'$slavepop',"
-                    ."'0',"
-                    ."'$maxam',"
-                    ."'$curam',"
-                    ."'$morale',"
-                    ."'$maxweight',"
-                    ."'0',"
-                    ."'$curr_hex',"
-                    ."'',"
-                    ."'',"
-                    ."'',"
-                    ."'18',"
-                    ."'$goodstribe')");
-         db_op_result($query,__LINE__,__FILE__);
+    $newtribe_array = array($clanid['clanid'],"$tribeid","$null","Y","$totalpop","$warpop","$activepop","$inactivepop","$slavepop","0","$maxam","$curam","$morale","$maxweight","$curr_hex","$goodstribe");
+
+    $newtribesql = $db->Prepare("INSERT INTO $dbtables[tribes] VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'0',?,'','','','18',?)");
+    $query = $db->Execute($newtribesql,$newtribe_array);
+    db_op_result($query,__LINE__,__FILE__);
         $_SESSION['hex_id'] = $curr_hex;
-        $query = $db->Execute("INSERT INTO $dbtables[garrisons] "
-                    ."VALUES("
-                    ."'',"
-                    ."'$curr_hex',"
-                    ."'$clanid[clanid]',"
-                    ."'$tribeid',"
-                    ."'500',"
-                    ."'1.00',"
-                    ."'$safeinfo[terrain]',"
-                    ."'1',"
-                    ."'0',"
-                    ."'Bone Spear',"
-                    ."'',"
-                    ."'',"
-                    ."'Jerkin',"
-                    ."'',"
-                    ."'',"
-                    ."'',"
-                    ."'',"
-                    ."'I')");
-        db_op_result($query,__LINE__,__FILE__);
+    $gar_arr = array($curr_hex,$clanid['clanid'],$tribeid,$safeinfo['terrain']);
+    $gar_sql = $db->Prepare("INSERT INTO $dbtables[garrisons] VALUES ('',?,?,?,'500','1.00',?,'1','0','Bone Spear',"
+                    ."'','','Jerkin','','','','','I')");
+ $query = $db->Execute($gar_sql,$gar_arr);
+    db_op_result($query,__LINE__,__FILE__);
 /////////////////////////////////////////////begin productions//////////////////////////////////////////
 
-        $products = $db->Execute("SELECT * FROM $dbtables[product_table] "
-                                ."WHERE include = 'Y'");
-
+        $products = $db->Execute("SELECT * FROM $dbtables[product_table] WHERE include = 'Y'");
+        db_op_result($products,__LINE__,__FILE___);
         while( !$products->EOF )
         {
             $productinfo = $products->fields;
-            $query = $db->Execute("INSERT INTO $dbtables[products] "
-                        ."VALUES("
-                        ."'$tribeid',"
-                        ."'$productinfo[proper]',"
-                        ."'$productinfo[long_name]',"
-                        ."'0',"
-                        ."'$productinfo[weapon]',"
-                        ."'$productinfo[armor]')");
+            $ins_arr = array($tribeid,$productinfo['proper'],$productinfo['long_name'],$productinfo['weapon'],$productinfo['armor']);
+            $ins_sql = $db->Prepare("INSERT INTO $dbtables[products] VALUES(?,?,?,'0',?,?)");
+            $query = $db->Execute($ins_sql,$ins_arr);
+            db_op_result($query,__LINE__,__FILE__);
             $products->MoveNext();
         }
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = 0 WHERE long_name = 'totem' and tribeid = '$tribeid'");
@@ -471,172 +357,256 @@ $query = $db->Execute("INSERT INTO $dbtables[livestock] VALUES('','$tribeid','Do
 ////////////////////////////////////////////////end livestock////////////////////////////////////////////////
 
 /////////////////////////////////////////////////begin skills///////////////////////////////////////////////
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','arm','Armor','a','$tribeid','$armor','')");
+//Problem here: if they submit raw post data from elsewhere, they can break this - even with $_GET if post is empty
+//this assumes too much and requires register_globals = on
+$skill_arr = array($tribeid,(int)$_POST['armor']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','arm','Armor','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','bnw','Bonework','a','$tribeid','$bonework','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','bon','Boning','a','$tribeid','$boning','')");
+$skill_arr = array($tribeid,(int)$_POST['bonework']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','bnw','Bonework','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','cur','Curing','a','$tribeid','$curing','')");
+$skill_arr = array($tribeid,(int)$_POST['boning']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','bon','Boning','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','dre','Dressing','a','$tribeid','$dressing','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','fish','Fishing','a','$tribeid','$fishing','')");
+$skill_arr = array($tribeid,(int)$_POST['curing']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','cur','Curing','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','flet','Fletching','a','$tribeid','$fletching','')");
+$skill_arr = array($tribeid,(int)$_POST['dressing']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','dre','Dressing','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','for','Forestry','a','$tribeid','$forestry','')");
+$skill_arr = array($tribeid,(int)$_POST['fishing']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','fish','Fishing','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','fur','Furrier','a','$tribeid','$furrier','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','gut','Gutting','a','$tribeid','$gutting','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','herd','Herding','a','$tribeid','$herding','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','hunt','Hunting','a','$tribeid','$hunting','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','jew','Jewelry','a','$tribeid','$jewelry','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','ltr','Leatherwork','a','$tribeid','$leather','')");
+$skill_arr = array($tribeid,(int)$_POST['fletching']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','flet','Fletching','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mtl','Metalwork','a','$tribeid','$metalwork','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','min','Mining','a','$tribeid','$mining','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','pot','Pottery','a','$tribeid','$pottery','')");
+$skill_arr = array($tribeid,(int)$_POST['forestry']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','for','Forestry','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','qry','Quarrying','a','$tribeid','$quarry','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','salt','Salting','a','$tribeid','$salting','')");
+$skill_arr = array($tribeid,(int)$_POST['furrier']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','fur','Furrier','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sew','Sewing','a','$tribeid','$sewing','')");
+$skill_arr = array($tribeid,(int)$_POST['gutting']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','gut','Gutting','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','seq','Siege Equipment','a','$tribeid','$siege','')");
+$skill_arr = array($tribeid,(int)$_POST['herding']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','herd','Herding','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','skn','Skinning','a','$tribeid','$skinning','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tan','Tanning','a','$tribeid','$tanning','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','wax','Waxworking','a','$tribeid','$waxworking','')");
-      db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','wpn','Weapons','a','$tribeid','$weapons','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','wv','Weaving','a','$tribeid','$weaving','')");
-    db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','wha','Whaling','a','$tribeid','$whaling','')");
+$skill_arr = array($tribeid,(int)$_POST['hunting']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','hunt','Hunting','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','wd','Woodwork','a','$tribeid','$woodwork','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','ldr','Leadership','b','$tribeid','$leadership','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sct','Scouting','b','$tribeid','$scouting','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','adm','Administration','b','$tribeid','$administration','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','eco','Economics','b','$tribeid','$economics','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','arc','Archery','b','$tribeid','$archery','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','ath','Atheism','b','$tribeid','$atheism','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','capt','Captaincy','b','$tribeid','$captaincy','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','char','Chariotry','b','$tribeid','$chariotry','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','com','Combat','b','$tribeid','$combat','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','dip','Diplomacy','b','$tribeid','$diplomacy','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','heal','Healing','b','$tribeid','$healing','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','hvyw','Heavy Weapons','b','$tribeid','$heavy_weapons','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','hor','Horsemanship','b','$tribeid','$horsemanship','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mar','Mariner','b','$tribeid','$mariner','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','nav','Navigation','b','$tribeid','$navigation','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','pol','Politics','b','$tribeid','$politics','')");
-   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','rel','Religion','b','$tribeid','$religion','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','row','Rowing','b','$tribeid','$rowing','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sail','Sailing','b','$tribeid','$sailing','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sea','Seamanship','b','$tribeid','$seamanship','')");
+$skill_arr = array($tribeid,(int)$_POST['jewelry']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','jew','Jewelry','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sec','Security','b','$tribeid','$security','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','shw','Shipwright','b','$tribeid','$shipwright','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','slv','Slavery','b','$tribeid','$slavery','')");
+$skill_arr = array($tribeid,(int)$_POST['leather']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','ltr','Leatherwork','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','spy','Spying','b','$tribeid','$spying','')");
+$skill_arr = array($tribeid,(int)$_POST['metalwork']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','mtl','Metalwork','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['mining']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','min','Mining','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['pottery']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','pot','Pottery','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['quarry']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','qry','Quarrying','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['salting']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','salt','Salting','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['sewing']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','sew','Sewing','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['siege']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','seq','Siege Equipment','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['skinning']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','skn','Skinning','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['tanning']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','tan','Tanning','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['waxworking']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','wax','Waxworking','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['weapons']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','wpn','Weapons','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['weaving']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','wv','Weaving','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['whaling']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','wha','Whaling','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['woodwork']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','wd','Woodwork','a',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['leadership']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','ldr','Leadership','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['scouting']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','sct','Scouting','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['administration']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','adm','Administration','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,(int)$_POST['economics']);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','eco','Economics','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+ //These are teh selected skills as posted.. the remaining values below are not even included in teh selection options
+ //is it necessary to insert them?
+
+$skill_arr = array($tribeid,0);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','arc','Archery','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,0);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','ath','Atheism','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,0);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','capt','Captaincy','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,0);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','char','Chariotry','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,0);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','com','Combat','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,0);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','dip','Diplomacy','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$skill_arr = array($tribeid,0);
+$skill_insert = $db->Prepare("INSERT INTO $dbtables[skills] VALUES('','capt','Captaincy','b',?,?,'')");
+$query = $db->Execute($skill_insert,$skill_arr);
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','heal','Healing','b','$tribeid',0,'')");
   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tac','Tactics','b','$tribeid','$tactics','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','hvyw','Heavy Weapons','b','$tribeid',0,'')");
   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tor','Torture','b','$tribeid','$torture','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tri','Triball','b','$tribeid','$triball','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','alc','Alchemy','c','$tribeid','$alchemy','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','hor','Horsemanship','b','$tribeid',0,'')");
    db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','api','Apiarism','c','$tribeid','$apiarism','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mar','Mariner','b','$tribeid',0,'')");
    db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','art','Art','c','$tribeid','$art','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','astr','Astronomy','c','$tribeid','$astronomy','')");
- db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','bak','Baking','c','$tribeid','$baking','')");
- db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','blub','Blubberwork','c','$tribeid','$blubberwork','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','brk','Brick Making','c','$tribeid','$brickmaking','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','cook','Cooking','c','$tribeid','$cooking','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','nav','Navigation','b','$tribeid',0,'')");
    db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','dan','Dance','c','$tribeid','$dance','')");
- db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','dis','Distilling','c','$tribeid','$distilling','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','eng','Engineering','c','$tribeid','$engineering','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','farm','Farming','c','$tribeid','$farming','')");
-  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','flen','Flensing','c','$tribeid','$flensing','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','pol','Politics','b','$tribeid',0,'')");
    db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','lit','Literacy','c','$tribeid','$literacy','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','rel','Religion','b','$tribeid','0','')");
   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mtnb','Maintain Boats','c','$tribeid','$maintain_boats','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','row','Rowing','b','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sail','Sailing','b','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sea','Seamanship','b','$tribeid','0','')");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mil','Milling','c','$tribeid','$milling','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','sec','Security','b','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','shw','Shipwright','b','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','slv','Slavery','b','$tribeid','0','')");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mus','Music','c','$tribeid','$music','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','spy','Spying','b','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tac','Tactics','b','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tor','Torture','b','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','tri','Triball','b','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','alc','Alchemy','c','$tribeid','0','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','api','Apiarism','c','$tribeid','0','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','art','Art','c','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','astr','Astronomy','c','$tribeid','0','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','bak','Baking','c','$tribeid','0','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','blub','Blubberwork','c','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','brk','Brick Making','c','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','cook','Cooking','c','$tribeid','0','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','dan','Dance','c','$tribeid','0','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','dis','Distilling','c','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','eng','Engineering','c','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','farm','Farming','c','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','flen','Flensing','c','$tribeid','0','')");
+   db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','lit','Literacy','c','$tribeid','0','')");
+  db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mtnb','Maintain Boats','c','$tribeid','0','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mil','Milling','c','$tribeid','0','')");
+ db_op_result($query,__LINE__,__FILE__);
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','mus','Music','c','$tribeid','0','')");
 db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','peel','Peeling','c','$tribeid','$peeling','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','peel','Peeling','c','$tribeid','0','')");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','ref','Refining','c','$tribeid','$refining','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','ref','Refining','c','$tribeid','0','')");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','res','Research','c','$tribeid','$research','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','res','Research','c','$tribeid','0','')");
 db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','san','Sanitation','c','$tribeid','$sanitation','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','san','Sanitation','c','$tribeid','0','')");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','seek','Seeking','c','$tribeid','$seeking','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','seek','Seeking','c','$tribeid','0','')");
 db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','shb','Shipbuilding','c','$tribeid','$shipbuilding','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','shb','Shipbuilding','c','$tribeid','0','')");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','stn','Stonework','c','$tribeid','$stonework','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','stn','Stonework','c','$tribeid','0','')");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','glss','Glasswork','c','$tribeid','$glasswork','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','glss','Glasswork','c','$tribeid','0','')");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','fctl','Fire Control','c','$tribeid','$fire_control','')");
+$query = $db->Execute("INSERT INTO $dbtables[skills] VALUES('','fctl','Fire Control','c','$tribeid','0','')");
  db_op_result($query,__LINE__,__FILE__);
 ///////////////////////////////////////////////////////end skills///////////////////////////////////////////////
 ///////////////////////////////////////////////////////begin mapping////////////////////////////////////////////
-$query = $db->Execute("ALTER TABLE $dbtables[mapping] "
-            ."ADD clanid_$tribeid smallint(2) DEFAULT '0' NOT NULL");
+$query = $db->Execute("ALTER TABLE $dbtables[mapping] ADD clanid_$tribeid smallint(2) DEFAULT '0' NOT NULL");
   db_op_result($query,__LINE__,__FILE__);
 $query = $query = $db->Execute("UPDATE $dbtables[mapping] SET clanid_$tribeid = '1' WHERE hex_id = '$curr_hex'");
 db_op_result($query,__LINE__,__FILE__);
@@ -648,12 +618,12 @@ include("weight.php");
        echo "Your password is " . $makepass . "<BR><BR>";
     }
     echo "Password has been sent to $username.<BR><BR><BR>";
-}
+
 }
 
 if ($flag==0 && $link_forums==$game_url.$game_url_path."forums/")
 {
-echo "<FORM METHOD=POST ACTION=$link_forums/profile.php TARGET=_blank>"
+echo  "<FORM METHOD=POST ACTION=$link_forums/profile.php TARGET=_blank>"
     ."<INPUT TYPE=HIDDEN NAME=mode VALUE=register>"
     ."<INPUT TYPE=HIDDEN NAME=agreed VALUE=true>"
     ."<INPUT TYPE=HIDDEN NAME=coppa VALUE=0>"

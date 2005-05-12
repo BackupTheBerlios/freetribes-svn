@@ -151,9 +151,12 @@ function adminlog($log_type, $data = '')
         if (!empty($log_type))
         {
             $stamp = date("Y-m-d H:i:s");
-            $debug_query = $db->Execute("INSERT INTO $dbtables[logs](type,time,data) VALUES  ($log_type,'$stamp','$data')");
+
+            $debug_query = $db->Execute("INSERT INTO $dbtables[logs] (clanid,tribeid,type,time,data) VALUES  ('0000','0000.00','$log_type','$stamp','$data')");
             db_op_result($debug_query,__LINE__,__FILE__);
+
         }
+
     }
 
 }
@@ -170,8 +173,9 @@ function db_op_result($query,$served_line,$served_page)
     {
         $dberror = "A Database error occurred in " . $served_page . " on line ". ($served_line-1) ." (called from: $_SERVER[PHP_SELF]): " . $db->ErrorMsg($query) ."";
         $dberror = str_replace("'","&#39;",$dberror); // Allows the use of apostrophes.
-        adminlog(513, $dberror);
+        adminlog('DBERROR', $dberror);
         //echo $dberror."<br>";
+        //die();
         return $db->ErrorMsg();
         $cumulative = 1; // For areas with multiple actions needing status - 0 is all good so far, 1 is at least one bad.
     }
