@@ -32,14 +32,19 @@ if( empty($username) || empty($character) || empty($email) || empty($email2) )
     echo "Email, Username, or Chiefname may not be left blank.<BR>";
     $flag=1;
 }
+
 if( !$email == $email2 )
 {
     echo "Both email addresses must be the same. Please correct your email.<BR>";
     $flag=1;
 }
+if(trim(strtolower($character)) == 'chief')
+{
+   echo "Your Chiefname may not be 'Chief' , this is a reserved chief name";
+}
 $character=htmlspecialchars($character);
 $clanname=htmlspecialchars($clanname);
-$password=htmlspecialchars($password);
+$username=htmlspecialchars($username);
 
 $sql = $db->Prepare("select email, username from $dbtables[chiefs] WHERE username=? OR email=? LIMIT 1");
 $result = $db->Execute ($sql,array($username,$email));
@@ -194,11 +199,11 @@ if( $flag == 0 )
             $bronze = 1800;
             $iron = 0;
         }
-        $coal =  $coal + rand(900,2500);
-        $bows =  $bows + rand(50,250);
-        $wagons = rand(5,50);
-        $jerkins = $jerkins + rand(0,600);
-        $provs = rand(15000,22000);
+        $coal =  round(mt_rand(900,2500));
+        $bows =  round(mt_rand(50,250));
+        $wagons = round(mt_rand(5,50));
+        $jerkins = round(mt_rand(0,600));
+        $provs = round(mt_rand(15000,22000));
 
         //// Give each new player a message that this is just a development server.
         $notice = $db->Execute("INSERT INTO $dbtables[messages] "
@@ -241,10 +246,10 @@ if( $flag == 0 )
     $maxam = $activepop + $slavepop;
     $curam = $activepop + $slavepop;
     $morale = '1.0';
-        $horse = $horse + rand(100,700);
-    $elephant = rand(10,200);
-    $goat = rand(5000,7000);
-    $cattle = rand(100,400);
+        $horse = round(mt_rand(100,700));
+    $elephant = round(mt_rand(10,200));
+    $goat = round(mt_rand(5000,7000));
+    $cattle = round(mt_rand(100,400));
     $maxweight = ($active * 30)+($horse * 150)+($elephant * 250);
     $goodstribe = $tribeid;
     $newtribe_array = array($clanid['clanid'],"$tribeid","$null","Y","$totalpop","$warpop","$activepop","$inactivepop","$slavepop","0","$maxam","$curam","$morale","$maxweight","$curr_hex","$goodstribe");
@@ -266,7 +271,7 @@ if( $flag == 0 )
         {
             $productinfo = $products->fields;
             $ins_arr = array($tribeid,$productinfo['proper'],$productinfo['long_name'],$productinfo['weapon'],$productinfo['armor']);
-            $ins_sql = $db->Prepare("INSERT INTO $dbtables[products] VALUES(?,?,?,'0',?,?)");
+            $ins_sql = $db->Prepare("INSERT INTO $dbtables[products] VALUES(?,?,?,'0',?,?,'')");
             $query = $db->Execute($ins_sql,$ins_arr);
             db_op_result($query,__LINE__,__FILE__);
             $products->MoveNext();

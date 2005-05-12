@@ -2,7 +2,7 @@
 include("../config.php");
 $time_start = getmicrotime();
 $title="TribeStrive Installer";
-echo "<!doctype html public \"-//w3c//dtd html 3.2//en\">";
+echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 echo "<html>";
 echo "<head>";
 echo "<title>";
@@ -47,6 +47,21 @@ else
     echo "<P>Click <A HREF=../index.php>here</A> to log in. | ";
     echo "<A HREF=../help_maps.php>here</A> to view the map info.</CENTER>";
     echo "<P>";
+    //to use db_op_result here, we need log table created first ..
+    $db->Execute("DROP TABLE IF EXISTS $dbtables[logs]");
+    $db->Execute("CREATE TABLE $dbtables[logs] ("
+                ."`logid` int(10) unsigned NOT NULL auto_increment,"
+                ."`month` smallint(2) NOT NULL default '0',"
+                ."`year` smallint(4) NOT NULL default '0',"
+                ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
+                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
+                ."`type` varchar(15) NOT NULL default '0',"
+                ."`time` datetime NOT NULL default '0000-00-00 00:00:00',"
+                ."`data` text,"
+                ."PRIMARY KEY  (`logid`)"
+                .") TYPE=MyISAM");
+    echo " Done!<BR>";
+    flush();
     echo "<CENTER>Creating weather table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[weather]");
@@ -54,7 +69,7 @@ else
                 ."`weather_id` smallint(2) NOT NULL auto_increment,"
                 ."`long_name` varchar(15) NOT NULL default '',"
                 ."`current_type` set('Y','N') NOT NULL default 'N',"
-                ."UNIQUE KEY `weather_id` (`weather_id`)) TYPE=MyISAM");
+                ."PRIMARY KEY `weather_id` (`weather_id`)) TYPE=MyISAM");
     $db->Execute("INSERT INTO $dbtables[weather] "
                 ."VALUES (1,'Fine','Y')");
     $db->Execute("INSERT INTO $dbtables[weather] "
@@ -79,7 +94,7 @@ else
                 ."`chance` int(10) NOT NULL default '0',"
                 ."`abbr` varchar(10) NOT NULL default '',"
                 ."`rsc` tinyint(1) NOT NULL default '0',"
-                ."UNIQUE KEY `id` (`id`)"
+                ."PRIMARY KEY `id` (`id`)"
                 .") TYPE=MyISAM");
     $db->Execute("INSERT INTO $dbtables[gd_terrain] VALUES (1,'Prairie',3,3000,'pr',0)");
     $db->Execute("INSERT INTO $dbtables[gd_terrain] VALUES (2,'Grassy Hills',5,5000,'gh',1)");
@@ -112,7 +127,7 @@ else
                 ."`produce` varchar(128) NOT NULL default '',"
                 ."`limit` smallint(1) NOT NULL default '0',"
                 ."`res_code` smallint(2) NOT NULL default '0',"
-                ."UNIQUE KEY `id` (`id`)"
+                ."PRIMARY KEY `id` (`id`)"
                 .") TYPE=MyISAM");
     ////res_code 0 = unmapped/unknown
     ////res_code 1 = mapped/unknown
@@ -140,7 +155,8 @@ else
                 ."`cav_inf` decimal(4,2) NOT NULL default '0.00',"
                 ."`cav_cav` decimal(4,2) NOT NULL default '0.00',"
                 ."`cav_arc` decimal(4,2) NOT NULL default '0.00',"
-                ."`hunting` decimal(3,2) NOT NULL default '0.00'"
+                ."`hunting` decimal(3,2) NOT NULL default '0.00',"
+                ."KEY `dbname` (`dbname`)"
                 .") TYPE=MyISAM");
     $db->Execute("INSERT INTO $dbtables[weapons] VALUES ('Club','club',1.68,1.29,1.80,1.53,0.67,1.69,0.03)");
     $db->Execute("INSERT INTO $dbtables[weapons] VALUES ('Bone Spear','bonespear',2.81,2.81,3.00,3.21,2.72,3.50,0.05)");
@@ -195,7 +211,7 @@ else
                 ."`steel_1` smallint(2) NOT NULL default '0',"
                 ."`steel_2` smallint(2) NOT NULL default '0',"
                 ."`stone` smallint(2) NOT NULL default '0',"
-                ."UNIQUE KEY `arm_id` (`arm_id`)"
+                ."PRIMARY KEY `arm_id` (`arm_id`)"
                 .") TYPE=MyISAM");
 
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (1,'Iron Breastplate','ironbreastplate','overtorso',5,20,10,15,5,10,8,6,4,25)");
@@ -240,7 +256,7 @@ else
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (43,'Steel Plate','steelplate','overtorso',50,75,65,65,50,45,55,45,40,85)");
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (44,'Steel_1 Plate','steel1plate','overtorso',55,85,70,70,55,50,60,55,50,90)");
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (45,'Steel_2 Plate','steel2plate','overtorso',60,90,75,75,60,55,65,60,55,90)");
-    $db->Execute("INSERT INTO $dbtables[armor] VALUES (47,'Steel Chain','steelchain','torso',2,20,17,6,2,6,15,12,10,25)");    
+    $db->Execute("INSERT INTO $dbtables[armor] VALUES (47,'Steel Chain','steelchain','torso',2,20,17,6,2,6,15,12,10,25)");
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (48,'Steel_1 Chain','steel1chain','torso',2,25,20,7,2,7,18,15,12,25)");
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (49,'Steel_2 Chain','steel2chain','torso',2,25,25,8,2,8,20,18,15,25)");
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (50,'None','none','leg',0,0,0,0,0,0,0,0,0,0)");
@@ -251,7 +267,7 @@ else
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (57,'Steel Plate Barding','steelplatebarding','horse',50,75,65,65,50,45,55,45,40,85)");
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (58,'Cuirboilli','cuirboilli','overtorso',5,14,8,12,5,7,5,3,3,15)");
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (59,'Iron Chain Barding','ironchainbarding','horse',2,17,15,5,2,5,12,10,7,20)");
-    $db->Execute("INSERT INTO $dbtables[armor] VALUES (60,'Steel Chain Barding','steelchainbarding','horse',2,20,17,6,2,6,15,12,10,25)");    
+    $db->Execute("INSERT INTO $dbtables[armor] VALUES (60,'Steel Chain Barding','steelchainbarding','horse',2,20,17,6,2,6,15,12,10,25)");
     echo " Done!<BR>";
     flush();
     echo "Creating activities table....";
@@ -263,8 +279,8 @@ else
                 ."`skill_abbr` varchar(5) NOT NULL default '',"
                 ."`product` varchar(15) NOT NULL default '',"
                 ."`actives` int(25) NOT NULL default '0',"
-                ."UNIQUE KEY `id` (`id`)"
-                .") TYPE=MyISAM PACK_KEYS=0");
+                ."PRIMARY KEY `id` (`id`)"
+                .") TYPE=MyISAM ");
     echo " Done!<BR>";
     flush();
     echo "Creating alliances table....";
@@ -275,7 +291,7 @@ else
                 ."`offerer_id` int(4) unsigned zerofill NOT NULL default '0000',"
                 ."`receipt_id` int(4) unsigned zerofill NOT NULL default '0000',"
                 ."`accept` set('Y','N') NOT NULL default 'N',"
-                ."UNIQUE KEY `alliance_id` (`alliance_id`)"
+                ."PRIMARY KEY `alliance_id` (`alliance_id`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
@@ -296,7 +312,7 @@ else
                 ."`owner` varchar(30) NOT NULL default '',"
                 ."`month` smallint(2) NOT NULL default '0',"
                 ."`year` smallint(5) NOT NULL default '0',"
-                ."UNIQUE KEY `entryid` (`entryid`)"
+                ."PRIMARY KEY `entryid` (`entryid`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
@@ -320,8 +336,8 @@ else
                 ."`hour` int(15) default NULL,"
                 ."`theme` varchar(50) NOT NULL default 'Original',"
                 ."`tooltip` ENUM( '0', '1' ) NOT NULL default '1',"
-                ."KEY `clanid` (`clanid`)"
-                .") TYPE=MyISAM PACK_KEYS=0");
+                ."PRIMARY KEY `clanid` (`clanid`)"
+                .") TYPE=MyISAM");
     $hashed_pass = md5($_REQUEST[password]);
     $db->Execute("INSERT INTO $dbtables[chiefs] "
                 ."VALUES("
@@ -342,7 +358,7 @@ else
                 ."'Original',"
                 ."'1')");
     echo " Done!<BR>";
-    flush(); 
+    flush();
     echo "Creating clans table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[clans]");
@@ -351,8 +367,8 @@ else
                 ."`clanname` varchar(25) NOT NULL default 'Wanderers',"
                 ."`religion` varchar(25) NOT NULL default 'None',"
                 ."`active` tinyint(1) NOT NULL default '1',"
-                ."KEY `clanid` (`clanid`)"
-                .") TYPE=MyISAM PACK_KEYS=0");
+                ."PRIMARY KEY `clanid` (`clanid`)"
+                .") TYPE=MyISAM ");
     $db->Execute("INSERT INTO $dbtables[clans] "
                 ."VALUES("
                 ."'0001',"
@@ -386,8 +402,8 @@ else
                 ."`research_att` varchar(25) NOT NULL default '',"
                 ."`move_pts` int(11) NOT NULL default '0',"
                 ."`goods_tribe` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."KEY `clanid` (`clanid`),"
-                ."KEY `tribeid` (`tribeid`)"
+                ."PRIMARY KEY `clanid` (`clanid`),"
+                ."UNIQUE KEY `tribeid` (`tribeid`)"
                 .") TYPE=MyISAM");
     $random_hex = rand(1, 4096);
     $db->Execute("INSERT INTO $dbtables[tribes] "
@@ -439,8 +455,8 @@ else
                 ."`sw` decimal(3,2) NOT NULL default '0.00',"
                 ."`tu` decimal(3,2) NOT NULL default '0.00',"
                 ."`dh` decimal(3,2) NOT NULL default '0.00',"
-                ."`jg` decimal(3,2) NOT NULL default '0.00'"
-                .") TYPE=MyISAM");
+                ."`jg` decimal(3,2) NOT NULL default '0.00',"
+                ."PRIMARY KEY type (type)) TYPE=MyISAM");
     $db->Execute("INSERT INTO $dbtables[combat_terrain_effect] "
                 ."VALUES("
                 ."'archery',0.80,1.00,0.32,1.00,0.40,0.32,0.80,0.50,0.50,0.24,1.00,0.60,0.24,0.18,0.60,1.00,0.80,0.50,1.00,0.40)");
@@ -488,8 +504,8 @@ else
                 ."`2` decimal(2,1) NOT NULL default '0.0',"
                 ."`5` decimal(2,1) NOT NULL default '0.0',"
                 ."`7` decimal(2,1) NOT NULL default '0.0',"
-                ."`8` decimal(2,1) NOT NULL default '0.0'"
-                .") TYPE=MyISAM");
+                ."`8` decimal(2,1) NOT NULL default '0.0',"
+                ."PRIMARY KEY type (type)) TYPE=MyISAM");
     $db->Execute("INSERT INTO $dbtables[combat_weather] "
                 ." VALUES ('sling',1.0,0.7,0.8,0.4,0.8,0.5)");
     $db->Execute("INSERT INTO $dbtables[combat_weather] "
@@ -535,8 +551,8 @@ else
                 ."`sector2` int(6) NOT NULL default '0',"
                 ."`startsector3` int(6) NOT NULL default '0',"
                 ."`sector3` int(6) NOT NULL default '0',"
-                ."`hex_id` int(11) default NULL"
-                .") TYPE=MyISAM");
+                ."`hex_id` int(11) default NULL,"
+                ."INDEX tribeid (tribeid,combat_id)) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Creating fair_tribe table....";
@@ -551,7 +567,7 @@ else
                 ."`product` varchar(20) NOT NULL default '0',"
                 ."`quantity` int(4) NOT NULL default '0',"
                 ."`price` decimal(10,2) NOT NULL default '0.00',"
-                ."UNIQUE KEY `transaction` (`trans_id`)"
+                ."PRIMARY KEY `transaction` (`trans_id`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
@@ -568,7 +584,7 @@ else
                 ."`limit` int(5) NOT NULL default '0',"
                 ."`cultural` set('Y','N') NOT NULL default '',"
                 ."`p_amount` int(7) NOT NULL default '0',"
-                ."UNIQUE KEY `prod_id` (`prod_id`)"
+                ."PRIMARY KEY `prod_id` (`prod_id`)"
                 .") TYPE=MyISAM");
     $db->Execute("INSERT INTO $dbtables[fair] VALUES (159,'Bricks','bricks',2.00,6.00,5000,1000,'N',5000)");
     $db->Execute("INSERT INTO $dbtables[fair] VALUES (160,'Bread','bread',1.00,2.99,5000,1000,'N',5000)");
@@ -629,7 +645,7 @@ else
     $db->Execute("INSERT INTO $dbtables[fair] VALUES (130,'Trews','trews',3.07,24.40,500,100,'N',500)");
     $db->Execute("INSERT INTO $dbtables[fair] VALUES (122,'Wooden Shield','woodenshield',0.00,80.00,200,40,'N',200)");
     $db->Execute("INSERT INTO $dbtables[fair] VALUES (125,'Bone Axe','boneaxe',6.00,10.83,200,40,'N',200)");
-    $db->Execute("INSERT INTO $dbtables[fair] VALUES (127,'Bone Frame','boneframe',2.00,5.00,250,50,'N',250)"); 
+    $db->Execute("INSERT INTO $dbtables[fair] VALUES (127,'Bone Frame','boneframe',2.00,5.00,250,50,'N',250)");
     $db->Execute("INSERT INTO $dbtables[fair] VALUES (112,'Zinc','zinc',10.05,2.27,6000,1200,'N',6000)");
     $db->Execute("INSERT INTO $dbtables[fair] VALUES (113,'Zinc Ore','zinc.ore',1.98,1.44,2500,500,'N',2500)");
     $db->Execute("INSERT INTO $dbtables[fair] VALUES (114,'Slaves','slaves',8610.21,27.77,500,100,'N',500)");
@@ -762,7 +778,7 @@ else
                 ."`action` varchar(11) NOT NULL default '',"
                 ."`actives` int(11) NOT NULL default '0',"
                 ."`skill` smallint(2) NOT NULL default '0',"
-                ."UNIQUE KEY `id` (`id`)"
+                ."PRIMARY KEY `id` (`id`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
@@ -779,7 +795,7 @@ else
                 ."`skill` smallint(2) NOT NULL default '0',"
                 ."`month` smallint(2) NOT NULL default '0',"
                 ."`harvest` int(11) NOT NULL default '0',"
-                ." UNIQUE KEY `cropid` (`cropid`)"
+                ." PRIMARY KEY `cropid` (`cropid`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
@@ -790,7 +806,7 @@ else
                 ."`date_id` int(11) NOT NULL auto_increment,"
                 ."`type` varchar(7) NOT NULL default '',"
                 ."`count` int(4) NOT NULL default '0',"
-                ."UNIQUE KEY `date_id` (`date_id`)"
+                ."PRIMARY KEY `date_id` (`date_id`)"
                 .") TYPE=MyISAM");
     $day = rand(1, 30);
     $month = rand(1, 12);
@@ -824,7 +840,7 @@ else
                 ."`shield` varchar(25) default NULL,"
                 ."`horse_armor` varchar(25) default NULL,"
                 ."`trooptype` set('A','Q','B','C','I') NOT NULL default 'I',"
-                ."UNIQUE KEY `garid` (`garid`)"
+                ."PRIMARY KEY `garid` (`garid`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
@@ -855,7 +871,7 @@ else
                 ."`prost_none` enum('Y','N') NOT NULL default 'N',"
                 ."`prost_mild` enum('Y','N') NOT NULL default 'N',"
                 ."`prost_strong` enum('Y','N') NOT NULL default 'N',"
-                ."KEY `skill_id` (`skill_id`)"
+                ."PRIMARY KEY `skill_id` (`skill_id`)"
                 .") TYPE=MyISAM");
 
     $db->Execute("INSERT INTO $dbtables[skill_table] "
@@ -1021,7 +1037,7 @@ else
     $db->Execute("INSERT INTO $dbtables[skill_table] "
                 ."VALUES (81,'fctl','Fire Control','c','Y',1,'N','N','Fire Control','N','N','Y','Y','Y','Y','Y','Y','Y','N','Y','N','N','N')");
     $db->Execute("INSERT INTO $dbtables[skill_table] "
-                ."VALUES (82,'chmk','Charcoal Making','c','Y',1,'N','N','Charcoal Making','N','N','Y','Y','Y','Y','Y','Y','Y','N','Y','N','N','N')");    
+                ."VALUES (82,'chmk','Charcoal Making','c','Y',1,'N','N','Charcoal Making','N','N','Y','Y','Y','Y','Y','Y','Y','N','Y','N','N','N')");
     echo " Done!<BR>";
     flush();
     echo "Checking skills table....";
@@ -1035,7 +1051,7 @@ else
                 ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
                 ."`level` smallint(2) NOT NULL default '0',"
                 ."`turn_done` set('Y','N') NOT NULL default 'N',"
-                ."KEY `skill_id` (`entry_id`)"
+                ."PRIMARY KEY `skill_id` (`entry_id`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
@@ -1053,7 +1069,7 @@ else
                 ."`material` varchar(20) NOT NULL default '',"
                 ."`include` set('Y','N') NOT NULL default '',"
                 ."`weight` decimal(6,2) NOT NULL default '0.00',"
-                ."KEY `prod_id` (`prod_id`)"
+                ."PRIMARY KEY `prod_id` (`prod_id`)"
                 .") TYPE=MyISAM");
 
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (2,'ale','Ale','N','N','dis',2,'','Y',8.00)");
@@ -1099,7 +1115,7 @@ else
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (44,'ornament','Ornament','N','N','jew',3,'','Y',0.10)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (45,'palanquin','Palanquin','N','N','wd',10,'','Y',20.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (46,'parchment','Parchment','N','N','wax',1,'','Y',1.00)");
-    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (47,'picks','Picks','Y','N','mtl',3,'bronze','Y',3.00)");    
+    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (47,'picks','Picks','Y','N','mtl',3,'bronze','Y',3.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (48,'plow','Plow','N','N','mtl',6,'bronze','Y',100.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (49,'provs','Provisions','N','N','hunt',0,'','Y',10.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (50,'rake','Rake','N','N','wd',3,'','Y',0.50)");
@@ -1121,7 +1137,7 @@ else
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (66,'strings','Strings','N','N','wax',2,'gut','Y',0.10)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (67,'spice','Spice','N','N','seek',0,'','Y',1.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (68,'scythe','Scythe','Y','N','mtl',5,'bronze','Y',3.00)");
-    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (69,'sugar','Sugar','N','N','farm',1,'','Y',1.00)");    
+    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (69,'sugar','Sugar','N','N','farm',1,'','Y',1.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (71,'tobacco','Tobacco','N','N','farm',3,'','Y',1.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (72,'traps','Traps','N','N','mtl',2,'bronze','Y',1.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (73,'trinket','Trinket','N','N','jew',1,'','Y',0.20)");
@@ -1143,7 +1159,7 @@ else
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (92,'pellets','Pellets','Y','N','mtl',1,'bronze','Y',0.50)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (93,'quarrels','Quarrels','Y','N','mtl',2,'bronze','Y',0.20)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (94,'mattock','Mattock','N','N','mtl',3,'bronze','Y',8.00)");
-    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (95,'shackles','Shackles','N','N','mtl',4,'bronze','Y',1.00)");    
+    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (95,'shackles','Shackles','N','N','mtl',4,'bronze','Y',1.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (96,'adze','Adze','N','N','mtl',4,'bronze','Y',2.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (97,'hoe','Hoe','N','N','mtl',4,'bronze','Y',2.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (98,'cauldron','Cauldron','N','N','mtl',8,'bronze','Y',100.00)");
@@ -1275,7 +1291,7 @@ else
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (393,'bronzeaxe','Bronze Axe','Y','N','wpn',4,'bronze','Y',4.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (394,'steelaxe','Steel Axe','Y','N','wpn',13,'steel','Y',4.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (395,'steelspear','Steel Spear','Y','N','wpn',17,'steel','Y',3.00)");
-    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (396,'steel1axe','Steel_1 Axe','Y','N','wpn',10,'steel_1','Y',4.00)");    
+    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (396,'steel1axe','Steel_1 Axe','Y','N','wpn',10,'steel_1','Y',4.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (397,'steel1spear','Steel_1 Spear','Y','N','wpn',17,'steel_1','Y',3.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (398,'steel2axe','Steel_2 Axe','Y','N','wpn',13,'steel_2','Y',4.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (399,'steel2spear','Steel_2 Spear','Y','N','wpn',12,'steel_2','Y',3.00)");
@@ -1301,9 +1317,9 @@ else
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (420,'brickworkoven','Brickwork Ovens','N','N','eng',5,'iron','N',0.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (421,'arrows','Arrows','Y','N','flet',1,'iron','Y',0.10)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (422,'ironchainbarding','Iron Chain Barding','N','Y','arm',12,'iron','Y',40.00)");
-    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (423,'steelchainbarding','Steel Chain Barding','N','Y','arm',15,'iron','Y',40.00)");    
-    echo " Done!<BR>";    
-    flush(); 
+    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (423,'steelchainbarding','Steel Chain Barding','N','Y','arm',15,'iron','Y',40.00)");
+    echo " Done!<BR>";
+    flush();
     echo "Checking gd_help table....";
     flush();
     //$db->Execute("DROP TABLE IF EXISTS $dbtables[gd_help]");
@@ -1318,7 +1334,7 @@ else
                     ."`value` varchar(40) NOT NULL default '',"
                     ."`title` varchar(50) NOT NULL default '',"
                     ."`help` text NOT NULL,"
-                    ." KEY `id` (`id`),"
+                    ." PRIMARY KEY `id` (`id`),"
                     ." KEY `title` (`title`),"
                     ." KEY `type` (`type`),"
                     ." KEY `value` (`value`)"
@@ -1335,7 +1351,7 @@ else
                         ."'$skillinfo[long_name]',"
                         ."'<ENTRIES-0>')");
             $skill->MoveNext();
-        } 
+        }
         $prod = $db->Execute("SELECT * FROM $dbtables[product_table]");
         while( !$prod->EOF )
         {
@@ -1370,7 +1386,7 @@ else
         echo " Present!<BR>";
         flush();
     }
-
+//TODO- Do we really need this thing?  - changes to signup process dont use this anymore, is it used anywhere else?
     echo "Creating form_submit table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[form_submits]");
@@ -1386,14 +1402,14 @@ else
     $db->Execute("CREATE TABLE $dbtables[map_view] ("
                 ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
                 ."`times` smallint(2) NOT NULL default '0',"
-                ."UNIQUE KEY `clanid` (`clanid`)"
+                ."PRIMARY KEY `clanid` (`clanid`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Creating seeking table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[seeking]");
-    $db->Execute("CREATE TABLE $dbtables[seeking] ("
+    $query = $db->Execute("CREATE TABLE $dbtables[seeking] ("
                 ."`id` int(11) NOT NULL auto_increment,"
                 ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
                 ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
@@ -1404,8 +1420,9 @@ else
                 ."`backpacks` int(3) NOT NULL default '0',"
                 ."`saddlebags` int(3) NOT NULL default '0',"
                 ."`target` varchar(12) NOT NULL default '',"
-                ."UNIQUE KEY `id` (`id`)"
+                ."PRIMARY KEY `id` (`id`)"
                 .") TYPE=MyISAM");
+      db_op_result($query,__LINE__,__FILE__);
     echo " Done!<BR>";
     flush();
     echo "Creating structures table....";
@@ -1424,7 +1441,7 @@ else
                 ."`subunit` varchar(15) NOT NULL default '',"
                 ."`number` int(11) NOT NULL default '0',"
                 ."`used` enum('Y','N') NOT NULL default 'N',"
-                ." UNIQUE KEY `struct_id` (`struct_id`)"
+                ." PRIMARY KEY `struct_id` (`struct_id`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
@@ -1472,7 +1489,7 @@ else
                 ."`skill_abbr` varchar(5) NOT NULL default '',"
                 ."`product` varchar(15) NOT NULL default '',"
                 ."`actives` int(25) NOT NULL default '0',"
-                ."UNIQUE KEY `id` (`id`)"
+                ."PRIMARY KEY `id` (`id`)"
                 .") TYPE=MyISAM PACK_KEYS=0");
     echo " Done!<BR>";
     flush();
@@ -1484,7 +1501,7 @@ else
                 ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
                 ."`type` varchar(10) NOT NULL default '',"
                 ."`amount` int(11) NOT NULL default '0',"
-                ."KEY `liv_id` (`liv_id`)"
+                ."PRIMARY KEY `liv_id` (`liv_id`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
@@ -1498,6 +1515,8 @@ else
                 ."`amount` int(11) NOT NULL default '0',"
                 ."`weapon` set('Y','N') NOT NULL default 'N',"
                 ."`armor` set('Y','N') NOT NULL default 'N',"
+                ."id bigint(20) unsigned auto_increment,"
+                ."PRIMARY KEY id (id),"
                 ."KEY `unitid` (`tribeid`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
@@ -1520,26 +1539,13 @@ else
                 ."`number` int(11) NOT NULL default '0',"
                 ."`actives` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
                 ."`inactives` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."UNIQUE KEY `tribeid` (`tribeid`)"
+                ."PRIMARY KEY `tribeid` (`tribeid`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Creating logs table....";
     flush();
-    $db->Execute("DROP TABLE IF EXISTS $dbtables[logs]");
-    $db->Execute("CREATE TABLE $dbtables[logs] ("
-                ."`logid` int(10) unsigned NOT NULL auto_increment,"
-                ."`month` smallint(2) NOT NULL default '0',"
-                ."`year` smallint(4) NOT NULL default '0',"
-                ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`type` varchar(15) NOT NULL default '0',"
-                ."`time` datetime NOT NULL default '0000-00-00 00:00:00',"
-                ."`data` varchar(255) default NULL,"
-                ."PRIMARY KEY  (`logid`)"
-                .") TYPE=MyISAM");
-    echo " Done!<BR>";
-    flush();
+
     echo "Creating mapping table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[mapping]");
@@ -1547,7 +1553,7 @@ else
                 ."`hex_id` int(11) NOT NULL auto_increment,"
                 ."`admin_0000` smallint(2) NOT NULL default '0',"
                 ."`clanid_0001` smallint(2) NOT NULL default '0',"
-                ."UNIQUE KEY `hex_id` (`hex_id`)"
+                ."PRIMARY KEY `hex_id` (`hex_id`)"
                 .") TYPE=MyISAM");
     $n = 1;
     while( $n <= 4096 )
@@ -1678,7 +1684,7 @@ else
                 ."`cav_legs_armor` varchar(25) NOT NULL default '',"
                 ."`cav_shield` varchar(25) NOT NULL default '',"
                 ."`cav_horse_armor` varchar(25) NOT NULL default '',"
-                ."UNIQUE KEY `relid` (`relid`)"
+                ."PRIMARY KEY `relid` (`relid`)"
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
@@ -1719,14 +1725,14 @@ else
                 ."`cl_keyf` varchar(50) NOT NULL default '',"
                 ."`cl_valf` varchar(50) NOT NULL default '',"
                 ."`method` int(11) NOT NULL default '1',"
-                ."UNIQUE KEY `id` (`id`),"
+                ."PRIMARY KEY `id` (`id`),"
                 ."KEY `res_type` (`res_type`),"
                 ."KEY `res_id` (`res_id`),"
                 ."KEY `res_key` (`res_key`),"
                 ."KEY `rq_type` (`rq_type`),"
                 ."KEY `rq_id` (`rq_id`),"
                 ."KEY `rq_key` (`rq_key`)"
-                .") TYPE=MyISAM AUTO_INCREMENT=0");
+                .") TYPE=MyISAM ");
 
     $db->Execute("INSERT INTO $dbtables[gd_rq] "
                 ."(`id`, `res_type`, `res_table`, `res_idf`, `res_id`, `res_keyf`, "
@@ -2254,8 +2260,8 @@ else
                 ."`cl_tribeidf` varchar(50) NOT NULL default 'tribeid',"
                 ."`cl_keyf` varchar(50) NOT NULL default '',"
                 ."`cl_valf` varchar(50) NOT NULL default '',"
-                ."UNIQUE KEY `id` (`id`)"
-                .") TYPE=MyISAM AUTO_INCREMENT=0");
+                ."PRIMARY KEY `id` (`id`)"
+                .") TYPE=MyISAM ");
     $db->Execute("INSERT INTO $dbtables[gd_rq_tables] (`id`, `entry_type`, `r_type`, `r_table`, `r_idf`, `r_keyf`, `r_goods_tribe`, `cl_table`, `cl_clanidf`, `cl_tribeidf`, `cl_keyf`, `cl_valf`) VALUES (1, 'res', 'Livestock', 'product_table', 'prod_id', 'long_name', 'Y', '', NULL, '0', '', ''), "
     ."(2, 'res', 'Product', 'product_table', 'prod_id', 'long_name', 'Y', '', NULL, '0', '', ''),"
     ."(3, 'res', 'Resource', 'product_table', 'prod_id', 'long_name', 'Y', '', NULL, '0', '', ''),"
@@ -2296,8 +2302,8 @@ else
                     ."`game` int(11) NOT NULL default '0',"
                     ."`prospect` smallint(2) NOT NULL default '0',"
                     ."`seed` int(10) unsigned zerofill NOT NULL default '1111111111',"
-                    ."UNIQUE KEY `hex_id` (`hex_id`)"
-                    .") TYPE=MyISAM PACK_KEYS=0");
+                    ."PRIMARY KEY `hex_id` (`hex_id`)"
+                    .") TYPE=MyISAM ");
         echo " Done!<BR>";
         flush();
         echo "Generating map....";

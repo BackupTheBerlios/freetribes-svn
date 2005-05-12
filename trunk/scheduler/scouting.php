@@ -376,10 +376,8 @@ while( !$res->EOF )
            }
     }
 
-  $query = $db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp','$tribe[tribeid]')");
-  db_op_result($query,__LINE__,__FILE__);
-  $query = $db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp')");
-  db_op_result($query,__LINE__,__FILE__);
+
+
    $query = $db->Execute("UPDATE $dbtables[mapping] "
                                 ."SET `clanid_$tribe[clanid]` = '1' "
                                 ."WHERE hex_id = '$hexinfo[hex_id]' "
@@ -541,10 +539,7 @@ while( !$res->EOF )
            }
        }
 
-  $query = $db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp','$tribe[tribeid]')");
-  db_op_result($query,__LINE__,__FILE__);
- $query = $db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp')");
-     db_op_result($query,__LINE__,__FILE__);
+
    $query = $db->Execute("UPDATE $dbtables[mapping] "
                                 ."SET `clanid_$tribe[clanid]` = '1' "
                                 ."WHERE hex_id = '$hexinfo[hex_id]' "
@@ -711,10 +706,7 @@ while( !$res->EOF )
              db_op_result($query,__LINE__,__FILE__);
            }
        }
-  $query = $db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp','$tribe[tribeid]')");
-   db_op_result($query,__LINE__,__FILE__);
-  $query = $db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp')");
-   db_op_result($query,__LINE__,__FILE__);
+
    $query = $db->Execute("UPDATE $dbtables[mapping] "
                                 ."SET `clanid_$tribe[clanid]` = '1' "
                                 ."WHERE hex_id = '$hexinfo[hex_id]' "
@@ -878,10 +870,7 @@ while( !$res->EOF )
               db_op_result($query,__LINE__,__FILE__);
            }
           }
-  $query = $db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp','$tribe[tribeid]')");
-    db_op_result($query,__LINE__,__FILE__);
-  $query = $db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp')");
-   db_op_result($query,__LINE__,__FILE__);
+
  $query = $db->Execute("UPDATE $dbtables[mapping] "
                                 ."SET `clanid_$tribe[clanid]` = '1' "
                                 ."WHERE hex_id = '$hexinfo[hex_id]' "
@@ -1043,10 +1032,7 @@ while( !$res->EOF )
              db_op_result($query,__LINE__,__FILE__);
            }
     }
-  $query = $db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp','$tribe[tribeid]')");
-  db_op_result($query,__LINE__,__FILE__);
-  $query = $db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp')");
-  db_op_result($query,__LINE__,__FILE__);
+
    $query = $db->Execute("UPDATE $dbtables[mapping] "
                                 ."SET `clanid_$tribe[clanid]` = '1' "
                                 ."WHERE hex_id = '$hexinfo[hex_id]' "
@@ -1208,10 +1194,7 @@ while( !$res->EOF )
            db_op_result($query,__LINE__,__FILE__);
            }
     }
-  $query = $db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp','$tribe[tribeid]')");
-   db_op_result($query,__LINE__,__FILE__);
-  $query = $db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp')");
-   db_op_result($query,__LINE__,__FILE__);
+
    $query = $db->Execute("UPDATE $dbtables[mapping] "
                                 ."SET `clanid_$tribe[clanid]` = '1' "
                                 ."WHERE hex_id = '$hexinfo[hex_id]' "
@@ -1375,10 +1358,7 @@ while( !$res->EOF )
             db_op_result($query,__LINE__,__FILE__);
            }
     }
-  $query = $db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp','$tribe[tribeid]')");
-  db_op_result($query,__LINE__,__FILE__);
-  $query = $db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$tribe[tribeid]','$tribe[clanid]','$hexinfo[hex_id]','$stamp')");
-   db_op_result($query,__LINE__,__FILE__);
+
    $query = $db->Execute("UPDATE $dbtables[mapping] "
                                 ."SET `clanid_$tribe[clanid]` = '1' "
                                 ."WHERE hex_id = '$hexinfo[hex_id]' "
