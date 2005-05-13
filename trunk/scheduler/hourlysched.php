@@ -12,17 +12,29 @@ if( $_SERVER[REMOTE_ADDR] != $_SERVER[SERVER_ADDR] )
 {
     die("You cannot access this page directly!");
 }
-$day[count] = date("H");
-if( $day[count] == 0 )
+
+$now = date("i");//minutes leading 0
+if($now == "00")//only on the hour
 {
-    $month[count]++;
-}
-if( $month[count] > 12 )
+ //JUST FOR DEVELOPMENT
+ if($day['count'] == 6 || $day['count'] == 12 || $day['count'] == 18)
+ {
+    $day['count'] = 0;
+ }
+  //REMOVE IN RELEASE CODE
+ //$day['count'] gotten from game_time
+
+if( $day['count'] == 0)
 {
-    $month[count] = 1;
-    $year[count]++;
+    $month['count']++;
 }
-if($month[count] == '3' || $month[count] == '4' || $month[count] == '5')
+if( $month['count'] > 12 )
+{
+    $month['count'] = 1;
+    $year['count']++;
+}
+}
+if($month['count'] == '3' || $month['count'] == '4' || $month['count'] == '5')
 {
     $season = 1;
     $res = $db->Execute("UPDATE $dbtables[hexes] SET move = 2 WHERE terrain = 'pr' OR terrain = 'tu' OR terrain = 'de'");
@@ -46,7 +58,7 @@ if($month[count] == '3' || $month[count] == '4' || $month[count] == '5')
     $res = $db->Execute("UPDATE $dbtables[skill_table] SET auto = 'N' WHERE abbr = 'seek'");
     db_op_result($res,__LINE__,__FILE__);
 }
-elseif($month[count] == '6' || $month[count] == '7' || $month[count] == '8')
+elseif($month['count'] == '6' || $month['count'] == '7' || $month['count'] == '8')
 {
     $season = 2;
     $res = $db->Execute("UPDATE $dbtables[hexes] SET move = 3 WHERE terrain = 'pr' OR terrain = 'tu' OR terrain = 'de'");
@@ -70,7 +82,7 @@ elseif($month[count] == '6' || $month[count] == '7' || $month[count] == '8')
     $res = $db->Execute("UPDATE $dbtables[skill_table] SET auto = 'N' WHERE abbr = 'seek'");
     db_op_result($res,__LINE__,__FILE__);
 }
-elseif($month[count] == '9' || $month[count] == '10' || $month[count] == '11' )
+elseif($month['count'] == '9' || $month['count'] == '10' || $month['count'] == '11' )
 {
     $season = 3;
     $res = $db->Execute("UPDATE $dbtables[hexes] SET move = 3 WHERE terrain = 'pr' OR terrain = 'tu' OR terrain = 'de'");
@@ -94,7 +106,7 @@ elseif($month[count] == '9' || $month[count] == '10' || $month[count] == '11' )
     $res = $db->Execute("UPDATE $dbtables[skill_table] SET auto = 'N' WHERE abbr = 'seek'");
     db_op_result($res,__LINE__,__FILE__);
 }
-elseif($month[count] == '12' || $month[count] == '1' || $month[count] == '2')
+elseif($month['count'] == '12' || $month['count'] == '1' || $month['count'] == '2')
 {
     $season = 4;
     $res = $db->Execute("UPDATE $dbtables[hexes] SET move = 4 WHERE terrain = 'pr' OR terrain = 'tu' OR terrain = 'de'");
@@ -133,11 +145,11 @@ $weather_roll = rand(1,100);
 $months = $db->Execute("SELECT * FROM $dbtables[game_date] WHERE type = 'month'");
 db_op_result($months,__LINE__,__FILE__);
 $month = $months->fields;
-if( $month[count] < 3 || $month[count] > 10 )
+if( $month[count] < 3 || $month['count'] > 10 )
 {
     $weather_roll = $weather_roll - 10;
 }
-elseif( $month[count] < 5 || $month[count] > 8 )
+elseif( $month['count'] < 5 || $month['count'] > 8 )
 {
     $weather_roll = $weather_roll - 5;
 }
@@ -205,7 +217,7 @@ if( $season[count] == '1' )
         db_op_result($res,__LINE__,__FILE__);
     }
 }
-elseif( $season[count] == '2' )
+elseif( $season['count'] == '2' )
 { ///Summer
     if( $weather_roll < 40 )
     {
@@ -243,7 +255,7 @@ elseif( $season[count] == '2' )
         db_op_result($res,__LINE__,__FILE__);
     }
 }
-elseif( $season[count] == '3' )
+elseif( $season['count'] == '3' )
 { ///Fall
     if( $weather_roll < 40 )
     {
@@ -285,7 +297,7 @@ elseif( $season[count] == '3' )
         db_op_result($res,__LINE__,__FILE__);
     }
 }
-elseif( $season[count] == '4' )
+elseif( $season['count'] == '4' )
 { ///Winter
     if( $weather_roll < 15 )
     {

@@ -62,7 +62,7 @@ $dbtables['traderoutes'] = "${db_prefix}traderoutes";
 $dbtables['tribes'] = "${db_prefix}tribes";
 $dbtables['weapons'] = "${db_prefix}weapons";
 $dbtables['weather'] = "${db_prefix}weather";
-
+$dbtables['news'] = "{$db_prefix}game_news";
 $privilege = array (
 // Helper privileges
                     "hlp_Search"       =>  0,

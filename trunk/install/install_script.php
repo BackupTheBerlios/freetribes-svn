@@ -1424,6 +1424,23 @@ else
                 .") TYPE=MyISAM");
       db_op_result($query,__LINE__,__FILE__);
     echo " Done!<BR>";
+      flush();
+    echo "Creating Admin News table....";
+    flush();
+    $db->Execute("DROP TABLE IF EXISTS $dbtables[news]");
+    $query = $db->Execute("CREATE TABLE `tstr_game_news` ("
+        ."`id` BIGINT( 20 ) UNSIGNED NOT NULL AUTO_INCREMENT ,"
+        ."`created` DATE NOT NULL , "
+        ."`expire` DATE NOT NULL ,"
+        ."`headline` VARCHAR( 80 ) NOT NULL ,"
+        ."`front_page` enum('1','0') default '0',"
+        ."`news` TEXT NOT NULL ,"
+        ."PRIMARY KEY ( `id` ) ,"
+        ."INDEX ( `created` , `expire` )"
+        .");");
+        db_op_result($query,__LINE__,__FILE__);
+        echo " DONE!<br>";
+
     flush();
     echo "Creating structures table....";
     flush();

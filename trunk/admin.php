@@ -61,7 +61,8 @@ $md5password = md5($_REQUEST['password']);
     if($admininfo[admin] >= $privilege['adm_tracking'])
     {
         echo "<OPTION VALUE=listing>Chief List</OPTION>"
-            ."<OPTION VALUE=multis>Multiplayer Detection</OPTION>";
+            ."<OPTION VALUE=multis>Multiplayer Detection</OPTION>"
+            ."<OPTION VALUE=news>News Announcements</OPTION>";
     }
     if($admininfo[admin] >= $privilege['adm_dev'])
     {
@@ -184,6 +185,10 @@ $md5password = md5($_REQUEST['password']);
     if($_REQUEST['menu'] == "restart")
     {
         echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=install/install_script.php\">";
+    }
+    if($_POST['menu'] == "news")
+    {
+        echo  "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=admin_news.php\">";
     }
     if($module == "zoneedit")
     {
