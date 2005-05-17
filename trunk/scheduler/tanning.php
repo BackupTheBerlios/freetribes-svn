@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
   $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
    db_op_result($res,__LINE__,__FILE__);
@@ -15,22 +20,22 @@ $cnt = $db->Execute("SELECT actives FROM $dbtables[activities] WHERE tribeid = '
 $tanners = 0;
 while(!$cnt->EOF){
 $count = $cnt->fields;
-$tanners += $count[actives];
+$tanners += $count['actives'];
 $cnt->MoveNext();
 }
 
 while(!$act->EOF){
 $act_do = $act->fields;
 
-if($act_do[skill_abbr] == 'tan'){
+if($act_do['skill_abbr'] == 'tan'){
 $tanskl = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$tribe[tribeid]' AND abbr = 'tan' LIMIT 1");
 db_op_result($tanskl,__LINE__,__FILE__);
 $skill = $tanskl->fields;
-$act_do[actives] == $tanners;
-$curtanners = $act_do[actives];
-$maxtanners = $act_do[actives];
-if($skill[level] < 10){
-$maxtanners = $skill[level] * 10;
+$act_do['actives'] == $tanners;
+$curtanners = $act_do['actives'];
+$maxtanners = $act_do['actives'];
+if($skill['level'] < 10){
+$maxtanners = $skill['level'] * 10;
 }
 if($maxtanners < $curtanners){
 $curtanners = $maxtanners;
@@ -38,11 +43,11 @@ $curtanners = $maxtanners;
 $skn = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'skins' AND tribeid = '$tribe[goods_tribe]'");
 db_op_result($skn,__LINE__,__FILE__);
 $skininfo = $skn->fields;
-$skins = $skininfo[amount];
+$skins = $skininfo['amount'];
 $brk = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'bark' AND tribeid = '$tribe[goods_tribe]'");
  db_op_result($brk,__LINE__,__FILE__);
 $barkinfo = $brk->fields;
-$bark = $barkinfo[amount];
+$bark = $barkinfo['amount'];
 $startskins = $skins;
 $startbark = $bark;
 $leather = 0;
@@ -56,7 +61,7 @@ $deltaskins = $startskins - $skins;
 $fur = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'furs' AND tribeid = '$tribe[goods_tribe]'");
  db_op_result($fur,__LINE__,__FILE__);
 $furinfo = $fur->fields;
-$furs = $furinfo[amount];
+$furs = $furinfo['amount'];
 $startfurs = $furs;
 while($curtanners > 0 & $bark > 9 & $furs > 3){
 $leather += 4;

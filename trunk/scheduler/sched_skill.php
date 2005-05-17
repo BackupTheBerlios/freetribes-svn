@@ -1,4 +1,10 @@
 <?
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+//FILE SCHEDULED FOR DELETION
 session_start();
 header("Cache-control: private");
 
@@ -12,17 +18,17 @@ connectdb();
 
 if ( !ISSET($_SESSION['username']) || !ISSET($_SESSION['password']) )
 {
-	$username = $_REQUEST['username'];
-	$_SESSION['username'] = $username;
-	$password = $_REQUEST['password'];
-	$md5password = md5($password);
-	$_SESSION['password'] = $password;
+    $username = $_REQUEST['username'];
+    $_SESSION['username'] = $username;
+    $password = $_REQUEST['password'];
+    $md5password = md5($password);
+    $_SESSION['password'] = $password;
 }
 
 $res = $db->Execute("SELECT * FROM $dbtables[chiefs] "
-					."WHERE username='$_SESSION[username]' "
-					."AND password='$_SESSION[password]' "
-					."LIMIT 1");
+                    ."WHERE username='$_SESSION[username]' "
+                    ."AND password='$_SESSION[password]' "
+                    ."LIMIT 1");
 $playerinfo = $res->fields;
 
 page_header("System Update");
@@ -33,8 +39,8 @@ $admininfo = $admin->fields;
 
 if(!$admininfo['admin'] >= $privilege['adm_sched'])
 {
-	echo "<BR>You must have privilege to run the scheduler to use this tool.<BR>\n";
-	page_footer();
+    echo "<BR>You must have privilege to run the scheduler to use this tool.<BR>\n";
+    page_footer();
 }
 
 
@@ -49,12 +55,12 @@ $sql = "OPTIMIZE TABLE ";
 $i = 1;
 foreach ($dbtables AS $key => $value)
 {
-	$sql .= "\$dbtables[$value]";
-	if ($i <> count($dbtables))
-	{
-		$sql .= ", ";
-	}
-	$i++;
+    $sql .= "\$dbtables[$value]";
+    if ($i <> count($dbtables))
+    {
+        $sql .= ", ";
+    }
+    $i++;
 }
 
 $opti = $db->Execute($sql);
@@ -77,10 +83,10 @@ include("goods_tribe.php");
 // Get rid of abandoned structures
 include("structures.php");
 
-// Primary Skill Attempts 
+// Primary Skill Attempts
 include("primaryskill.php");
 
-// Secondary Skill Attempts 
+// Secondary Skill Attempts
 include("secondaryskill.php");
 
 $db->Execute("DELETE FROM $dbtables[last_turn]");
@@ -232,10 +238,10 @@ $db->Execute("INSERT INTO $dbtables[logs] "
 echo "<P>The System Update has been completed.";
 
 
-	if (ISSET($_REQUEST['chain']))
-	{
-		echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=sched_time.php?force=1\">";
-	}
+    if (ISSET($_REQUEST['chain']))
+    {
+        echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=sched_time.php?force=1\">";
+    }
 
 page_footer();
 ?>

@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
@@ -19,14 +24,14 @@ while( !$res->EOF )
     while( !$act->EOF )
     {
         $act_do = $act->fields;
-        if( $act_do[skill_abbr] == 'hunt' )
+        if( $act_do['skill_abbr'] == 'hunt' )
         {
-            $starthunt = $act_do[actives];
+            $starthunt = $act_do['actives'];
             $season = $db->Execute("SELECT count from $dbtables[game_date] "
                                   ."WHERE type = 'season'");
                db_op_result($season,__LINE__,__FILE__);
             $seasoninfo = $season->fields;
-            $seasonbonus = (6 - $seasoninfo[count]);
+            $seasonbonus = (6 - $seasoninfo['count']);
             $weather = $db->Execute("SELECT * FROM $dbtables[game_date] "
                                    ."WHERE type = 'weather'");
               db_op_result($weather,__LINE__,__FILE__);
@@ -36,59 +41,59 @@ while( !$res->EOF )
                 db_op_result($hex,__LINE__,__FILE__);
             $hexinfo = $hex->fields;
 
-            if( $hexinfo[terrain] == 'pr' )
+            if( $hexinfo['terrain'] == 'pr' )
             {
                 $terrain_bonus = 3;
             }
-            elseif( $hexinfo[terrain] == 'df' )
+            elseif( $hexinfo['terrain'] == 'df' )
             {
                 $terrain_bonus = 7;
             }
-            elseif( $hexinfo[terrain] == 'cf' )
+            elseif( $hexinfo['terrain'] == 'cf' )
             {
                 $terrain_bonus = 6;
             }
-            elseif( $hexinfo[terrain] == 'dh' )
+            elseif( $hexinfo['terrain'] == 'dh' )
             {
                 $terrain_bonus = 5;
             }
-            elseif( $hexinfo[terrain] == 'ch' )
+            elseif( $hexinfo['terrain'] == 'ch' )
             {
                 $terrain_bonus = 4;
             }
-            elseif( $hexinfo[terrain] == 'lcm' )
+            elseif( $hexinfo['terrain'] == 'lcm' )
             {
                 $terrain_bonus = 2;
             }
-            elseif( $hexinfo[terrain] == 'ljm' )
+            elseif( $hexinfo['terrain'] == 'ljm' )
             {
                 $terrain_bonus = 4;
             }
-            elseif( $hexinfo[terrain] == 'hsm' )
+            elseif( $hexinfo['terrain'] == 'hsm' )
             {
                 $terrain_bonus = 0;
             }
-            elseif( $hexinfo[terrain] == 'jh' )
+            elseif( $hexinfo['terrain'] == 'jh' )
             {
                 $terrain_bonus = 8;
             }
-            elseif( $hexinfo[terrain] == 'jg' )
+            elseif( $hexinfo['terrain'] == 'jg' )
             {
                 $terrain_bonus = 10;
             }
-            elseif( $hexinfo[terrain] == 'de' )
+            elseif( $hexinfo['terrain'] == 'de' )
             {
                 $terrain_bonus = 0;
             }
-            elseif( $hexinfo[terrain] == 'tu' )
+            elseif( $hexinfo['terrain'] == 'tu' )
             {
                 $terrain_bonus = 1;
             }
-            elseif( $hexinfo[terrain] == 'sw' )
+            elseif( $hexinfo['terrain'] == 'sw' )
             {
                 $terrain_bonus = 0;
             }
-            elseif( $hexinfo[terrain] == 'gh' )
+            elseif( $hexinfo['terrain'] == 'gh' )
             {
                 $terrain_bonus = 5;
             }
@@ -133,18 +138,18 @@ while( !$res->EOF )
             while( !$trap->EOF )
             {
                 $trapinfo = $trap->fields;
-                $traps = $act_do[actives] * 5;
-                if( $traps > $trapinfo[amount] )
+                $traps = $act_do['actives'] * 5;
+                if( $traps > $trapinfo['amount'] )
                 {
-                    $traps_used += $trapinfo[amount];
-                    $prod_used = $trapinfo[amount];
+                    $traps_used += $trapinfo['amount'];
+                    $prod_used = $trapinfo['amount'];
                 }
                 else
                 {
                     $traps_used += $traps;
                     $prod_used = $traps;
                 }
-                if( !$trapinfo[long_name] == '' )
+                if( !$trapinfo['long_name'] == '' )
                 {
                 $query = $db->Execute("INSERT INTO $dbtables[products_used] "
                             ."VALUES("
@@ -167,7 +172,7 @@ while( !$res->EOF )
 
 
             $weapons = 0;
-            $weapons_needed = $act_do[actives] - ($traps_used/5);
+            $weapons_needed = $act_do['actives'] - ($traps_used/5);
             while( $weapons_needed > 0 )
             {
                 while( !$imp->EOF )
@@ -179,12 +184,12 @@ while( !$res->EOF )
                                             ."AND amount > 0");
                       db_op_result($wepstock,__LINE__,__FILE__);
                     $wepinfo = $wepstock->fields;
-                    if( $wepinfo[amount] > $weapons_needed )
+                    if( $wepinfo['amount'] > $weapons_needed )
                     {
-                        $wepinfo[amount] = $weapons_needed;
+                        $wepinfo['amount'] = $weapons_needed;
                     }
-                    $weapons_needed -= $wepinfo[amount];
-                if( !$wepinfo[long_name] == '' )
+                    $weapons_needed -= $wepinfo['amount'];
+                if( !$wepinfo['long_name'] == '' )
                 {
                 $query = $db->Execute("INSERT INTO $dbtables[products_used] "
                             ."VALUES("
@@ -198,7 +203,7 @@ while( !$res->EOF )
                             ."AND long_name = '$wepinfo[long_name]'");
                     db_op_result($query,__LINE__,__FILE__);
                 }
-                    $weap_bonus += $wepinfo[amount] * $impinfo[hunting];
+                    $weap_bonus += $wepinfo['amount'] * $impinfo['hunting'];
                     $imp->MoveNext();
                 }
                 $weapons_needed = 0;
@@ -208,8 +213,8 @@ while( !$res->EOF )
             {
                 $weap_bonus = 0;
             }
-            $hunter_ability = round($hunterinfo[level] * $weap_bonus);
-            $hunter_produce = round($act_do[actives] + $hunter_ability);
+            $hunter_ability = round($hunterinfo['level'] * $weap_bonus);
+            $hunter_produce = round($act_do['actives'] + $hunter_ability);
             if( $seasonbonus == '0' )
             {
                 $seasonbonus = .5;
@@ -218,16 +223,16 @@ while( !$res->EOF )
             {
                 $terrain_bonus = .5;
             }
-            $hunter_produce = round(((($hunter_produce + $bonuses + $terrain_bonus) * $seasonbonus) * $tribe[morale]) - $weatherinfo[count]);
+            $hunter_produce = round(((($hunter_produce + $terrain_bonus) * $seasonbonus) * $tribe['morale']) - $weatherinfo['count']);
 
             if( $hunter_produce < 0 )
             {
                 $hunter_produce = 0;
             }
 
-            if( $hexinfo[game] < $hunter_produce )
+            if( $hexinfo['game'] < $hunter_produce )
             {
-                $hunter_produce = $hexinfo[game];
+                $hunter_produce = $hexinfo['game'];
             }
 
             $furinfo = array();
@@ -241,9 +246,9 @@ while( !$res->EOF )
             $furmax = 0;
             $fur_skin = 0;
             $logtext = '';
-            if( $furinfo[level] > 0 )
+            if( $furinfo['level'] > 0 )
             {
-                $furmax = $furinfo[level] * 10;
+                $furmax = $furinfo['level'] * 10;
                 $fur_skin = 0;
                 if( $furmax > 0 )
                 {
@@ -302,7 +307,7 @@ while( !$res->EOF )
                         ."'$stamp',"
                         ."'Hunting: $hunter_produce Provisions hunted$logtext by $starthunt hunters using $traps_used traps and available weapons.')");
                 db_op_result($query,__LINE__,__FILE__);
-            if( $hexinfo[game] <= $hunter_produce )
+            if( $hexinfo['game'] <= $hunter_produce )
             {
                 $query = $db->Execute("INSERT INTO $dbtables[logs] "
                             ."VALUES("

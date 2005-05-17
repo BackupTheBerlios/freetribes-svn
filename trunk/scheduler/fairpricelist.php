@@ -1,7 +1,15 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+if( $month['count'] == '6' || $month['count'] == '12' )
+{
+
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $sk = $db->Execute("SELECT distinct tribeid FROM $dbtables[skills] "
                   ."WHERE abbr = 'eco' "
@@ -49,7 +57,7 @@ if( !$sk->EOF )
         $sk->MoveNext();
     }
 }
-
+}
 $time_end = getmicrotime();
 $time = $time_end - $time_start;
 $page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed

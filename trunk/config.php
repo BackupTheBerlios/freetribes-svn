@@ -58,6 +58,7 @@ $local_number_dec_point = ".";
 $local_number_thousands_sep = ",";
 $language = "english";
 $title = "TribeStrive";
+$version = "v 0.9.3-Alpha";
 
 /* game variables */
 $ip = getenv("REMOTE_ADDR");

@@ -1,5 +1,12 @@
 <?php
-require_once("../config.php");
+
+error_reporting  (E_ALL);
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 connectdb();
 /////////////////////////////////Establish Game Time//////////////////////////////////////////
 

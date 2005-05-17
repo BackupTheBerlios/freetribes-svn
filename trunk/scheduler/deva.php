@@ -1,15 +1,46 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
+$res = $db->Execute("UPDATE $dbtables[products] SET amount = 0 WHERE amount < 0");
+db_op_result($res,__LINE__,__FILE__);
+$res = $db->Execute("OPTIMIZE TABLE $dbtables[chiefs] ,"
+            ." $dbtables[clans],"
+            //." $dbtables[elements],"
+            ." $dbtables[game_date],"
+            ." $dbtables[hexes],"
+            ." $dbtables[livestock],"
+            ." $dbtables[logs],"
+            ." $dbtables[map_table],"
+            ." $dbtables[movement_log],"
+            ." $dbtables[products],"
+            ." $dbtables[resources],"
+            ." $dbtables[skills],"
+            ." $dbtables[tribes],"
+            ." $dbtables[last_turn],"
+            ." $dbtables[activities],"
+            ." $dbtables[scouts],"
+            ." $dbtables[weather]");
+
+db_op_result($res,__LINE__,__FILE__);
+//////////////////////////////////Undo the Transfers table//////////////////////////////
+
+$res = $db->Execute("TRUNCATE table $dbtables[poptrans]");
+db_op_result($res,__LINE__,__FILE__);
+
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
 while( !$res->EOF )
 {
     $tribe = $res->fields;
 
-    if( $tribe[DeVA] > 0 )
+    if( $tribe['DeVA'] > 0 )
     {
         $seige = $db->Execute("SELECT * FROM $dbtables[garrisons] "
                              ."WHERE tribeid = '$tribe[DeVA]' "

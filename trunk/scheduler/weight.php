@@ -1,5 +1,11 @@
 <?php
-require_once("../config.php");
+error_reporting  (E_ALL);
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php"); //we dont need THESE do we? this stuff is already included in the calling file.. but oh well
 $time_start = getmicrotime();
 include("game_time.php");
 connectdb();
@@ -17,22 +23,24 @@ while( !$res->EOF )
     $horse = 0;
     $elephant = 0;
     $wagon = 0;
+    $cattle = 0;
     $palanquin = 0;
+    $palanquins = 0;
     $maxweight = 0;
     while( !$liv->EOF )
     {
         $livinfo = $liv->fields;
-        if( $livinfo[type] == 'Horses' )
+        if( $livinfo['type'] == 'Horses' )
         {
-            $horse = $livinfo[amount];
+            $horse = $livinfo['amount'];
         }
-        elseif( $livinfo[type] == 'Elephants' )
+        elseif( $livinfo['type'] == 'Elephants' )
         {
-            $elephant = $livinfo[amount];
+            $elephant = $livinfo['amount'];
         }
-        elseif( $livinfo[type] == 'Cattle' )
+        elseif( $livinfo['type'] == 'Cattle' )
         {
-            $cattle = $livinfo[amount];
+            $cattle = $livinfo['amount'];
         }
         $liv->MoveNext();
     }
@@ -56,70 +64,70 @@ while( !$res->EOF )
         db_op_result($pal,__LINE__,__FILE__);
     $palanquin = $pal->fields;
     ////////////Figure out how many bearers needed for the palanquins////////
-    $bearers_needed = $palanquin[amount] * 4;
+    $bearers_needed = $palanquin['amount'] * 4;
     ///////Now, deduct the bearers from further calculations////////////////
-    while( $bearers_needed > 0 && $tribe[slavepop] > 0 && $tribe[activepop] > 0 )
+    while( $bearers_needed > 0 && $tribe['slavepop'] > 0 && $tribe['activepop'] > 0 )
     {
-        while( $tribe[slavepop] > 0 && $bearers_needed > 0 )
+        while( $tribe['slavepop'] > 0 && $bearers_needed > 0 )
         {
             $bearers_needed -= 1;
-            $tribe[slavepop] -= 1;
+            $tribe['slavepop'] -= 1;
             $palanquins += 300;
         }
-        while( $tribe[activepop] > 0 && $bearers_needed > 0 )
+        while( $tribe['activepop'] > 0 && $bearers_needed > 0 )
         {
             $bearers_needed -= 1;
-            $tribe[activepop] -= 1;
+            $tribe['activepop'] -= 1;
             $palanquins += 300;
         }
     }
-    $maxweight = ( $tribe[activepop] * 30 )+( $tribe[slavepop] * 30 ) + ( $tribe[inactivepop] * 15 ) + $palanquins;
+    $maxweight = ( $tribe['activepop'] * 30 )+( $tribe['slavepop'] * 30 ) + ( $tribe['inactivepop'] * 15 ) + $palanquins;
     $saddlebags = $sad->fields;
     $wagons = $wag->fields;
     $backpacks = $bak->fields;
     $wagonscheck = ( $horse / 2 ) + ( $cattle / 2 ) + $elephant;
     $wagons_used = 0;
-    while( $wagons[amount] > 0 && $cattle > 1 && $wagonscheck > 0 )
+    while( $wagons['amount'] > 0 && $cattle > 1 && $wagonscheck > 0 )
     {
-        $wagons[amount] -= 1;
+        $wagons['amount'] -= 1;
         $cattle -= 2;
         $wagons_used += 1;
         $wagonscheck -= 1;
     }
-    while( $wagons[amount] > 0 && $horse > 1 && $wagonscheck > 0 )
+    while( $wagons['amount'] > 0 && $horse > 1 && $wagonscheck > 0 )
     {
-        $wagons[amount] -= 1;
+        $wagons['amount'] -= 1;
         $horse -= 2;
         $wagons_used += 1;
         $wagonscheck -= 1;
     }
-    while( $wagons[amount] > 0 && $elephant > 0 && $wagonscheck > 0 )
+    while( $wagons['amount'] > 0 && $elephant > 0 && $wagonscheck > 0 )
     {
-        $wagons[amount] -= 1;
+        $wagons['amount'] -= 1;
         $elephant -= 1;
         $wagons_used += 1;
         $wagonscheck -= 1;
     }
 
     $maxweight = $maxweight + ( $wagons_used * 2300 ) + ( $horse * 150 ) + ( $elephant * 1000 );
-    $backpackwearers = $tribe[activepop] + $tribe[slavepop] + $tribe[inactivepop] - $horse;
+    $backpackwearers = $tribe['activepop'] + $tribe['slavepop'] + $tribe['inactivepop'] - $horse;
     if( $backpackwearers < 0 )
     {
         $backpackwearers = 0;
     }
-    if( $backpacks[amount] > $backpackwearers )
+    if( $backpacks['amount'] > $backpackwearers )
     {
-        $backpack[amount] = $backpackwearers;
+        $backpack['amount'] = $backpackwearers;
     }
-    $maxweight = $maxweight + ( $backpacks[amount] * 30 );
+    $maxweight = $maxweight + ( $backpacks['amount'] * 30 );
 
-    if( $saddlebags[amount] > $horse )
+    if( $saddlebags['amount'] > $horse )
     {
-        $saddlebags[amount] = $horse;
+        $saddlebags['amount'] = $horse;
     }
-    $maxweight = $maxweight + ( $saddlebags[amount] * 150 );
+    $maxweight = $maxweight + ( $saddlebags['amount'] * 150 );
 
-    if( $tribe[tribeid] == $tribe[goods_tribe] )
+    if( $tribe['tribeid'] == $tribe['goods_tribe'] )
     {
         $query = $db->Execute("UPDATE $dbtables[tribes] "
                     ."SET maxweight = '$maxweight' "
@@ -153,7 +161,7 @@ while( !$res->EOF )
                               ."WHERE long_name = '$prodinfo[long_name]'");
           db_op_result($weight,__LINE__,__FILE__);
         $prodweight = $weight->fields;
-        $totalweight += $prodweight[weight] * $prodinfo[amount];
+        $totalweight += $prodweight['weight'] * $prodinfo['amount'];
         $prod->MoveNext();
     }
 
@@ -164,7 +172,7 @@ while( !$res->EOF )
     while( !$resource->EOF )
     {
         $resinfo = $resource->fields;
-        $totalweight += $resinfo[amount];
+        $totalweight += $resinfo['amount'];
         $resource->MoveNext();
     }
 

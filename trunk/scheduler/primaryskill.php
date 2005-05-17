@@ -5,10 +5,14 @@
 // option) any later version.
 //
 // File: primaryskill.php
-
-require_once("../config.php");
+ $pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes] "
                    ."WHERE pri_skill_att != ''");
@@ -129,18 +133,18 @@ while( !$res->EOF )
     {
         $current_pri[level] = 0;
     }
-    $primary = $current_pri[level];
+    $primary = $current_pri['level'];
     $primary++;
     $chancebonus = 0;
     if( $primary > 10 )
     {
         $totaldeduct = $basechance + $primary - 1;   ///bluesman addition
-        $chancebonus += $research[level] + $literacy[level];
+        $chancebonus += $research['level'] + $literacy['level'];
     }
     elseif( $primary <= 10 )
     {
         $totaldeduct = $primary * 10;            ///bluesman addition
-        $chancebonus += $literacy[level];
+        $chancebonus += $literacy['level'];
         if( $chancebonus < 0 )
         {
             $chancebonus = 0;
@@ -150,9 +154,9 @@ while( !$res->EOF )
 
     $totalchance = $totalchance + $rel_bonus;
 
-    if( $totalchance >= 0 && $current_pri[level] < 20 )                      ///bluesman addition
+    if( $totalchance >= 0 && $current_pri['level'] < 20 )                      ///bluesman addition
     {
-        $current_pri[level] += 1;
+        $current_pri['level'] += 1;
         if( $game_skill_debug )
         {
             $query = $db->Execute("INSERT INTO $dbtables[logs] "
@@ -182,7 +186,7 @@ while( !$res->EOF )
         // NOTE: $rel_bonus<>0 will also result in a morale gain
         // if the tribe succeeded with a skill penalised by the religion
 
-        if( $skinfo[morale] == 'Y' || $rel_bonus<>0)
+        if( $skinfo['morale'] == 'Y' || $rel_bonus<>0)
         {
             if ($rel_bonus<>0)
             {
@@ -197,7 +201,7 @@ while( !$res->EOF )
                         ."WHERE tribeid = '$tribe[tribeid]'");
                     db_op_result($query,__LINE__,__FILE__);
         }
-        if( $current_pri[level] > 10 )
+        if( $current_pri['level'] > 10 )
         {
             $query = $db->Execute("UPDATE $dbtables[skills] "
                         ."SET level = '0' "

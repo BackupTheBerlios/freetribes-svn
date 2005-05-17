@@ -5,10 +5,14 @@
 // option) any later version.
 //
 // File: refining.php
-
-require_once("../config.php");
+ $pos = (strpos($_SERVER['PHP_SELF'], "/refining.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 
   $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
@@ -27,7 +31,7 @@ while( !$res->EOF )
         $act_do = $act->fields;
 
 
-        if( $act_do[skill_abbr] == 'ref' )
+        if( $act_do['skill_abbr'] == 'ref' )
         {
             $refiner = $db->Execute("SELECT * FROM $dbtables[structures] "
                                    ."WHERE long_name = 'refinery' "
@@ -46,16 +50,16 @@ while( !$res->EOF )
 
             $max_skill = 1000000;
 
-            if( $refskill[level] < 10 )
+            if( $refskill['level'] < 10 )
             {
-                $act_do[actives] = $refskill[level] * 10;
+                $act_do['actives'] = $refskill['level'] * 10;
             }
 
-            $max_refiners = $refinerinfo[number] * 10;
+            $max_refiners = $refinerinfo['number'] * 10;
 
-            if( $act_do[actives] > $max_refiners )
+            if( $act_do['actives'] > $max_refiners )
             {
-                $act_do[actives] = $max_refiners;
+                $act_do['actives'] = $max_refiners;
             }
 
             if( !$refiner->EOF )
@@ -67,11 +71,11 @@ while( !$res->EOF )
                                     ."AND amount > 0");
                   db_op_result($coal,__LINE__,__FILE__);
                 $coalinfo = $coal->fields;
-                $coalstart = $coalinfo[amount];
+                $coalstart = $coalinfo['amount'];
                 $resource = 0;
                 $normal = true;
 
-                if( $act_do[product] == 'iron' )
+                if( $act_do['product'] == 'iron' )
                 {
 
                     $ore = $db->Execute("SELECT * FROM $dbtables[resources] "
@@ -80,19 +84,19 @@ while( !$res->EOF )
                                        ."AND amount > 0");
                       db_op_result($ore,__LINE__,__FILE__);
                     $oreinfo = $ore->fields;
-                    $orestart = $oreinfo[amount];
-                    while( $oreinfo[amount] > 19 && $coalinfo[amount] > 9 && $act_do[actives] > 0 )
+                    $orestart = $oreinfo['amount'];
+                    while( $oreinfo['amount'] > 19 && $coalinfo['amount'] > 9 && $act_do['actives'] > 0 )
                     {
-                        $oreinfo[amount] -= 20;
-                        $coalinfo[amount] -= 10;
-                        $act_do[actives] -= 1;
+                        $oreinfo['amount'] -= 20;
+                        $coalinfo['amount'] -= 10;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $deltaore = $orestart - $oreinfo[amount];
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltaore = $orestart - $oreinfo['amount'];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltaore iron ore and $deltacoal coal.";
                 }
-                elseif( $act_do[product] == 'copper' )
+                elseif( $act_do['product'] == 'copper' )
                 {
 
                     $ore = $db->Execute("SELECT * FROM $dbtables[resources] "
@@ -101,19 +105,19 @@ while( !$res->EOF )
                                        ."AND amount > 0");
                      db_op_result($ore,__LINE__,__FILE__);
                     $oreinfo = $ore->fields;
-                    $orestart = $oreinfo[amount];
-                    while( $oreinfo[amount] > 19 && $coalinfo[amount] > 3 && $act_do[actives] > 0 )
+                    $orestart = $oreinfo['amount'];
+                    while( $oreinfo['amount'] > 19 && $coalinfo['amount'] > 3 && $act_do['actives'] > 0 )
                     {
-                        $oreinfo[amount] -= 20;
-                        $coalinfo[amount] -= 4;
-                        $act_do[actives] -= 1;
+                        $oreinfo['amount'] -= 20;
+                        $coalinfo['amount'] -= 4;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $deltaore = $orestart - $oreinfo[amount];
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltaore = $orestart - $oreinfo['amount'];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltaore copper ore and $deltacoal coal.";
                 }
-                elseif( $act_do[product] == 'tin' )
+                elseif( $act_do['product'] == 'tin' )
                 {
                     $ore = $db->Execute("SELECT * FROM $dbtables[resources] "
                                        ."WHERE long_name = 'Tin Ore' "
@@ -121,19 +125,19 @@ while( !$res->EOF )
                                        ."AND amount > 0");
                        db_op_result($ore,__LINE__,__FILE__);
                     $oreinfo = $ore->fields;
-                    $orestart = $oreinfo[amount];
-                    while( $oreinfo[amount] > 19 && $coalinfo[amount] > 5 && $act_do[actives] > 0 )
+                    $orestart = $oreinfo['amount'];
+                    while( $oreinfo['amount'] > 19 && $coalinfo['amount'] > 5 && $act_do['actives'] > 0 )
                     {
-                        $oreinfo[amount] -= 20;
-                        $coalinfo[amount] -= 6;
-                        $act_do[actives] -= 1;
+                        $oreinfo['amount'] -= 20;
+                        $coalinfo['amount'] -= 6;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $deltaore = $orestart - $oreinfo[amount];
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltaore = $orestart - $oreinfo['amount'];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltaore tin ore and $deltacoal coal.";
                 }
-                elseif( $act_do[product] == 'zinc' )
+                elseif( $act_do['product'] == 'zinc' )
                 {
                     $ore = $db->Execute("SELECT * FROM $dbtables[resources] "
                                        ."WHERE long_name = 'Zinc Ore' "
@@ -141,19 +145,19 @@ while( !$res->EOF )
                                        ."AND amount > 0");
                     db_op_result($ore,__LINE__,__FILE__);
                     $oreinfo = $ore->fields;
-                    $orestart = $oreinfo[amount];
-                    while( $oreinfo[amount] > 19 && $coalinfo[amount] > 7 && $act_do[actives] > 0 )
+                    $orestart = $oreinfo['amount'];
+                    while( $oreinfo['amount'] > 19 && $coalinfo['amount'] > 7 && $act_do['actives'] > 0 )
                     {
-                        $oreinfo[amount] -= 20;
-                        $coalinfo[amount] -= 8;
-                        $act_do[actives] -= 1;
+                        $oreinfo['amount'] -= 20;
+                        $coalinfo['amount'] -= 8;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $deltaore = $orestart - $oreinfo[amount];
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltaore = $orestart - $oreinfo['amount'];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltaore $oreinfo[long_name] and $deltacoal coal.";
                 }
-                elseif( $act_do[product] == 'lead' )
+                elseif( $act_do['product'] == 'lead' )
                 {
                     $ore = $db->Execute("SELECT * FROM $dbtables[resources] "
                                        ."WHERE long_name = 'Lead Ore' "
@@ -161,19 +165,19 @@ while( !$res->EOF )
                                        ."AND amount > 0");
                     db_op_result($ore,__LINE__,__FILE__);
                     $oreinfo = $ore->fields;
-                    $orestart = $oreinfo[amount];
-                    while( $oreinfo[amount] > 19 && $coalinfo[amount] > 5 && $act_do[actives] > 0 )
+                    $orestart = $oreinfo['amount'];
+                    while( $oreinfo['amount'] > 19 && $coalinfo['amount'] > 5 && $act_do['actives'] > 0 )
                     {
-                        $oreinfo[amount] -= 20;
-                        $coalinfo[amount] -= 6;
-                        $act_do[actives] -= 1;
+                        $oreinfo['amount'] -= 20;
+                        $coalinfo['amount'] -= 6;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $deltaore = $orestart - $oreinfo[amount];
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltaore = $orestart - $oreinfo['amount'];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltaore $oreinfo[long_name] and $deltacoal coal.";
                 }
-                elseif( $act_do[product] == 'gold' )
+                elseif( $act_do['product'] == 'gold' )
                 {
                     $ore = $db->Execute("SELECT * FROM $dbtables[resources] "
                                        ."WHERE long_name = 'Gold Ore' "
@@ -181,19 +185,19 @@ while( !$res->EOF )
                                        ."AND amount > 0");
                     db_op_result($ore,__LINE__,__FILE__);
                     $oreinfo = $ore->fields;
-                    $orestart = $oreinfo[amount];
-                    while( $oreinfo[amount] > 19 && $coalinfo[amount] > 5 && $act_do[actives] > 0 )
+                    $orestart = $oreinfo['amount'];
+                    while( $oreinfo['amount'] > 19 && $coalinfo['amount'] > 5 && $act_do['actives'] > 0 )
                     {
-                        $oreinfo[amount] -= 20;
-                        $coalinfo[amount] -= 6;
-                        $act_do[actives] -= 1;
+                        $oreinfo['amount'] -= 20;
+                        $coalinfo['amount'] -= 6;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $deltaore = $orestart - $oreinfo[amount];
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltaore = $orestart - $oreinfo['amount'];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltaore $oreinfo[long_name] and $deltacoal coal.";
                 }
-                elseif( $act_do[product] == 'silver' )
+                elseif( $act_do['product'] == 'silver' )
                 {
                     $ore = $db->Execute("SELECT * FROM $dbtables[resources] "
                                        ."WHERE long_name = 'Silver Ore' "
@@ -201,19 +205,19 @@ while( !$res->EOF )
                                        ."AND amount > 0");
                       db_op_result($ore,__LINE__,__FILE__);
                     $oreinfo = $ore->fields;
-                    $orestart = $oreinfo[amount];
-                    while( $oreinfo[amount] > 14 && $coalinfo[amount] > 5 && $act_do[actives] > 0 )
+                    $orestart = $oreinfo['amount'];
+                    while( $oreinfo['amount'] > 14 && $coalinfo['amount'] > 5 && $act_do['actives'] > 0 )
                     {
-                        $oreinfo[amount] -= 15;
-                        $coalinfo[amount] -= 6;
-                        $act_do[actives] -= 1;
+                        $oreinfo['amount'] -= 15;
+                        $coalinfo['amount'] -= 6;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $deltaore = $orestart - $oreinfo[amount];
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltaore = $orestart - $oreinfo['amount'];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltaore $oreinfo[long_name] and $deltacoal coal.";
                 }
-                elseif( $act_do[product] == 'bronze' )
+                elseif( $act_do['product'] == 'bronze' )
                 {
                     $copper = $db->Execute("SELECT * FROM $dbtables[resources] "
                                           ."WHERE long_name = 'Copper' "
@@ -225,20 +229,20 @@ while( !$res->EOF )
                        db_op_result($tin,__LINE__,__FILE__);
                     $copperinfo = $copper->fields;
                     $tininfo = $tin->fields;
-                    $copperstart = $copperinfo[amount];
-                    $tinstart = $tininfo[amount];
+                    $copperstart = $copperinfo['amount'];
+                    $tinstart = $tininfo['amount'];
 
-                    while( $copperinfo[amount] > 24 && $tininfo[amount] > 4 &&  $coalinfo[amount] > 9 && $act_do[actives] > 0 )
+                    while( $copperinfo['amount'] > 24 && $tininfo['amount'] > 4 &&  $coalinfo['amount'] > 9 && $act_do['actives'] > 0 )
                     {
-                        $copperinfo[amount] -= 25;
-                        $tininfo[amount] -= 5;
-                        $coalinfo[amount] -= 10;
-                        $act_do[actives] -= 1;
+                        $copperinfo['amount'] -= 25;
+                        $tininfo['amount'] -= 5;
+                        $coalinfo['amount'] -= 10;
+                        $act_do['actives'] -= 1;
                         $resource += 30;
                     }
-                    $deltacopper = $copperstart - $copperinfo[amount];
-                    $deltatin = $tinstart - $tininfo[amount];
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltacopper = $copperstart - $copperinfo['amount'];
+                    $deltatin = $tinstart - $tininfo['amount'];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltacopper copper ore, $deltatin tin ore, and $deltacoal coal.";
                     $query = $db->Execute("UPDATE $dbtables[resources] "
                                 ."SET amount = '$copperinfo[amount]' "
@@ -251,7 +255,7 @@ while( !$res->EOF )
                                 ."AND long_name = 'Tin'");
                   db_op_result($query,__LINE__,__FILE__);
                 }
-                elseif( $act_do[product] == 'brass' )
+                elseif( $act_do['product'] == 'brass' )
                 {
                     $copper = $db->Execute("SELECT * FROM $dbtables[resources] "
                                           ."WHERE long_name = 'Copper' "
@@ -263,20 +267,20 @@ while( !$res->EOF )
                           db_op_result($zinc,__LINE__,__FILE__);
                     $copperinfo = $copper->fields;
                     $zincinfo = $zinc->fields;
-                    $copperstart = $copperinfo[amount];
-                    $zincstart = $zincinfo[amount];
+                    $copperstart = $copperinfo['amount'];
+                    $zincstart = $zincinfo['amount'];
 
-                    while( $copperinfo[amount] > 15 && $zincinfo[amount] > 3 && $coalinfo[amount] > 9 && $act_do[actives] > 0 )
+                    while( $copperinfo['amount'] > 15 && $zincinfo['amount'] > 3 && $coalinfo['amount'] > 9 && $act_do['actives'] > 0 )
                     {
-                        $copperinfo[amount] -= 16;
-                        $zincinfo[amount] -= 4;
-                        $coalinfo[amount] -= 10;
-                        $act_do[actives] -= 1;
+                        $copperinfo['amount'] -= 16;
+                        $zincinfo['amount'] -= 4;
+                        $coalinfo['amount'] -= 10;
+                        $act_do['actives'] -= 1;
                         $resource += 20;
                     }
-                    $deltacopper = $copperstart - $copperinfo[amount];
-                    $deltazinc = $zincstart - $zincinfo[amount];
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltacopper = $copperstart - $copperinfo['amount'];
+                    $deltazinc = $zincstart - $zincinfo['amount'];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltacopper copper ore, $deltazinc zinc ore, and $deltacoal coal.";
                     $query = $db->Execute("UPDATE $dbtables[resources] "
                                 ."SET amount = '$copperinfo[amount]' "
@@ -289,7 +293,7 @@ while( !$res->EOF )
                                 ."AND long_name = 'Zinc'");
                    db_op_result($query,__LINE__,__FILE__);
                 }
-                elseif( $act_do[product] == 'steel' )
+                elseif( $act_do['product'] == 'steel' )
                 {
                     $normal = false;
                     $iron = $db->Execute("SELECT * FROM $dbtables[resources] "
@@ -302,17 +306,17 @@ while( !$res->EOF )
                        db_op_result($coke,__LINE__,__FILE__);
                     $ironinfo = $iron->fields;
                     $cokeinfo = $coke->fields;
-                    $ironstart = $ironinfo[amount];
-                    $cokestart = $cokeinfo[amount];
-                    while( $ironinfo[amount] > 19 && $cokeinfo[amount] > 4 && $act_do[actives] > 0 )
+                    $ironstart = $ironinfo['amount'];
+                    $cokestart = $cokeinfo['amount'];
+                    while( $ironinfo['amount'] > 19 && $cokeinfo['amount'] > 4 && $act_do['actives'] > 0 )
                     {
-                        $cokeinfo[amount] -= 5;
-                        $ironinfo[amount] -= 20;
-                        $act_do[actives] -= 1;
+                        $cokeinfo['amount'] -= 5;
+                        $ironinfo['amount'] -= 20;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $irondelta = $ironstart - $ironinfo[amount];
-                    $cokedelta = $cokestart - $cokeinfo[amount];
+                    $irondelta = $ironstart - $ironinfo['amount'];
+                    $cokedelta = $cokestart - $cokeinfo['amount'];
                     $oreused = "using $cokedelta coke and $irondelta iron.";
                     $query = $db->Execute("UPDATE $dbtables[resources] "
                                 ."SET amount = '$ironinfo[amount]' "
@@ -331,7 +335,7 @@ while( !$res->EOF )
                            db_op_result($query,__LINE__,__FILE__);
 
                 }
-                elseif( $act_do[product] == 'steel1' )
+                elseif( $act_do['product'] == 'steel1' )
                 {
                     $normal = false;
                     $iron = $db->Execute("SELECT * FROM $dbtables[resources] "
@@ -344,18 +348,18 @@ while( !$res->EOF )
                         db_op_result($coke,__LINE__,__FILE__);
                     $ironinfo = $iron->fields;
                     $cokeinfo = $coke->fields;
-                    $ironstart = $ironinfo[amount];
-                    $cokestart = $cokeinfo[amount];
+                    $ironstart = $ironinfo['amount'];
+                    $cokestart = $cokeinfo['amount'];
 
-                    while( $ironinfo[amount] > 24 && $cokeinfo[amount] > 9 && $act_do[actives] > 0 )
+                    while( $ironinfo['amount'] > 24 && $cokeinfo['amount'] > 9 && $act_do['actives'] > 0 )
                     {
-                        $cokeinfo[amount] -= 10;
-                        $ironinfo[amount] -= 25;
-                        $act_do[actives] -= 1;
+                        $cokeinfo['amount'] -= 10;
+                        $ironinfo['amount'] -= 25;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $irondelta = $ironstart - $ironinfo[amount];
-                    $cokedelta = $cokestart - $cokeinfo[amount];
+                    $irondelta = $ironstart - $ironinfo['amount'];
+                    $cokedelta = $cokestart - $cokeinfo['amount'];
                     $oreused = "using $cokedelta coke and $irondelta iron.";
                     $query = $db->Execute("UPDATE $dbtables[resources] "
                                 ."SET amount = '$ironinfo[amount]' "
@@ -374,7 +378,7 @@ while( !$res->EOF )
                       db_op_result($query,__LINE__,__FILE__);
 
                 }
-                elseif( $act_do[product] == 'steel2' )
+                elseif( $act_do['product'] == 'steel2' )
                 {
                     $normal = false;
                     $iron = $db->Execute("SELECT * FROM $dbtables[resources] "
@@ -388,17 +392,17 @@ while( !$res->EOF )
 
                     $ironinfo = $iron->fields;
                     $cokeinfo = $coke->fields;
-                    $ironstart = $ironinfo[amount];
-                    $cokestart = $cokeinfo[amount];
-                    while( $ironinfo[amount] > 29 && $cokeinfo[amount] > 9 && $act_do[actives] > 0 )
+                    $ironstart = $ironinfo['amount'];
+                    $cokestart = $cokeinfo['amount'];
+                    while( $ironinfo['amount'] > 29 && $cokeinfo['amount'] > 9 && $act_do['actives'] > 0 )
                     {
-                        $cokeinfo[amount] -= 10;
-                        $ironinfo[amount] -= 30;
-                        $act_do[actives] -= 1;
+                        $cokeinfo['amount'] -= 10;
+                        $ironinfo['amount'] -= 30;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $irondelta = $ironstart - $ironinfo[amount];
-                    $cokedelta = $cokestart - $cokeinfo[amount];
+                    $irondelta = $ironstart - $ironinfo['amount'];
+                    $cokedelta = $cokestart - $cokeinfo['amount'];
                     $oreused = "using $cokedelta coke and $irondelta iron.";
                     $query = $db->Execute("UPDATE $dbtables[resources] "
                                 ."SET amount = '$ironinfo[amount]' "
@@ -417,19 +421,19 @@ while( !$res->EOF )
 
                     db_op_result($query,__LINE__,__FILE__);
                 }
-                elseif( $act_do[product] == 'coke' )
+                elseif( $act_do['product'] == 'coke' )
                 {
 
-                    while( $coalinfo[amount] > 19 && $act_do[actives] > 0 )
+                    while( $coalinfo['amount'] > 19 && $act_do['actives'] > 0 )
                     {
-                        $coalinfo[amount] -= 20;
-                        $act_do[actives] -= 1;
+                        $coalinfo['amount'] -= 20;
+                        $act_do['actives'] -= 1;
                         $resource += 15;
                     }
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltacoal coal.";
                 }
-                elseif( $act_do[product] == 'sulphur' )
+                elseif( $act_do['product'] == 'sulphur' )
                 {
                     $normal = false;
                     $st = $db->Execute("SELECT * FROM $dbtables[products] "
@@ -438,16 +442,16 @@ while( !$res->EOF )
                                       ."AND amount > 0");
                      db_op_result($st,__LINE__,__FILE__);
                     $stones = $st->fields;
-                    $stonestart = $stones[amount];
-                    while( $coalinfo[amount] > 19 && $act_do[actives] > 0 && $stones[amount] > 9 )
+                    $stonestart = $stones['amount'];
+                    while( $coalinfo['amount'] > 19 && $act_do['actives'] > 0 && $stones['amount'] > 9 )
                     {
-                        $coalinfo[amount] -= 20;
-                        $stones[amount] -= 10;
-                        $act_do[actives] -= 1;
+                        $coalinfo['amount'] -= 20;
+                        $stones['amount'] -= 10;
+                        $act_do['actives'] -= 1;
                         $resource += 10;
                     }
-                    $deltastone = $stonestart - $stones[amount];
-                    $deltacoal = $coalstart - $coalinfo[amount];
+                    $deltastone = $stonestart - $stones['amount'];
+                    $deltacoal = $coalstart - $coalinfo['amount'];
                     $oreused = "using $deltastone stones and $deltacoal coal.";
                     $query = $db->Execute("UPDATE $dbtables[products] "
                                 ."SET amount = '$stones[amount]' "
@@ -508,12 +512,12 @@ while( !$res->EOF )
                         ."AND tribeid = '$tribe[tribeid]' "
                         ."AND skill_abbr = '$act_do[skill_abbr]'");
           db_op_result($query,__LINE__,__FILE__);
-
-        }
-        $query = $db->Execute("UPDATE $dbtables[structures] "
+          $query = $db->Execute("UPDATE $dbtables[structures] "
                     ."SET used = 'Y' "
                     ."WHERE struct_id = '$refinerinfo[struct_id]'");
          db_op_result($query,__LINE__,__FILE__);
+        }
+
         $act->MoveNext();
     }
 

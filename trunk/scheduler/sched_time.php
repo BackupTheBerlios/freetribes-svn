@@ -1,10 +1,14 @@
 <?php
-session_start();
-header("Cache-control: private");
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+ //FILE SCHEDULED FOR DELETION
 
 error_reporting  (E_ALL);
 
-require_once("../config.php");
+require_once("config.php");
 if ($sched_type == 1) ob_start();
 
 global $db, $dbtables;

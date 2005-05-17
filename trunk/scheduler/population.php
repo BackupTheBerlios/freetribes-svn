@@ -5,10 +5,15 @@
 // option) any later version.
 //
 // File: population.php
+$pos = (strpos($_SERVER['PHP_SELF'], "/population.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
 
-require_once("../config.php");
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $loginfogoat = 0;
 $loginfohorses = 0;
@@ -28,11 +33,11 @@ while( !$res->EOF )
     while( !$war->EOF )
     {
         $warinfo = $war->fields;
-        $totalwar += $warinfo[force];
+        $totalwar += $warinfo['force'];
         $war->MoveNext();
     }
 
-    $totalpop = $tribe[activepop] + $tribe[inactivepop] + $totalwar + $tribe[slavepop];
+    $totalpop = $tribe['activepop'] + $tribe['inactivepop'] + $totalwar + $tribe['slavepop'];
 
     if( $game_pop_debug )
     {
@@ -75,24 +80,24 @@ while( !$res->EOF )
       db_op_result($whip,__LINE__,__FILE__);
     $whips = $whip->fields;
 
-    if( $whips[amount] > $tribe[slavepop]/10 )
+    if( $whips['amount'] > $tribe['slavepop']/10 )
     {
-        $whips[amount] = $tribe[slavepop]/10;
+        $whips['amount'] = $tribe['slavepop']/10;
     }
-    $slaversneeded = 10 + $slaver[level];
+    $slaversneeded = 10 + $slaver['level'];
 
     $shack = $db->Execute("SELECT * FROM $dbtables[products] "
                          ."WHERE tribeid = '$tribe[tribeid]' "
                          ."AND long_name = 'shackles'");
           db_op_result($shack,__LINE__,__FILE__);
     $shackles = $shack->fields;
-    $slaves = $tribe[slavepop];
+    $slaves = $tribe['slavepop'];
 
-    if( $tribe[slavepop] < $shackles[amount] )
+    if( $tribe['slavepop'] < $shackles['amount'] )
     {
         $slaves = $slaves/2;
     }
-    $slavers = ceil( $slaves / ( $slaversneeded + $whips[amount] ) );
+    $slavers = ceil( $slaves / ( $slaversneeded + $whips['amount'] ) );
 
     $liv2 = $db->Execute("SELECT * FROM $dbtables[livestock] "
                         ."WHERE tribeid = '$tribe[tribeid]' "
@@ -104,7 +109,7 @@ while( !$res->EOF )
                         ."AND type = 'Elephants'");
         db_op_result($liv3,__LINE__,__FILE__);
     $mounts3 = $liv3->fields;
-    $available_mounts = $mounts2[amount] + ($mounts3[amount] * 4);
+    $available_mounts = $mounts2['amount'] + ($mounts3['amount'] * 4);
 
 
     if( $totalpop <= $available_mounts )
@@ -130,32 +135,32 @@ while( !$res->EOF )
 
     if( !$vil->EOF )
     {
-        $popgrowth = .015 * $tribe[morale];
+        $popgrowth = .015 * $tribe['morale'];
     }
     else
     {
-        $popgrowth = .01 * $tribe[morale];
+        $popgrowth = .01 * $tribe['morale'];
     }
 
-    if( $tribe[activepop] < $tribe[inactivepop] )
+    if( $tribe['activepop'] < $tribe['inactivepop'] )
     {
-        $tribeactivebred = round($tribe[activepop] * $popgrowth);
-        $tribeinactivebred = round($tribe[activepop] * $popgrowth);
-        $tribe[activepop] += $tribeactivebred;
-        $tribe[inactivepop] += $tribeinactivebred;
+        $tribeactivebred = round($tribe['activepop'] * $popgrowth);
+        $tribeinactivebred = round($tribe['activepop'] * $popgrowth);
+        $tribe['activepop'] += $tribeactivebred;
+        $tribe['inactivepop'] += $tribeinactivebred;
     }
     else
     {
-        $tribeactivebred = round($tribe[inactivepop] * $popgrowth);
-        $tribeinactivebred = round($tribe[inactivepop] * $popgrowth);
-        $tribe[activepop] += $tribeactivebred;
-        $tribe[inactivepop] += $tribeinactivebred;
+        $tribeactivebred = round($tribe['inactivepop'] * $popgrowth);
+        $tribeinactivebred = round($tribe['inactivepop'] * $popgrowth);
+        $tribe['activepop'] += $tribeactivebred;
+        $tribe['inactivepop'] += $tribeinactivebred;
     }
 
-    $tribeslavesbred = ceil($tribe[slavepop] * $popgrowth);
-    $tribe[slavepop] += ceil($tribe[slavepop] * $popgrowth);
-    $tribe[totalpop] = $tribe[activepop] + $tribe[inactivepop] + $tribe[slavepop] + $totalwar;
-    $maxam = $tribe[slavepop] + $tribe[activepop] - $slavers;
+    $tribeslavesbred = ceil($tribe['slavepop'] * $popgrowth);
+    $tribe['slavepop'] += ceil($tribe['slavepop'] * $popgrowth);
+    $tribe['totalpop'] = $tribe['activepop'] + $tribe['inactivepop'] + $tribe['slavepop'] + $totalwar;
+    $maxam = $tribe['slavepop'] + $tribe['activepop'] - $slavers;
 
     $goat_provs = 4;
     $cow_provs = 20;
@@ -163,7 +168,7 @@ while( !$res->EOF )
     $elephant_provs = 60;
     $sheep_provs = 4;
     $pig_prov = 4;
-    $food_eaten = round($tribe[warpop] * 2) + round($tribe[activepop] * 1) + round($tribe[inactivepop] * .8) + $tribe[slavepop];
+    $food_eaten = round($tribe['warpop'] * 2) + round($tribe['activepop'] * 1) + round($tribe['inactivepop'] * .8) + $tribe['slavepop'];
 
     $food = $db->Execute("SELECT * FROM $dbtables[products] "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -171,7 +176,7 @@ while( !$res->EOF )
        db_op_result($food,__LINE__,__FILE__);
     $foodinfo = $food->fields;
 
-    if( $foodinfo[amount] >= $food_eaten )
+    if( $foodinfo['amount'] >= $food_eaten )
     {
         $result = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount - '$food_eaten' "
@@ -186,10 +191,10 @@ while( !$res->EOF )
                             ."AND tribeid = '$tribe[goods_tribe]'");
           db_op_result($goat,__LINE__,__FILE__);
         $mount = $goat->fields;
-        $goat = $mount[amount];
+        $goat = $mount['amount'];
         $foodneeded = $food_eaten;
-        $foodneeded -= $foodinfo[amount];
-        $foodinfo[amount] = 0;
+        $foodneeded -= $foodinfo['amount'];
+        $foodinfo['amount'] = 0;
         $loginfogoat = 0;
         while( $foodneeded > 0 && $goat > 0 )
         {
@@ -207,7 +212,7 @@ while( !$res->EOF )
                               ."AND tribeid = '$tribe[goods_tribe]'");
           db_op_result($cattle,__LINE__,__FILE__);
         $mount = $cattle->fields;
-        $cattle = $mount[amount];
+        $cattle = $mount['amount'];
         $loginfocattle = 0;
         while( $foodneeded > 0 & $cattle > 0 )
         {
@@ -225,7 +230,7 @@ while( !$res->EOF )
                              ."AND tribeid = '$tribe[goods_tribe]'");
           db_op_result($sheep,__LINE__,__FILE__);
         $mount = $sheep->fields;
-        $sheep = $mount[amount];
+        $sheep = $mount['amount'];
         $loginfosheep = 0;
         while( $foodneeded > 0 & $sheep > 0 )
         {
@@ -243,7 +248,7 @@ while( !$res->EOF )
                            ."AND tribeid = '$tribe[goods_tribe]'");
              db_op_result($pig,__LINE__,__FILE__);
         $mount = $pig->fields;
-        $pig = $mount[amount];
+        $pig = $mount['amount'];
         $loginfopig = 0;
         while( $foodneeded > 0 & $pig > 0 )
         {
@@ -262,7 +267,7 @@ while( !$res->EOF )
                               ."AND tribeid = '$tribe[goods_tribe]'");
            db_op_result($horses,__LINE__,__FILE__);
         $mount = $horses->fields;
-        $horses = $mount[amount];
+        $horses = $mount['amount'];
         $loginfohorses = 0;
         while( $foodneeded > 0 && $horses > 0 )
         {
@@ -281,7 +286,7 @@ while( !$res->EOF )
                                 ."AND tribeid = '$tribe[goods_tribe]'");
             db_op_result($elephant,__LINE__,__FILE__);
         $mount = $elephant->fields;
-        $elephant = $mount[amount];
+        $elephant = $mount['amount'];
         $loginfoelephant = 0;
         while( $foodneeded > 0 & $elephant > 0 )
         {
@@ -295,20 +300,30 @@ while( !$res->EOF )
                     ."AND tribeid = '$tribe[goods_tribe]'");
            db_op_result($result,__LINE__,__FILE__);
 
-        $foodinfo[amount] = 0;
-
-        if( $foodinfo[amount] < 1 && $foodneeded > 0 && $goat < 1 && $cattle < 1 && $horse < 1 && $elephant < 1 && $pig < 1 && $sheep < 1 )
+        $foodinfo['amount'] = 0;
+        $loginfoactives = 0;
+        $loginfoinactives = 0;
+        $loginfoslavepop = 0;
+        $starving = false;
+        if( $foodinfo['amount'] < 1 && $foodneeded > 0 && $goat < 1 && $cattle < 1 && $horse < 1 && $elephant < 1 && $pig < 1 && $sheep < 1 )
         {
-            $loginfoactives = round( $tribe[activepop] * .05 );
-            $loginfoinactives = round( $tribe[inactivepop] * .05 );
-            $loginfoslavepop = round( $tribe[slavepop] * .20 );
-            $tribe[activepop] -= $loginfoactives;
-            $tribe[slavepop] -= $loginfoslavepop;
-            $tribe[inactivepop] -= $loginfoinactives;
+            $loginfoactives = abs(round( $tribe['activepop'] * .05 ));
+            $loginfoinactives = abs(round( $tribe['inactivepop'] * .05 ));
+            $loginfoslavepop = abs(round( $tribe['slavepop'] * .20 ));
+            $tribe['activepop'] -= $loginfoactives;
+            $tribe['slavepop'] -= $loginfoslavepop;
+            $tribe['inactivepop'] -= $loginfoinactives;
             $starving = true;
+             $logtext = "Food shortage: $loginfogoat Goats, "
+                  ."$loginfocattle Cattle, $loginfohorses Horses, "
+                  ."$loginfoelephant Elephants, "
+                  ."$loginfosheep Sheep, $loginfopig Pigs eaten.";
+
+            $logtext2 = "Starvation: $loginfoactives Actives, $loginfoinactives Inactives, "
+                   ."$loginfoslavepop Slaves either starved or ran away.";
         }
-        $totalpop = $tribe[activepop] + $tribe[inactivepop] + $totalwar + $tribe[slavepop];
-        $maxam = $tribe[activepop] + $tribe[slavepop] - $slavers;
+        $totalpop = $tribe['activepop'] + $tribe['inactivepop'] + $totalwar + $tribe['slavepop'];
+        $maxam = $tribe['activepop'] + $tribe['slavepop'] - $slavers;
 
         $result = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = '0' "
@@ -316,13 +331,6 @@ while( !$res->EOF )
                     ."AND long_name = 'provs'");
            db_op_result($result,__LINE__,__FILE__);
 
-        $logtext = "Food shortage: $loginfogoat Goats, "
-                  ."$loginfocattle Cattle, $loginfohorses Horses, "
-                  ."$loginfoelephant Elephants, "
-                  ."$loginfosheep Sheep, $loginfopig Pigs eaten.";
-
-        $logtext2 = "Starvation: $loginfoactives Actives, $loginfoinactives Inactives, "
-                   ."$loginfoslavepop Slaves either starved or ran away.";
 
         if( $loginfogoat > 0 || $loginfocattle > 0 || $loginfohorses > 0 || $loginfoelephant > 0 || $loginfosheep > 0 || $loginfopig > 0 )
         {
@@ -353,9 +361,9 @@ while( !$res->EOF )
              db_op_result($result,__LINE__,__FILE__);
         }
     }
-    $totalpop = $tribe[activepop] + $tribe[inactivepop] + $totalwar + $tribe[slavepop];
+    $totalpop = $tribe['activepop'] + $tribe['inactivepop'] + $totalwar + $tribe['slavepop'];
 
-    if( !ISSET( $starving ) )
+    if(!$starving)
     {
         $result = $db->Execute("UPDATE $dbtables[tribes] "
                     ."SET totalpop = '$totalpop', "
@@ -370,9 +378,9 @@ while( !$res->EOF )
     }
     else
     {
-        $actives = $tribe[activepop] - $loginfoactives;
-        $inactives = $tribe[inactivepop] - $loginfoinactives;
-        $slavepop = $tribe[slavepop] - $loginfoslavepop;
+        $actives = $tribe['activepop'] - $loginfoactives;
+        $inactives = $tribe['inactivepop'] - $loginfoinactives;
+        $slavepop = $tribe['slavepop'] - $loginfoslavepop;
         $totalpop = $totalwar + $actives + $inactives + $slavepop;
         $maxam = $actives + $slavepop;
 

@@ -5,10 +5,14 @@
 // option) any later version.
 //
 // File: secondaryskill.php
-
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes] "
                    ."WHERE sec_skill_att != ''");
@@ -16,7 +20,7 @@ $res = $db->Execute("SELECT * FROM $dbtables[tribes] "
 while( !$res->EOF )
 {
     $tribe = $res->fields;
-    if( !$tribe[sec_skill_att] == "" )
+    if( !$tribe['sec_skill_att'] == "" )
     {
         ////////////////////////////////Get the info needed//////////////////////////////////
         $cur_sec = $db->Execute("SELECT * FROM $dbtables[skills] "
@@ -37,7 +41,7 @@ while( !$res->EOF )
                            ."AND tribeid = '$tribe[tribeid]'");
           db_op_result($lit,__LINE__,__FILE__);
         $literacy = $lit->fields;
-        if( $current_sec[level] > 10 )
+        if( $current_sec['level'] > 10 )
         {
             $resk = $db->Execute("SELECT * FROM $dbtables[skills] "
                                 ."WHERE abbr = 'res' "
@@ -133,20 +137,20 @@ while( !$res->EOF )
         $basechance = 55;                                     ///bluesman addition
         if( !$cur_sec )
         {
-            $current_sec[level] = 0;
+            $current_sec['level'] = 0;
         }
-        $secondary = $current_sec[level];
+        $secondary = $current_sec['level'];
         $secondary++;
         $chancebonus = 0;
         if( $secondary > 10 )
         {
             $totaldeduct = round( $basechance + $secondary/2 - .5);                      ///bluesman addition
-            $chancebonus += round(($research[level]/2) + ($literacy[level]/2));
+            $chancebonus += round(($research['level']/2) + ($literacy['level']/2));
         }
         elseif( $secondary <= 10 )
         {
             $totaldeduct = $secondary * 5;                      ///bluesman addition
-            $chancebonus += round( $literacy[level]/2 );        ///bluesman addition
+            $chancebonus += round( $literacy['level']/2 );        ///bluesman addition
         if( $chancebonus < 0 )
         {
             $chancebonus = 0;
@@ -155,11 +159,11 @@ while( !$res->EOF )
 
     $totalchance += $basechance + $chancebonus - $totaldeduct;
 
-    if( $tribe[pri_skill_att] == $tribe[sec_skill_att] )
+    if( $tribe['pri_skill_att'] == $tribe['sec_skill_att'] )
     {
         $totalchance = 0;
     }
-    elseif( $pkinfo[group] == $skinfo[group] )
+    elseif( $pkinfo['group'] == $skinfo['group'] )
     {
         $totalchance = round( $totalchance / 2 );
     }
@@ -168,9 +172,9 @@ while( !$res->EOF )
 
     $totalchance -= $skillroll;
 
-    if( $totalchance >= 0 && $current_sec[level] < 20 )                 ///bluesman addition
+    if( $totalchance >= 0 && $current_sec['level'] < 20 )                 ///bluesman addition
     {
-        $current_sec[level] += 1;
+        $current_sec['level'] += 1;
         if( $game_skill_debug )
         {
             $query = $db->Execute("INSERT INTO $dbtables[logs] "
@@ -197,7 +201,7 @@ while( !$res->EOF )
                     ."SET sec_skill_att = '' "
                     ."WHERE tribeid = '$tribe[tribeid]'");
            db_op_result($query,__LINE__,__FILE__);
-        if( $skinfo[morale] == 'Y'  || $rel_bonus<>0)
+        if( $skinfo['morale'] == 'Y'  || $rel_bonus<>0)
         {
             if ($rel_bonus<>0)
             {
@@ -212,7 +216,7 @@ while( !$res->EOF )
                         ."WHERE tribeid = '$tribe[tribeid]'");
                db_op_result($query,__LINE__,__FILE__);
         }
-        if( $current_sec[level] > 10 )
+        if( $current_sec['level'] > 10 )
         {
             $query = $db->Execute("UPDATE $dbtables[skills] "
                         ."SET level = '0' "

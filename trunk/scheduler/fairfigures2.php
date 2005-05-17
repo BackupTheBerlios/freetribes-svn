@@ -1,7 +1,15 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+if( $month['count'] == '5' || $month['count'] == '11' )
+{
+
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 
 if( $month[count] == '5' | $month[count] == '11' )
@@ -13,15 +21,15 @@ if( $month[count] == '5' | $month[count] == '11' )
     while( !$level->EOF )
     {
         $levelinfo = $level->fields;
-        $delta = $levelinfo[p_amount]/$levelinfo[amount];
-        $newbuy = $levelinfo[price_buy] * $delta;
+        $delta = $levelinfo['p_amount']/$levelinfo['amount'];
+        $newbuy = $levelinfo['price_buy'] * $delta;
         if( $newbuy < 1 )
         {
             $newbuy = 1;
         }
-        if( $newbuy > ( $levelinfo[price_buy] * 2 ))
+        if( $newbuy > ( $levelinfo['price_buy'] * 2 ))
         {
-            $newbuy = $levelinfo[price_buy] * 2;
+            $newbuy = $levelinfo['price_buy'] * 2;
         }
         $res = $db->Execute("UPDATE $dbtables[fair] "
                     ."SET price_buy = '$newbuy' "
@@ -55,7 +63,7 @@ if( $month[count] == '5' | $month[count] == '11' )
                 ."SET amount = p_amount");  ///Sets the amounts back to the original levels
      db_op_result($res,__LINE__,__FILE__);
 }
-
+}
 $time_end = getmicrotime();
 $time = $time_end - $time_start;
 $page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed

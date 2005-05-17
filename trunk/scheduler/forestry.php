@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/forestry.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
@@ -17,7 +22,7 @@ while(!$res->EOF)
     while(!$cnt->EOF)
     {
         $count = $cnt->fields;
-        $foresters += $count[actives];
+        $foresters += $count['actives'];
         $cnt->MoveNext();
     }
     $foresters_used = 0;
@@ -30,7 +35,7 @@ while(!$res->EOF)
     {
         $act_do = $act->fields;
 
-        if($act_do[skill_abbr] == 'for')
+        if($act_do['skill_abbr'] == 'for')
         {
 
             $startingadze = 0;
@@ -46,12 +51,12 @@ while(!$res->EOF)
             $skillinfo = $skill->fields;
 
             $max_forestry = 10000000;
-            if($skillinfo[level] < 10)
+            if($skillinfo['level'] < 10)
             {
-                $max_forestry = $skillinfo[level] * 10;
-                if($act_do[actives] > $max_forestry)
+                $max_forestry = $skillinfo['level'] * 10;
+                if($act_do['actives'] > $max_forestry)
                 {
-                    $act_do[actives] = $max_forestry;
+                    $act_do['actives'] = $max_forestry;
                 }
                 if ($foresters_used > $max_forestry)
                 {
@@ -65,17 +70,17 @@ while(!$res->EOF)
 
             }
 
-            $scrapeinfo[amount] = 0;
+            $scrapeinfo['amount'] = 0;
             $scrape = $db->Execute("SELECT * FROM $dbtables[products] "
                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
                                     ."AND long_name = 'scrapers'");
                db_op_result($scrape,__LINE__,__FILE__);
             $scrapeinfo = $scrape->fields;
-            if($scrapeinfo[amount] > $act_do[actives])
+            if($scrapeinfo['amount'] > $act_do['actives'])
             {
-                $scrapeinfo[amount] = $act_do[actives];
+                $scrapeinfo['amount'] = $act_do['actives'];
             }
-            if( !$scrapeinfo[long_name] == '' && $scrapeinfo[amount] > 1 )
+            if( !$scrapeinfo['long_name'] == '' && $scrapeinfo['amount'] > 1 )
             {
                 $result = $db->Execute("INSERT INTO $dbtables[products_used] "
                             ."VALUES("
@@ -91,35 +96,35 @@ while(!$res->EOF)
             }
 
 
-            if(       $hexinfo[terrain] == 'cf'
-                || $hexinfo[terrain] == 'ch'
-                || $hexinfo[terrain] == 'lcm'
-                || $hexinfo[terrain] == 'df'
-                || $hexinfo[terrain] == 'dh'
-                || $hexinfo[terrain] == 'jg'
-                || $hexinfo[terrain] == 'jh'
-                || $hexinfo[terrain] == 'ljm')
+            if(       $hexinfo['terrain'] == 'cf'
+                || $hexinfo['terrain'] == 'ch'
+                || $hexinfo['terrain'] == 'lcm'
+                || $hexinfo['terrain'] == 'df'
+                || $hexinfo['terrain'] == 'dh'
+                || $hexinfo['terrain'] == 'jg'
+                || $hexinfo['terrain'] == 'jh'
+                || $hexinfo['terrain'] == 'ljm')
             {
-                if($act_do[product] == 'bark')
+                if($act_do['product'] == 'bark')
                 {
                     $startingadze = 0;
                     $scrapersused = 0;
-                    $startingforesters = $act_do[actives];
-                    if($scrapeinfo[amount] > 0)
+                    $startingforesters = $act_do['actives'];
+                    if($scrapeinfo['amount'] > 0)
                     {
-                        while($act_do[actives] > 0 & $scrapeinfo[amount] > 0)
+                        while($act_do['actives'] > 0 & $scrapeinfo['amount'] > 0)
                         {
                             $scrapersused += 1;
-                            $act_do[actives] += .5;
-                            $scrapeinfo[amount] -= 1;
+                            $act_do['actives'] += .5;
+                            $scrapeinfo['amount'] -= 1;
                         }
-                        $act_do[actives] = round($act_do[actives]);
+                        $act_do['actives'] = round($act_do['actives']);
                     }
 
                     $barks = 0;
-                    while($act_do[actives] > 0)
+                    while($act_do['actives'] > 0)
                     {
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $barks += 20;
                     }
                     if($scrapersused > 0)
@@ -148,7 +153,7 @@ while(!$res->EOF)
                      db_op_result($result,__LINE__,__FILE__);
                 } // end BARK
 
-                if($act_do[product] == 'logs')
+                if($act_do['product'] == 'logs')
                 {
                     $adze = $db->Execute("SELECT * FROM $dbtables[products] "
                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -156,28 +161,28 @@ while(!$res->EOF)
                                         ."AND long_name = 'adze'");
                       db_op_result($adze,__LINE__,__FILE__);
                     $startingadze = 0;
-                    $startingforesters = $act_do[actives];
+                    $startingforesters = $act_do['actives'];
                     $logs = 0;
                     if($adze->EOF)
                     {
-                        while($act_do[actives] > 0)
+                        while($act_do['actives'] > 0)
                         {
-                            $act_do[actives] -= 1;
+                            $act_do['actives'] -= 1;
                             $logs += 4;
                         }
                     }
                     else
                     {
                         $adzeinfo = $adze->fields;
-                        $startingadze = $adzeinfo[amount];
-                        if($adzeinfo[amount] == '0' | empty($adzeinfo[amount]))
+                        $startingadze = $adzeinfo['amount'];
+                        if($adzeinfo['amount'] == '0' | empty($adzeinfo['amount']))
                         {
                             $startingadze = 0;
                         }
-                        if($adzeinfo[amount] > $act_do[actives])
+                        if($adzeinfo['amount'] > $act_do['actives'])
                         {
-                            $adzeinfo[amount] = $act_do[actives];
-                            if( !$adzeinfo[long_name] == '' && $adzeinfo[amount] > 1 )
+                            $adzeinfo['amount'] = $act_do['actives'];
+                            if( !$adzeinfo['long_name'] == '' && $adzeinfo['amount'] > 1 )
                             {
                                 $result = $db->Execute("INSERT INTO $dbtables[products_used] "
                                             ."VALUES("
@@ -192,15 +197,15 @@ while(!$res->EOF)
                                   db_op_result($result,__LINE__,__FILE__);
                             }
                         }
-                        while($act_do[actives] > 0 & $adzeinfo[amount] > 0)
+                        while($act_do['actives'] > 0 & $adzeinfo['amount'] > 0)
                         {
-                            $act_do[actives] -= 1;
-                            $adzeinfo[amount] -= 1;
+                            $act_do['actives'] -= 1;
+                            $adzeinfo['amount'] -= 1;
                             $logs += 8;
                         }
-                        while($act_do[actives] > 0)
+                        while($act_do['actives'] > 0)
                         {
-                            $act_do[actives] -= 1;
+                            $act_do['actives'] -= 1;
                             $logs += 4;
                         }
                     }

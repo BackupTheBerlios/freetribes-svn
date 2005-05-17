@@ -5,9 +5,14 @@
 // option) any later version.
 //
 // File: dressing.php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/dressing.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
@@ -21,7 +26,7 @@ while( !$res->EOF )
     while( !$act->EOF )
     {
         $act_do = $act->fields;
-        if( $act_do[skill_abbr] == 'dre' )
+        if( $act_do['skill_abbr'] == 'dre' )
         {
             $salt = $db->Execute("SELECT * FROM $dbtables[resources] "
                                 ."WHERE long_name = 'Salt' "
@@ -47,28 +52,28 @@ while( !$res->EOF )
               db_op_result($dress,__LINE__,__FILE__);
             $dressinfo = $dress->fields;
             $max_dressers = 10000000;
-            if( $dressinfo[level] < 10 )
+            if( $dressinfo['level'] < 10 )
             {
-                $max_dressers = $dressinfo[level] * 10;
-                if( $act_do[actives] > $max_dressers )
+                $max_dressers = $dressinfo['level'] * 10;
+                if( $act_do['actives'] > $max_dressers )
                 {
-                    $act_do[actives] = $max_dressers;
+                    $act_do['actives'] = $max_dressers;
                 }
             }
 
             $leathermake = 0;
-            while( $skininfo[amount] > 3 && $saltinfo[amount] > 0 && $act_do[actives] > 0 )
+            while( $skininfo['amount'] > 3 && $saltinfo['amount'] > 0 && $act_do['actives'] > 0 )
             {
-                $saltinfo[amount] -= 1;
-                $act_do[actives] -= 1;
-                $skininfo[amount] -= 4;
+                $saltinfo['amount'] -= 1;
+                $act_do['actives'] -= 1;
+                $skininfo['amount'] -= 4;
                 $leathermake += 4;
             }
-            while( $furinfo[amount] > 3 && $act_do[actives] > 0 && $saltinfo[amount] > 0 )
+            while( $furinfo['amount'] > 3 && $act_do['actives'] > 0 && $saltinfo['amount'] > 0 )
             {
-                $saltinfo[amount] -= 1;
-                $act_do[actives] -= 1;
-                $furinfo[amount] -= 4;
+                $saltinfo['amount'] -= 1;
+                $act_do['actives'] -= 1;
+                $furinfo['amount'] -= 4;
                 $leathermake += 4;
             }
             $query = $db->Execute("UPDATE $dbtables[products] "

@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/woodworking.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
    db_op_result($res,__LINE__,__FILE__);
@@ -18,23 +23,23 @@ while( !$res->EOF )
     {
         $act_do = $act->fields;
 
-        if( $act_do[product] == 'club' )
+        if( $act_do['product'] == 'club' )
         {
             $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'logs'");
                 db_op_result($log,__LINE__,__FILE__);
             $loginfo = $log->fields;
-            $startlog = $loginfo[amount];
+            $startlog = $loginfo['amount'];
 
             $club = 0;
-            while( $act_do[actives] > 0 && $loginfo[amount] > 0 )
+            while( $act_do['actives'] > 0 && $loginfo['amount'] > 0 )
             {
                 $club += 4;
-                $act_do[actives] -= 1;
-                $loginfo[amount] -= 1;
+                $act_do['actives'] -= 1;
+                $loginfo['amount'] -= 1;
             }
-            $logdelta = $startlog - $loginfo[amount];
+            $logdelta = $startlog - $loginfo['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $logdelta "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -63,23 +68,23 @@ while( !$res->EOF )
               db_op_result($query,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'frame' )
+        if( $act_do['product'] == 'frame' )
         {
             $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'logs'");
                db_op_result($log,__LINE__,__FILE__);
             $loginfo = $log->fields;
-            $startlog = $loginfo[amount];
+            $startlog = $loginfo['amount'];
 
             $frame = 0;
-            while( $act_do[actives] > 0 && $loginfo[amount] > 0 )
+            while( $act_do['actives'] > 0 && $loginfo['amount'] > 0 )
             {
                 $frame += 2;
-                $loginfo[amount] -= 1;
-                $act_do[actives] -= 1;
+                $loginfo['amount'] -= 1;
+                $act_do['actives'] -= 1;
             }
-            $logdelta = $startlog - $loginfo[amount];
+            $logdelta = $startlog - $loginfo['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $logdelta "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -108,23 +113,23 @@ while( !$res->EOF )
               db_op_result($query,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'rake' )
+        if( $act_do['product'] == 'rake' )
         {
             $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'logs'");
                 db_op_result($log,__LINE__,__FILE__);
             $loginfo = $log->fields;
-            $startlog = $loginfo[amount];
+            $startlog = $loginfo['amount'];
 
             $rake = 0;
-            while( $act_do[actives] > 0 && $loginfo[amount] > 0 )
+            while( $act_do['actives'] > 0 && $loginfo['amount'] > 0 )
             {
                 $rake += 1;
-                $loginfo[amount] -= 1;
-                $act_do[actives] -= 1;
+                $loginfo['amount'] -= 1;
+                $act_do['actives'] -= 1;
             }
-            $logdelta = $startlog - $loginfo[amount];
+            $logdelta = $startlog - $loginfo['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $logdelta "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -153,22 +158,22 @@ while( !$res->EOF )
                db_op_result($query,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'wagon' )
+        if( $act_do['product'] == 'wagon' )
         {
             $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'logs'");
                  db_op_result($log,__LINE__,__FILE__);
             $loginfo = $log->fields;
-            $startlog = $loginfo[amount];
+            $startlog = $loginfo['amount'];
             $wagon = 0;
-            while( $act_do[actives] > 9 && $loginfo[amount] > 5 )
+            while( $act_do['actives'] > 9 && $loginfo['amount'] > 5 )
             {
                 $wagon += 1;
-                $loginfo[amount] -= 6;
-                $act_do[actives] -= 10;
+                $loginfo['amount'] -= 6;
+                $act_do['actives'] -= 10;
             }
-            $logdelta = $startlog - $loginfo[amount];
+            $logdelta = $startlog - $loginfo['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $logdelta "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -197,22 +202,22 @@ while( !$res->EOF )
               db_op_result($query,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'canoe' )
+        if( $act_do['product'] == 'canoe' )
         {
             $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'logs'");
                db_op_result($log,__LINE__,__FILE__);
             $loginfo = $log->fields;
-            $startlog = $loginfo[amount];
+            $startlog = $loginfo['amount'];
             $canoe = 0;
-            while( $act_do[actives] > 9 && $loginfo[amount] > 1 )
+            while( $act_do['actives'] > 9 && $loginfo['amount'] > 1 )
             {
                 $canoe += 1;
-                $loginfo[amount] -= 2;
-                $act_do[actives] -= 10;
+                $loginfo['amount'] -= 2;
+                $act_do['actives'] -= 10;
             }
-            $logdelta = $startlog - $loginfo[amount];
+            $logdelta = $startlog - $loginfo['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $logdelta "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -241,22 +246,22 @@ while( !$res->EOF )
               db_op_result($query,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'structure' )
+        if( $act_do['product'] == 'structure' )
         {
             $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'logs'");
                  db_op_result($log,__LINE__,__FILE__);
             $loginfo = $log->fields;
-            $startlog = $loginfo[amount];
+            $startlog = $loginfo['amount'];
             $structure = 0;
-            while( $act_do[actives] > 4 && $loginfo[amount] > 1 )
+            while( $act_do['actives'] > 4 && $loginfo['amount'] > 1 )
             {
                 $structure += 1;
-                $act_do[actives] -= 5;
-                $loginfo[amount] -= 2;
+                $act_do['actives'] -= 5;
+                $loginfo['amount'] -= 2;
             }
-            $logdelta = $startlog - $loginfo[amount];
+            $logdelta = $startlog - $loginfo['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $logdelta "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -285,28 +290,28 @@ while( !$res->EOF )
                db_op_result($query,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'totem' )
+        if( $act_do['product'] == 'totem' )
         {
             $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'logs'");
                db_op_result($log,__LINE__,__FILE__);
             $loginfo = $log->fields;
-            $startlog = $loginfo[amount];
+            $startlog = $loginfo['amount'];
             $totem = 0;
-            while( $act_do[actives] > 9 && $loginfo[amount] > 11 )
+            while( $act_do['actives'] > 9 && $loginfo['amount'] > 11 )
             {
                 $totem += 1;
-                $act_do[actives] -= 10;
-                $loginfo[amount] -= 12;
+                $act_do['actives'] -= 10;
+                $loginfo['amount'] -= 12;
             }
-            $logdelta = $startlog - $loginfo[amount];
+            $logdelta = $startlog - $loginfo['amount'];
             $here = $db->Execute("SELECT * FROM $dbtables[products] "
                                 ."WHERE long_name = 'totem' "
                                 ."AND tribeid = '$tribe[tribeid]'");
                   db_op_result($here,__LINE__,__FILE__);
             $hereinfo = $here->fields;
-            if( $hereinfo[amount] < 1 && $totem > 0 )
+            if( $hereinfo['amount'] < 1 && $totem > 0 )
             {
                 $query = $db->Execute("UPDATE $dbtables[tribes] "
                             ."SET morale = morale + .04 "

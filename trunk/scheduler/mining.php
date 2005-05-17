@@ -5,10 +5,14 @@
 // option) any later version.
 //
 // File: mining.php
-
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/mining.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
@@ -21,9 +25,9 @@ while( !$res->EOF )
                        ."LIMIT 1");
         db_op_result($act,__LINE__,__FILE__);
     $act_do = $act->fields;
-    if( $act_do[skill_abbr] == 'min' )
+    if( $act_do['skill_abbr'] == 'min' )
     {
-        $start_miners = $act_do[actives];
+        $start_miners = $act_do['actives'];
         $skill = $db->Execute("SELECT * FROM $dbtables[skills] "
                              ."WHERE tribeid = '$tribe[tribeid]' "
                              ."AND abbr = 'min'");
@@ -34,41 +38,50 @@ while( !$res->EOF )
           db_op_result($hex,__LINE__,__FILE__);
         $hexinfo = $hex->fields;
 
-        if( $hexinfo[resource] == 'Y' )
+        if( $hexinfo['resource'] == 'Y' )
         {
-            $shov = $db->Execute("SELECT * FROM $dbtables[products] "
+            $shovinfo['amount'] = 0;
+            $shovinfo['long_name'] = '';
+            $pickinfo['amount'] = 0;
+            $pickinfo['long_name'] = '';
+            $mattockinfo['amount'] = 0;
+            $mattockinfo['long_name'] = '';
+            $shov = $db->Execute("SELECT amount,long_name FROM $dbtables[products] "
                                 ."WHERE tribeid = '$tribe[goods_tribe]' "
                                 ."AND amount > 0 "
                                 ."AND long_name = 'shovel'");
              db_op_result($shov,__LINE__,__FILE__);
-            $pick = $db->Execute("SELECT * FROM $dbtables[products] "
+             if( !$shov->EOF )
+            {
+                $shovinfo = $shov->fields;
+            }
+
+            $pick = $db->Execute("SELECT amount FROM $dbtables[products] "
                                 ."WHERE tribeid = '$tribe[goods_tribe]' "
                                 ."AND amount > 0 "
                                 ."AND long_name = 'picks'");
              db_op_result($pick,__LINE__,__FILE__);
-            $mattock = $db->Execute("SELECT * FROM $dbtables[products] "
+             if( !$pick->EOF )
+            {
+                $pickinfo = $pick->fields;
+            }
+
+            $mattock = $db->Execute("SELECT amount FROM $dbtables[products] "
                                    ."WHERE tribeid = '$tribe[goods_tribe]' "
                                    ."AND amount > 0 "
                                    ."AND long_name = 'mattock'");
                  db_op_result($mattock,__LINE__,__FILE__);
-
-            if( !$shov->EOF )
-            {
-                $shovinfo = $shov->fields;
-            }
-            if( !$pick->EOF )
-            {
-                $pickinfo = $pick->fields;
-            }
             if( !$mattock->EOF )
             {
                 $mattockinfo = $mattock->fields;
             }
-            if( $shovinfo[amount] > $act_do[actives] )
+
+
+            if( $shovinfo['amount'] > $act_do['actives'] )
             {
-                $shovinfo[amount] = $act_do[actives];
+                $shovinfo['amount'] = $act_do['actives'];
             }
-            if( !$shovinfo[long_name] == '' && $shovinfo[amount] > 1 )
+            if( !$shovinfo['long_name'] == '' && $shovinfo['amount'] > 1 )
             {
                 $query = $db->Execute("INSERT INTO $dbtables[products_used] "
                             ."VALUES("
@@ -83,11 +96,11 @@ while( !$res->EOF )
                   db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $pickinfo[amount] > ( $act_do[actives] - $shovinfo[amount] ) )
+            if( $pickinfo['amount'] > ( $act_do['actives'] - $shovinfo['amount'] ) )
             {
-                $pickinfo[amount] = $act_do[actives] - $shovinfo[amount];
+                $pickinfo['amount'] = $act_do['actives'] - $shovinfo['amount'];
             }
-            if( !$pickinfo[long_name] == '' && $pickinfo[amount] > 1 )
+            if( !$pickinfo['long_name'] == '' && $pickinfo['amount'] > 1 )
             {
                 $query = $db->Execute("INSERT INTO $dbtables[products_used] "
                             ."VALUES("
@@ -102,11 +115,11 @@ while( !$res->EOF )
                   db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $mattockinfo[amount] > ( $act_do[actives] - $shovinfo[amount] - $pickinfo[amount] ) )
+            if( $mattockinfo['amount'] > ( $act_do['actives'] - $shovinfo['amount'] - $pickinfo['amount'] ) )
             {
-                $mattockinfo[amount] = $act_do[actives] - $shovinfo[amount] - $pickinfo[amount];
+                $mattockinfo['amount'] = $act_do['actives'] - $shovinfo['amount'] - $pickinfo['amount'];
             }
-            if( !$mattockinfo[long_name] == '' && $mattockinfo[amount] > 1 )
+            if( !$mattockinfo['long_name'] == '' && $mattockinfo['amount'] > 1 )
             {
                 $query = $db->Execute("INSERT INTO $dbtables[products_used] "
                             ."VALUES("
@@ -121,15 +134,15 @@ while( !$res->EOF )
                     db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $skillinfo[level] > 0 )
+            if( $skillinfo['level'] > 0 )
             {
-                $skill_bonus_prune = $skillinfo[level] - 1;
-                $skill_bonus = ($skillinfo[level] * 1.1);
+                $skill_bonus_prune = $skillinfo['level'] - 1;
+                $skill_bonus = ($skillinfo['level'] * 1.1);
                 $skill_bonus = $skill_bonus - $skill_bonus_prune;
             }
-            $shov_bonus = round($shovinfo[amount] * 1.4);
-            $pick_bonus = round($pickinfo[amount] * 1.5);
-            $mattock_bonus = round($mattockinfo[amount] * 1.3);
+            $shov_bonus = round($shovinfo['amount'] * 1.4);
+            $pick_bonus = round($pickinfo['amount'] * 1.5);
+            $mattock_bonus = round($mattockinfo['amount'] * 1.3);
 
             $rand_accident = rand(1,1000);
             $season = $db->Execute("SELECT count FROM $dbtables[game_date] "
@@ -140,27 +153,27 @@ while( !$res->EOF )
                                    ."WHERE type = 'weather'");
               db_op_result($weather,__LINE__,__FILE__);
             $weatherinfo = $weather->fields;
-            $safe_mine = $skillinfo[level] + $rand_accident;
+            $safe_mine = $skillinfo['level'] + $rand_accident;
             $res_limit = false;
 
-            if( $safe_mine < ( ( $weatherinfo[count] + $season_modifyer[count] ) / 4 ) )
+            if( $safe_mine < ( ( $weatherinfo['count'] + $season_modifyer['count'] ) / 4 ) )
             {
-                if( $skillinfo[level] < 10 )
+                if( $skillinfo['level'] < 10 )
                 {
-                    $lost = ( 10 - $skillinfo[level] ) * .01;
-                    $potential_miners_lost = round( $act_do[actives] * $lost);
+                    $lost = ( 10 - $skillinfo['level'] ) * .01;
+                    $potential_miners_lost = round( $act_do['actives'] * $lost);
                     $miners_lost = rand( 1, $potential_miners_lost );
                 }
                 else
                 {
-                    $potential_miners_lost = round( $act_do[actives]  * .015 );
+                    $potential_miners_lost = round( $act_do['actives']  * .015 );
                     $miners_lost = rand( 1, $potential_miners_lost );
                 }
                 if( $miners_lost < 1 )
                 {
                     $miners_lost = 1;
                 }
-                $act_do[actives] = $act_do[actives] - $miners_lost;
+                $act_do['actives'] = $act_do['actives'] - $miners_lost;
                 if( $miners_lost > 0 )
                 {
                     $query = $db->Execute("UPDATE $dbtables[tribes] "
@@ -197,65 +210,65 @@ while( !$res->EOF )
                 }
             }
 
-            $mining_actives = ($act_do[actives] + $shov_bonus + $pick_bonus + $mattock_bonus) * $skill_bonus;
-            $mining_ability = round($mining_actives / $season_modifyer[count]);
+            $mining_actives = ($act_do['actives'] + $shov_bonus + $pick_bonus + $mattock_bonus) * $skill_bonus;
+            $mining_ability = round($mining_actives / $season_modifyer['count']);
 
-            if( $skillinfo[level] >= 1 )
+            if( $skillinfo['level'] >= 1 )
             {
-                $mining_ability = round( $mining_ability * $skillinfo[level] );
+                $mining_ability = round( $mining_ability * $skillinfo['level'] );
             }
             else
             {
                 $minint_ability = round( $mining_ability * .5 );
             }
 
-            if( $hexinfo[res_type] == 'coal' )
+            if( $hexinfo['res_type'] == 'coal' )
             {
                 $res_type = "Coal";
             }
-            elseif( $hexinfo[res_type] == 'salt' )
+            elseif( $hexinfo['res_type'] == 'salt' )
             {
                 $res_type = "Salt";
                 $mining_ability = round( $mining_ability * .80 );
             }
-            elseif( $hexinfo[res_type] == 'tin' )
+            elseif( $hexinfo['res_type'] == 'tin' )
             {
                 $res_type = "Tin Ore";
                 $mining_ability = round( $mining_ability * .65 );
             }
-            elseif( $hexinfo[res_type] == 'copper' )
+            elseif( $hexinfo['res_type'] == 'copper' )
             {
                 $res_type = "Copper Ore";
                 $mining_ability = round( $mining_ability * .55 );
             }
-            elseif( $hexinfo[res_type] == 'gold' )
+            elseif( $hexinfo['res_type'] == 'gold' )
             {
                 $res_type = "Gold Ore";
                 $res_limit = true;
                 $mining_ability = round( $mining_ability * .15 );
             }
-            elseif( $hexinfo[res_type] == 'zinc' )
+            elseif( $hexinfo['res_type'] == 'zinc' )
             {
                 $res_type = "Zinc Ore";
                 $mining_ability = round( $mining_ability * .70 );
             }
-            elseif( $hexinfo[res_type] == 'iron' )
+            elseif( $hexinfo['res_type'] == 'iron' )
             {
                 $res_type = "Iron Ore";
                 $mining_ability = round( $mining_ability * .50 );
             }
-            elseif( $hexinfo[res_type] == 'silver' )
+            elseif( $hexinfo['res_type'] == 'silver' )
             {
                 $res_type = "Silver Ore";
                 $res_limit = true;
                 $mining_ability = round( $mining_ability * .25 );
             }
-            elseif( $hexinfo[res_type] == 'lead' )
+            elseif( $hexinfo['res_type'] == 'lead' )
             {
                 $res_type = "Lead Ore";
                 $mining_ability = round( $mining_ability * .40 );
             }
-            elseif( $hexinfo[res_type] == 'gems' )
+            elseif( $hexinfo['res_type'] == 'gems' )
             {
                 $res_type = "Raw Gems";
                 $res_limit = true;
@@ -263,9 +276,9 @@ while( !$res->EOF )
             }
             if( $res_limit )
             {
-                if( $mining_ability > $hexinfo[res_amount] )
+                if( $mining_ability > $hexinfo['res_amount'] )
                 {
-                    $mining_ability = $hexinfo[res_amount];
+                    $mining_ability = $hexinfo['res_amount'];
                 }
                 if( $mining_ability < 0 )
                 {

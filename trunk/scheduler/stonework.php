@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/stonework.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
@@ -13,38 +18,38 @@ while( !$res->EOF )
                        ."AND skill_abbr = 'stn'");
      db_op_result($act,__LINE__,__FILE__);
     $act_do = $act->fields;
-    if( $act_do[product] == 'stoneaxe' )
+    if( $act_do['product'] == 'stoneaxe' )
     {
         $clb = $db->Execute("SELECT * FROM $dbtables[products] "
                            ."WHERE long_name = 'club' "
                            ."AND tribeid = '$tribe[goods_tribe]'");
           db_op_result($clb,__LINE__,__FILE__);
         $club = $clb->fields;
-        $startclub = $club[amount];
+        $startclub = $club['amount'];
         $ltr = $db->Execute("SELECT * FROM $dbtables[products] "
                            ."WHERE long_name = 'leather' "
                            ."AND tribeid = '$tribe[goods_tribe]'");
          db_op_result($ltr,__LINE__,__FILE__);
         $leather = $ltr->fields;
-        $startleather = $leather[amount];
+        $startleather = $leather['amount'];
         $stn = $db->Execute("SELECT * FROM $dbtables[products] "
                            ."WHERE long_name = 'stones' "
                            ."AND tribeid = '$tribe[goods_tribe]'");
          db_op_result($stn,__LINE__,__FILE__);
         $stone = $stn->fields;
-        $startstone = $stone[amount];
+        $startstone = $stone['amount'];
 
-        while( $act_do[actives] > 0 && $stone[amount] > 0 && $leather[amount] > 0 && $club[amount] > 0 )
+        while( $act_do['actives'] > 0 && $stone['amount'] > 0 && $leather['amount'] > 0 && $club['amount'] > 0 )
         {
-            $act_do[actives] -= 1;
-            $stone[amount] -= 1;
-            $leather[amount] -= 1;
-            $club[amount] -= 1;
+            $act_do['actives'] -= 1;
+            $stone['amount'] -= 1;
+            $leather['amount'] -= 1;
+            $club['amount'] -= 1;
             $product_made += 1;
         }
-        $deltastone = $startstone - $stone[amount];
-        $deltaclub = $startclub - $club[amount];
-        $deltaltr = $startleather - $leather[amount];
+        $deltastone = $startstone - $stone['amount'];
+        $deltaclub = $startclub - $club['amount'];
+        $deltaltr = $startleather - $leather['amount'];
 
         $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount - $deltastone "
@@ -85,30 +90,30 @@ while( !$res->EOF )
 
     }
 
-    if( $act_do[product] == 'stonespear' )
+    if( $act_do['product'] == 'stonespear' )
     {
         $shft = $db->Execute("SELECT * FROM $dbtables[products] "
                             ."WHERE tribeid = '$tribe[goods_tribe] "
                             ."AND long_name = 'shaft'");
          db_op_result($shft,__LINE__,__FILE__);
         $shaft = $shft->fields;
-        $startshaft = $shaft[amount];
+        $startshaft = $shaft['amount'];
         $stn = $db->Execute("SELECT * FROM $dbtables[products] "
                            ."WHERE long_name = 'stones' "
                            ."AND tribeid = '$tribe[goods_tribe]'");
           db_op_result($stn,__LINE__,__FILE__);
         $stone = $stn->fields;
-        $startstone = $stone[amount];
+        $startstone = $stone['amount'];
 
-        while ( $act_do[actives] > 0 && $stone[amount] > 0 && $shaft[amount] > 0 )
+        while ( $act_do['actives'] > 0 && $stone['amount'] > 0 && $shaft['amount'] > 0 )
         {
-            $act_do[actives] -= 1;
-            $stone[amount] -= 1;
-            $shaft[amount] -= 1;
+            $act_do['actives'] -= 1;
+            $stone['amount'] -= 1;
+            $shaft['amount'] -= 1;
             $product_made += 1;
         }
-        $deltastone = $startstone - $stone[amount];
-        $deltashaft = $startshaft - $shaft[amount];
+        $deltastone = $startstone - $stone['amount'];
+        $deltashaft = $startshaft - $shaft['amount'];
         $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount - $deltastone "
                     ."WHERE long_name = 'stones' "
@@ -143,22 +148,22 @@ while( !$res->EOF )
 
     }
 
-    if( $act_do[product] == 'millstone' )
+    if( $act_do['product'] == 'millstone' )
     {
         $stn = $db->Execute("SELECT * FROM $dbtables[products] "
                            ."WHERE long_name = 'stones' "
                            ."AND tribeid = '$tribe[goods_tribe]'");
           db_op_result($stn,__LINE__,__FILE__);
         $stone = $stn->fields;
-        $startstone = $stone[amount];
+        $startstone = $stone['amount'];
 
-        while( $act_do[actives] > 9 && $stone[amount] > 9 )
+        while( $act_do['actives'] > 9 && $stone['amount'] > 9 )
         {
-            $act_do[actives] -= 10;
-            $stone[amount] -= 10;
+            $act_do['actives'] -= 10;
+            $stone['amount'] -= 10;
             $product_made += 1;
         }
-        $deltastone = $startstone - $stone[amount];
+        $deltastone = $startstone - $stone['amount'];
         $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount - $deltastone "
                     ."WHERE long_name = 'stones' "
@@ -188,22 +193,22 @@ while( !$res->EOF )
 
     }
 
-    if( $act_do[product] == 'scrapers' )
+    if( $act_do['product'] == 'scrapers' )
     {
         $stn = $db->Execute("SELECT * FROM $dbtables[products] "
                            ."WHERE long_name = 'stones' "
                            ."AND tribeid = '$tribe[goods_tribe]'");
          db_op_result($stn,__LINE__,__FILE__);
         $stone = $stn->fields;
-        $startstone = $stone[amount];
+        $startstone = $stone['amount'];
 
-        while( $act_do[actives] > 0 && $stone[amount] > 0 )
+        while( $act_do['actives'] > 0 && $stone['amount'] > 0 )
         {
-            $act_do[actives] -= 1;
-            $stone[amount] -= 1;
+            $act_do['actives'] -= 1;
+            $stone['amount'] -= 1;
             $product_made += 1;
         }
-        $deltastone = $startstone - $stone[amount];
+        $deltastone = $startstone - $stone['amount'];
         $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount - $deltastone "
                     ."WHERE long_name = 'stones' "
@@ -234,22 +239,22 @@ while( !$res->EOF )
 
 
 
-    if( $act_do[product] == 'sculpture' )
+    if( $act_do['product'] == 'sculpture' )
     {
         $stn = $db->Execute("SELECT * FROM $dbtables[products] "
                            ."WHERE long_name = 'stones' "
                            ."AND tribeid = '$tribe[goods_tribe]'");
         db_op_result($stn,__LINE__,__FILE__);
         $stone = $stn->fields;
-        $startstone = $stone[amount];
+        $startstone = $stone['amount'];
 
-        while( $act_do[actives] > 3 && $stone[amount] > 4 )
+        while( $act_do['actives'] > 3 && $stone['amount'] > 4 )
         {
-            $act_do[actives] -= 4;
-            $stone[amount] -= 5;
+            $act_do['actives'] -= 4;
+            $stone['amount'] -= 5;
             $product_made += 1;
         }
-        $deltastone = $startstone - $stone[amount];
+        $deltastone = $startstone - $stone['amount'];
         $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount - $deltastone "
                     ."WHERE long_name = 'stones' "
@@ -279,22 +284,22 @@ while( !$res->EOF )
 
     }
 
-    if( $act_do[product] == 'statue' )
+    if( $act_do['product'] == 'statue' )
     {
         $stn = $db->Execute("SELECT * FROM $dbtables[products] "
                            ."WHERE long_name = 'stones' "
                            ."AND tribeid = '$tribe[goods_tribe]'");
          db_op_result($stn,__LINE__,__FILE__);
         $stone = $stn->fields;
-        $startstone = $stone[amount];
+        $startstone = $stone['amount'];
 
-        while( $act_do[actives] > 9 && $stone[amount] > 9 )
+        while( $act_do['actives'] > 9 && $stone['amount'] > 9 )
         {
-            $act_do[actives] -= 10;
-            $stone[amount] -= 10;
+            $act_do['actives'] -= 10;
+            $stone['amount'] -= 10;
             $product_made += 1;
         }
-        $deltastone = $startstone - $stone[amount];
+        $deltastone = $startstone - $stone['amount'];
         $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount - $deltastone "
                     ."WHERE long_name = 'stones' "
@@ -323,7 +328,7 @@ while( !$res->EOF )
         db_op_result($query,__LINE__,__FILE__);
     }
 
-    if( $act_do[product] == 'smelter' )
+    if( $act_do['product'] == 'smelter' )
     {
         $ski = $db->Execute("SELECT * FROM $dbtables[skills] "
                            ."WHERE abbr = 'eng' "
@@ -335,7 +340,7 @@ while( !$res->EOF )
                            ."AND tribeid = '$tribe[goods_tribe]'");
          db_op_result($stn,__LINE__,__FILE__);
         $stone = $stn->fields;
-        $startstone = $stone[amount];
+        $startstone = $stone['amount'];
         $ref = $db->Execute("SELECT * FROM $dbtables[structures] "
                            ."WHERE clanid = '$tribe[clanid]' "
                            ."AND hex_id = '$tribe[hex_id]' "
@@ -348,14 +353,14 @@ while( !$res->EOF )
 
         $product_made = 0;
         $total_smelt = $product_made + $refinfo[number];
-        while( $act_do[actives] > 0 && $stone[amount] > 4 && $total_smelt < 100 && $skill[level] > 4 )
+        while( $act_do['actives'] > 0 && $stone['amount'] > 4 && $total_smelt < 100 && $skill[level] > 4 )
         {
-            $act_do[actives] -= 1;
-            $stone[amount] -= 5;
+            $act_do['actives'] -= 1;
+            $stone['amount'] -= 5;
             $product_made += 1;
             $total_smelt += 1;
         }
-        $deltastone = $startstone - $stone[amount];
+        $deltastone = $startstone - $stone['amount'];
         $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount - $deltastone "
                     ."WHERE long_name = 'stones' "
@@ -407,7 +412,7 @@ while( !$res->EOF )
 
     }
 
-    if( $act_do[product] == 'refinery' )
+    if( $act_do['product'] == 'refinery' )
     {
         $ski = $db->Execute("SELECT * FROM $dbtables[skills] "
                            ."WHERE abbr = 'eng' "
@@ -419,7 +424,7 @@ while( !$res->EOF )
                            ."AND tribeid = '$tribe[goods_tribe]'");
           db_op_result($stn,__LINE__,__FILE__);
         $stone = $stn->fields;
-        $startstone = $stone[amount];
+        $startstone = $stone['amount'];
         $mh = $db->Execute("SELECT * FROM $dbtables[structures] "
                            ."WHERE clanid = '$tribe[clanid]' "
                            ."AND hex_id = '$tribe[hex_id]' "
@@ -438,14 +443,14 @@ while( !$res->EOF )
 
         $product_made = 0;
         $total = $product_made + $refinfo[struct_pts];
-        while( $act_do[actives] > 0 && $stone[amount] > 4 && $total < 100 && $skill[level] > 4 )
+        while( $act_do['actives'] > 0 && $stone['amount'] > 4 && $total < 100 && $skill[level] > 4 )
         {
-            $act_do[actives] -= 1;
-            $stone[amount] -= 5;
+            $act_do['actives'] -= 1;
+            $stone['amount'] -= 5;
             $product_made += 5;
             $total += 1;
         }
-        $deltastone = $startstone - $stone[amount];
+        $deltastone = $startstone - $stone['amount'];
         if( $total == 100 )
         {
             $complete = 'Y';

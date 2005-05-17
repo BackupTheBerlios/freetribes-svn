@@ -1,4 +1,4 @@
-<?
+<?php
 include("../config.php");
 $time_start = getmicrotime();
 $title="TribeStrive Installer";
@@ -1386,16 +1386,72 @@ else
         echo " Present!<BR>";
         flush();
     }
-//TODO- Do we really need this thing?  - changes to signup process dont use this anymore, is it used anywhere else?
-    echo "Creating form_submit table....";
+    echo "Creating Scheduler Table.....";
     flush();
-    $db->Execute("DROP TABLE IF EXISTS $dbtables[form_submits]");
-    $db->Execute("CREATE TABLE $dbtables[form_submits] ("
-                ."`formid` VARCHAR( 50 ) NOT NULL ,"
-                ."UNIQUE KEY `formid` (`formid`)"
-                .") TYPE=MyISAM");
-    echo " Done!<BR>";
-    flush();
+    $result = $db->Execute("DROP TABLE IF EXISTS $dbtables[scheduler]");
+    $result = $db->Execute("CREATE TABLE $dbtables[scheduler] ("
+        ."id tinyint(3) unsigned NOT NULL auto_increment,"
+        ."sequence tinyint(3) unsigned NOT NULL default '0',"
+        ."type enum('H','D') NOT NULL default 'H',"
+        ."frequency int(6) unsigned NOT NULL default '60',"
+        ."script varchar(50) NOT NULL default '',"
+        ."last_run datetime NOT NULL default '0000-00-00 00:00:00',"
+        ."PRIMARY KEY  (id),"
+        ."KEY type (type),"
+        ."KEY sequence (sequence)"
+        .") TYPE=MyISAM;");
+db_op_result($result,__LINE__,__FILE__);
+echo "Inserting Data....";
+$result = $db->Execute("INSERT INTO tstr_scheduler VALUES ('', 6, 'D', 1440, 'defaultactivities.php', '0000-00-00 00:00:00'),"
+."('', 7, 'D', 1440, 'fairfigures.php', '0000-00-00 00:00:00'),   "
+."('', 8, 'D', 1440, 'fairfigures2.php', '0000-00-00 00:00:00'),  "
+."('', 9, 'D', 1440, 'fairpricelist.php', '0000-00-00 00:00:00'), "
+."('', 33, 'D', 1440, 'farmgrowth.php', '0000-00-00 00:00:00'),   "
+."('', 32, 'D', 1440, 'farming.php', '0000-00-00 00:00:00'),      "
+."('', 37, 'D', 1440, 'fletching.php', '0000-00-00 00:00:00'),   "
+."('', 15, 'D', 1440, 'forestry.php', '0000-00-00 00:00:00'),    "
+."('', 2, 'D', 1440, 'goods_tribe.php', '0000-00-00 00:00:00'),  "
+."('', 43, 'D', 1440, 'gttransfers.php', '0000-00-00 00:00:00'), "
+."('', 29, 'D', 1440, 'herding.php', '0000-00-00 00:00:00'),     "
+."('', 12, 'D', 1440, 'huntfur.php', '0000-00-00 00:00:00'),     "
+."('', 27, 'D', 1440, 'hvywpns.php', '0000-00-00 00:00:00'),     "
+."('', 20, 'D', 1440, 'leatherworking.php', '0000-00-00 00:00:00'),"
+."('', 25, 'D', 1440, 'metalworking.php', '0000-00-00 00:00:00'), "
+."('', 10, 'D', 1440, 'mining.php', '0000-00-00 00:00:00'),       "
+."('', 4, 'D', 1440, 'primaryskill.php', '0000-00-00 00:00:00'),  "
+."('', 45, 'D', 1440, 'productgiveback.php', '0000-00-00 00:00:00'),"
+."('', 11, 'D', 1440, 'quarry.php', '0000-00-00 00:00:00'),       "
+."('', 30, 'D', 1440, 'refining.php', '0000-00-00 00:00:00'),     "
+."('', 5, 'D', 1440, 'secondaryskill.php', '0000-00-00 00:00:00'),"
+."('', 38, 'D', 1440, 'seeking.php', '0000-00-00 00:00:00'),     "
+."('', 22, 'D', 1440, 'sewing.php', '0000-00-00 00:00:00'),      "
+."('', 13, 'D', 1440, 'skingutbone.php', '0000-00-00 00:00:00'), "
+."('', 28, 'D', 1440, 'stonework.php', '0000-00-00 00:00:00'),   "
+."('', 44, 'D', 1440, 'hexupdate.php', '0000-00-00 00:00:00'),   "
+."('', 16, 'D', 1440, 'tanning.php', '0000-00-00 00:00:00'),     "
+."('', 23, 'D', 1440, 'waxwork.php', '0000-00-00 00:00:00'),     "
+."('', 26, 'D', 1440, 'weaponmaking.php', '0000-00-00 00:00:00'),"
+."('', 21, 'D', 1440, 'weaving.php', '0000-00-00 00:00:00'),    "
+."('', 24, 'D', 1440, 'woodworking.php', '0000-00-00 00:00:00'),"
+."('', 42, 'D', 1440, 'scores.php', '0000-00-00 00:00:00'),     "
+."('', 19, 'D', 1440, 'armormaking.php', '0000-00-00 00:00:00'),"
+."('', 17, 'D', 1440, 'curing.php', '0000-00-00 00:00:00'),     "
+."('', 1, 'D', 1440, 'deva.php', '0000-00-00 00:00:00'),        "
+."('', 35, 'D', 1440, 'distilling.php', '0000-00-00 00:00:00'), "
+."('', 18, 'D', 1440, 'dressing.php', '0000-00-00 00:00:00'),   "
+."('', 36, 'D', 1440, 'baking.php', '0000-00-00 00:00:00'),     "
+."('', 14, 'D', 1440, 'bonework.php', '0000-00-00 00:00:00'),   "
+."('', 46, 'D', 1440, 'cleanup.php', '0000-00-00 00:00:00'),    "
+."('', 40, 'D', 1440, 'garexp.php', '0000-00-00 00:00:00'),     "
+."('', 34, 'D', 1440, 'apiarism.php', '0000-00-00 00:00:00'),   "
+."('', 31, 'D', 1440, 'engineering.php', '0000-00-00 00:00:00'),"
+."('', 39, 'D', 1440, 'population.php', '0000-00-00 00:00:00'), "
+."('', 41, 'D', 1440, 'scouting.php', '0000-00-00 00:00:00'),   "
+."('', 1, 'H', 60, 'hourlysched.php', '0000-00-00 00:00:00'),  "
+."('', 3, 'D', 1440, 'structures.php', '0000-00-00 00:00:00');");
+db_op_result($result,__LINE__,__FILE__);
+echo " Done!<br>";
+flush();
     echo "Creating map_view table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[map_view]");
@@ -1428,7 +1484,7 @@ else
     echo "Creating Admin News table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[news]");
-    $query = $db->Execute("CREATE TABLE `tstr_game_news` ("
+    $query = $db->Execute("CREATE TABLE `$dbtables[news]` ("
         ."`id` BIGINT( 20 ) UNSIGNED NOT NULL AUTO_INCREMENT ,"
         ."`created` DATE NOT NULL , "
         ."`expire` DATE NOT NULL ,"
@@ -1439,6 +1495,15 @@ else
         ."INDEX ( `created` , `expire` )"
         .");");
         db_op_result($query,__LINE__,__FILE__);
+     $stamp = date("Y-m-d H:i:s");
+    $query = $db->Execute("INSERT INTO $dbtables[news] (created,expire,headline,front_page,news) VALUES ("
+                            ."now(),"
+                            ."date_add(cur_date(),interval 1 year),"
+                            ."'Game Reset!',"
+                            ."'1',"
+                            ."'$title $version has been Reset on $stamp. Join up, and Conquer!'"
+                            .")");
+       db_op_result($query,__LINE__,__FILE__);
         echo " DONE!<br>";
 
     flush();
@@ -1705,6 +1770,7 @@ else
                 .") TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
+    //Scheduled for deletion - we'll add next reset date to config values
     echo "Creating reset_date table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[reset_date]");
@@ -1717,6 +1783,7 @@ else
                 ."VALUES('$stamp')");
     echo " Done!<BR>";
     flush();
+    //Remove above once sure its no longer used in code. dont want errors
     echo "Creating gd_rq table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[gd_rq]");

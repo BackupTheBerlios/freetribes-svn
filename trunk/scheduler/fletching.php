@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/fletching.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
 db_op_result($res,__LINE__,__FILE__);
@@ -21,33 +26,33 @@ while( !$res->EOF )
                             ."AND abbr = 'flet'");
           db_op_result($flet,__LINE__,__FILE__);
         $skill = $flet->fields;
-        $skillcheck = $skill[level] * 10;
-        if( $skill[level] < 10 && $act_do[actives] > $skillcheck )
+        $skillcheck = $skill['level'] * 10;
+        if( $skill['level'] < 10 && $act_do['actives'] > $skillcheck )
         {
-            $act_do[actives] = $skillcheck;
+            $act_do['actives'] = $skillcheck;
         }
         $coal = $db->Execute("SELECT * FROM $dbtables[resources] "
                             ."WHERE tribeid = '$tribe[goods_tribe]' "
                             ."AND long_name = 'Coal'");
           db_op_result($coal,__LINE__,__FILE__);
         $coalinfo = $coal->fields;
-        $startcoal = $coalinfo[amount];
+        $startcoal = $coalinfo['amount'];
         $mtl = $db->Execute("SELECT * FROM $dbtables[resources] "
                            ."WHERE tribeid = '$tribe[goods_tribe]' "
                            ."AND long_name = 'Iron'");
             db_op_result($mtl,__LINE__,__FILE__);
         $mtlinfo = $mtl->fields;
-        $startmtl = $mtlinfo[amount];
+        $startmtl = $mtlinfo['amount'];
         $product = 0;
-        while( $act_do[actives] > 0 && $mtlinfo[amount] > 0 && $coalinfo[amount] > 9 )
+        while( $act_do['actives'] > 0 && $mtlinfo['amount'] > 0 && $coalinfo['amount'] > 9 )
         {
-            $act_do[actives] -= 1;
-            $mtlinfo[amount] -= 1;
-            $coalinfo[amount] -= 10;
+            $act_do['actives'] -= 1;
+            $mtlinfo['amount'] -= 1;
+            $coalinfo['amount'] -= 10;
             $product += 10;
         }
-        $deltacoal = $startcoal - $coalinfo[amount];
-        $deltamtl = $startmtl - $mtlinfo[amount];
+        $deltacoal = $startcoal - $coalinfo['amount'];
+        $deltamtl = $startmtl - $mtlinfo['amount'];
         $result = $db->Execute("UPDATE $dbtables[resources] "
                     ."SET amount = amount - $deltamtl "
                     ."WHERE tribeid = '$tribe[goods_tribe]' "

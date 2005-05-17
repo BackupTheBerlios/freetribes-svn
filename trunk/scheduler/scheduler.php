@@ -1,12 +1,12 @@
 <?php
-
-if( $_SERVER[REMOTE_ADDR] != $_SERVER[SERVER_ADDR] )
+ //FILE SCHEDULED FOR DELETION
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
-
-require_once("../config.php");
-require_once("../global_funcs.php");
+require_once("config.php");
+require_once("global_funcs.php");
 connectdb();
 $starttime = time();
 $res = $db->Execute("UPDATE $dbtables[products] SET amount = 0 WHERE amount < 0");
@@ -185,6 +185,32 @@ $res = $db->Execute("UPDATE $dbtables[game_date] set count = 0 WHERE type = 'wea
 db_op_result($res,__LINE__,__FILE__);
 $res = $db->Execute("UPDATE $dbtables[structures] SET used = 'N' WHERE used = 'Y'");
 db_op_result($res,__LINE__,__FILE__);
+$time_update = $db->Execute("SELECT * FROM $dbtables[game_date] where type='month'");
+db_op_result($time_update,__LINE__,__FILE__);
+$data = $time_update->fields;
+if($data['count'] == 12)
+{
+   $newmonth = 1;
+   $years = $db->Execute("select count from $dbtables[game_date] where type='year'");
+   db_op_result($years,__LINE__,__FILE__);
+   $yearinfo = $years->fields;
+   $newyear = $yearinfo['count'] + 1;
+}
+else
+{
+   $newmonth = $data['count'] + 1;
+}
+
+$gameupdate = $db->Execute("UPDATE $dbtables[game_date] SET count=1 where type='day'");
+db_op_result($gameupdate,__LINE__,__FILE__);
+$gameupdate = $db->Execute("UPDATE $dbtables[game_date] SET count=$newmonth where type='month'");
+db_op_result($gameupdate,__LINE__,__FILE__);
+if($newmonth == 1)
+{
+    $gameupdate = $db->Execute("UPDATE $dbtables[game_date] SET count=$newyear where type='year'");
+    db_op_result($gameupdate,__LINE__,__FILE__);
+}
+
 $endtime = time();
 $diff_seconds = $endtime - $starttime;
 $diff_minutes = floor($diff_seconds/60);

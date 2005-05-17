@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
 db_op_result($res,__LINE__,__FILE__);
@@ -16,23 +21,23 @@ while( !$res->EOF )
     {
         $act_do = $act->fields;
 
-        if( $act_do[skill_abbr] == 'qry' )
+        if( $act_do['skill_abbr'] == 'qry' )
         {
             $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
                                ."WHERE hex_id = '$tribe[hex_id]'");
              db_op_result($hex,__LINE__,__FILE__);
             $hexinfo = $hex->fields;
-            if( $hexinfo[terrain] == 'gh' | $hexinfo[terrain] == 'dh' | $hexinfo[terrain] == 'ch' | $hexinfo[terrain] == 'jh' | $hexinfo[terrain] == 'lcm' | $hexinfo[terrain] == 'ljm' )
+            if( $hexinfo['terrain'] == 'gh' | $hexinfo['terrain'] == 'dh' | $hexinfo['terrain'] == 'ch' | $hexinfo['terrain'] == 'jh' | $hexinfo['terrain'] == 'lcm' | $hexinfo['terrain'] == 'ljm' )
             {
                 $qryskill = $db->Execute("SELECT * FROM $dbtables[skills] "
                                         ."WHERE tribeid = '$tribe[tribeid]' "
                                         ."AND abbr = 'qry'");
                  db_op_result($qryskill,__LINE__,__FILE__);
                 $qryinfo = $qryskill->fields;
-                $max_quarry = $qryinfo[level] * 10;
-                if( $act_do[actives] > $max_quarry )
+                $max_quarry = $qryinfo['level'] * 10;
+                if( $act_do['actives'] > $max_quarry )
                 {
-                    $act_do[actives] = $max_quarry;
+                    $act_do['actives'] = $max_quarry;
                 }
                 $shov = $db->Execute("SELECT * FROM $dbtables[products] "
                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -62,11 +67,11 @@ while( !$res->EOF )
                 {
                     $mattockinfo = $mattock->fields;
                 }
-                if( $shovinfo[amount] > $act_do[actives] )
+                if( $shovinfo['amount'] > $act_do['actives'] )
                 {
-                    $shovinfo[amount] = $act_do[actives];
+                    $shovinfo['amount'] = $act_do['actives'];
                 }
-                if( !$shovinfo[long_name] == '' && $shovinfo[amount] > 1 )
+                if( !$shovinfo['long_name'] == '' && $shovinfo['amount'] > 1 )
                 {
                     $query = $db->Execute("INSERT INTO $dbtables[products_used] "
                                 ."VALUES("
@@ -81,11 +86,11 @@ while( !$res->EOF )
                    db_op_result($query,__LINE__,__FILE__);
                 }
 
-                if( $pickinfo[amount] > ($act_do[actives] - $shovinfo[amount]) )
+                if( $pickinfo['amount'] > ($act_do['actives'] - $shovinfo['amount']) )
                 {
-                    $pickinfo[amount] = $act_do[actives] - $shovinfo[amount];
+                    $pickinfo['amount'] = $act_do['actives'] - $shovinfo['amount'];
                 }
-                if( !$pickinfo[long_name] == '' && $pickinfo[amount] > 1 )
+                if( !$pickinfo['long_name'] == '' && $pickinfo['amount'] > 1 )
                 {
                     $query = $db->Execute("INSERT INTO $dbtables[products_used] "
                                 ."VALUES("
@@ -100,11 +105,11 @@ while( !$res->EOF )
                      db_op_result($query,__LINE__,__FILE__);
                 }
 
-                if( $mattockinfo[amount] > ($act_do[actives] - $shovinfo[amount] - $pickinfo[amount]) )
+                if( $mattockinfo['amount'] > ($act_do['actives'] - $shovinfo['amount'] - $pickinfo['amount']) )
                 {
-                    $mattockinfo[amount] = $act_do[actives] - $shovinfo[amount] - $pickinfo[amount];
+                    $mattockinfo['amount'] = $act_do['actives'] - $shovinfo['amount'] - $pickinfo['amount'];
                 }
-                if( !$mattockinfo[long_name] == '' && $mattockinfo[amount] > 1 )
+                if( !$mattockinfo['long_name'] == '' && $mattockinfo['amount'] > 1 )
                 {
                     $query = $db->Execute("INSERT INTO $dbtables[products_used] "
                                 ."VALUES("
@@ -118,19 +123,19 @@ while( !$res->EOF )
                                 ."AND long_name = '$mattockinfo[long_name]'");
                     db_op_result($query,__LINE__,__FILE__);
                 }
-                $startactives = $act_do[actives];
-                $shov_bonus = round($shovinfo[amount] * .5);
-                $pick_bonus = round($pickinfo[amount] * .5);
-                $mattock_bonus = $mattockinfo[amount];
-                $act_do[actives] += $shov_bonus;
-                $act_do[actives] += $pick_bonus;
-                $act_do[actives] += $mattock_bonus;
+                $startactives = $act_do['actives'];
+                $shov_bonus = round($shovinfo['amount'] * .5);
+                $pick_bonus = round($pickinfo['amount'] * .5);
+                $mattock_bonus = $mattockinfo['amount'];
+                $act_do['actives'] += $shov_bonus;
+                $act_do['actives'] += $pick_bonus;
+                $act_do['actives'] += $mattock_bonus;
 
                 $stones = 0;
-                while( $act_do[actives] > 0 )
+                while( $act_do['actives'] > 0 )
                 {
                     $stones += 5;
-                    $act_do[actives] -= 1;
+                    $act_do['actives'] -= 1;
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] "
                             ."SET amount = amount + '$stones' "

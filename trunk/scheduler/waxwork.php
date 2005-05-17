@@ -5,9 +5,14 @@
 // option) any later version.
 //
 // File: waxwork.php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/waxwork.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 
     $act = $db->Execute("SELECT * FROM $dbtables[activities] WHERE skill_abbr LIKE '%wax%'");

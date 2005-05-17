@@ -1,8 +1,13 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/leatherworking.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
 
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
@@ -16,9 +21,9 @@ while( !$res->EOF )
     {
         $act_do = $act->fields;
 
-        if( $act_do[skill_abbr] == 'ltr' )
+        if( $act_do['skill_abbr'] == 'ltr' )
         {
-            if( $act_do[product] == 'hood' )
+            if( $act_do['product'] == 'hood' )
             {
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] "
                                         ."WHERE long_name = 'leather' "
@@ -26,14 +31,14 @@ while( !$res->EOF )
                   db_op_result($leather,__LINE__,__FILE__);
                 $leatherinfo = $leather->fields;
                 $hoods = 0;
-                $startltr = $leatherinfo[amount];
-                while( $leatherinfo[amount] > 1 && $act_do[actives] > 0 )
+                $startltr = $leatherinfo['amount'];
+                while( $leatherinfo['amount'] > 1 && $act_do['actives'] > 0 )
                 {
                     $hoods += 2;
-                    $leatherinfo[amount] -= 1;
-                    $act_do[actives] -= 1;
+                    $leatherinfo['amount'] -= 1;
+                    $act_do['actives'] -= 1;
                 }
-                $deltaltr = $startltr - $leatherinfo[amount];
+                $deltaltr = $startltr - $leatherinfo['amount'];
                 $query = $db->Execute("UPDATE $dbtables[products] "
                              ."SET amount = amount + '$hoods' "
                              ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -61,7 +66,7 @@ while( !$res->EOF )
                              ."'Leatherworking: $hoods Hoods made using $deltaltr leather.')");
                        db_op_result($query,__LINE__,__FILE__);
             }
-            if( $act_do[product] == 'leatherbarding' )
+            if( $act_do['product'] == 'leatherbarding' )
             {
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] "
                                         ."WHERE long_name = 'leather' "
@@ -69,14 +74,14 @@ while( !$res->EOF )
                  db_op_result($leather,__LINE__,__FILE__);
                 $leatherinfo = $leather->fields;
                 $product = 0;
-                $startltr = $leatherinfo[amount];
-                while( $leatherinfo[amount] > 6 && $act_do[actives] > 1 )
+                $startltr = $leatherinfo['amount'];
+                while( $leatherinfo['amount'] > 6 && $act_do['actives'] > 1 )
                 {
                     $product += 2;
-                    $leatherinfo[amount] -= 6;
-                    $act_do[actives] -= 2;
+                    $leatherinfo['amount'] -= 6;
+                    $act_do['actives'] -= 2;
                 }
-                $deltaltr = $startltr - $leatherinfo[amount];
+                $deltaltr = $startltr - $leatherinfo['amount'];
                 $query = $db->Execute("UPDATE $dbtables[products] "
                              ."SET amount = amount + '$product' "
                              ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -105,19 +110,19 @@ while( !$res->EOF )
                 db_op_result($query,__LINE__,__FILE__);
             }
 
-            if($act_do[product] == 'sling')
+            if($act_do['product'] == 'sling')
             {
 
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
                 db_op_result($leather,__LINE__,__FILE__);
                 $leatherinfo = $leather->fields;
                 $slings = 0;
-                while($leatherinfo[amount] > 0 & $act_do[actives] > 0)
+                while($leatherinfo['amount'] > 0 & $act_do['actives'] > 0)
                 {
 
                     $slings += 1;
-                    $leatherinfo[amount] -= 1;
-                    $act_do[actives] -= 1;
+                    $leatherinfo['amount'] -= 1;
+                    $act_do['actives'] -= 1;
 
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$slings' WHERE tribeid = '$tribe[goods_tribe]' and long_name = '$act_do[product]'");
@@ -129,17 +134,17 @@ while( !$res->EOF )
                 $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Leatherworking: $slings Slings made.')");
                 db_op_result($query,__LINE__,__FILE__);
             }
-            if($act_do[product] == 'heaters')
+            if($act_do['product'] == 'heaters')
             {
 
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
                 db_op_result($leather,__LINE__,__FILE__);
                 $leatherinfo = $leather->fields;
-                $startltr = $leatherinfo[amount];
+                $startltr = $leatherinfo['amount'];
                 $frame = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'frame' AND tribeid = '$tribe[goods_tribe]' AND amount > 0 OR long_name = 'boneframe' AND tribeid = '$tribe[goods_tribe]' AND amount > 0");
                  db_op_result($frame,__LINE__,__FILE__);
                 $frameinfo = $frame->fields;
-                if($frameinfo[long_name] == 'boneframe')
+                if($frameinfo['long_name'] == 'boneframe')
                 {
                     $frametype = 'boneframe';
                 }
@@ -147,17 +152,17 @@ while( !$res->EOF )
                 {
                     $frametype = 'frame';
                 }
-                $startframe = $frameinfo[amount];
+                $startframe = $frameinfo['amount'];
                 $heaters = 0;
-                while($leatherinfo[amount] > 2 & $act_do[actives] > 0 & $frameinfo[amount] > 0)
+                while($leatherinfo['amount'] > 2 & $act_do['actives'] > 0 & $frameinfo['amount'] > 0)
                 {
                     $heaters += 1;
-                    $leatherinfo[amount] -= 1;
-                    $act_do[actives] -= 1;
-                    $frameinfo[amount] -= 1;
+                    $leatherinfo['amount'] -= 1;
+                    $act_do['actives'] -= 1;
+                    $frameinfo['amount'] -= 1;
                 }
-                $deltaframe = $startframe - $frameinfo[amount];
-                $deltaltr = $startltr - $leatherinfo[amount];
+                $deltaframe = $startframe - $frameinfo['amount'];
+                $deltaltr = $startltr - $leatherinfo['amount'];
 
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$heaters' WHERE tribeid = '$tribe[goods_tribe]' and long_name = 'heaters'");
                 db_op_result($query,__LINE__,__FILE__);
@@ -170,7 +175,7 @@ while( !$res->EOF )
                 $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Leatherworking: $heaters Heaters made using $deltaltr leather and $deltaframe $frametype.')");
                db_op_result($query,__LINE__,__FILE__);
             }
-            if($act_do[product] == 'jerkin')
+            if($act_do['product'] == 'jerkin')
             {
 
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
@@ -178,12 +183,12 @@ while( !$res->EOF )
                 $leatherinfo = $leather->fields;
                 $jerkins = 0;
 
-                while($leatherinfo[amount] > 3 & $act_do[actives] > 1)
+                while($leatherinfo['amount'] > 3 & $act_do['actives'] > 1)
                 {
 
                     $jerkins += 1;
-                    $leatherinfo[amount] -= 4;
-                    $act_do[actives] -= 2;
+                    $leatherinfo['amount'] -= 4;
+                    $act_do['actives'] -= 2;
 
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$jerkins' WHERE tribeid = '$tribe[goods_tribe]' and long_name = 'jerkin'");
@@ -196,19 +201,19 @@ while( !$res->EOF )
                 db_op_result($query,__LINE__,__FILE__);
             }
 
-            if($act_do[product] == 'trews')
+            if($act_do['product'] == 'trews')
             {
 
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
                 db_op_result($leather,__LINE__,__FILE__);
                 $leatherinfo = $leather->fields;
                 $trews = 0;
-                while($leatherinfo[amount] > 1 & $act_do[actives] > 0)
+                while($leatherinfo['amount'] > 1 & $act_do['actives'] > 0)
                 {
 
                     $trews += 1;
-                    $leatherinfo[amount] -= 2;
-                    $act_do[actives] -= 1;
+                    $leatherinfo['amount'] -= 2;
+                    $act_do['actives'] -= 1;
 
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$trews' WHERE tribeid = '$tribe[goods_tribe]' and long_name = 'trews'");
@@ -221,7 +226,7 @@ while( !$res->EOF )
                 db_op_result($query,__LINE__,__FILE__);
             }
 
-            if($act_do[product] == 'leathergreaves')
+            if($act_do['product'] == 'leathergreaves')
             {
 
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
@@ -229,11 +234,11 @@ while( !$res->EOF )
                 $leatherinfo = $leather->fields;
 
                 $greaves = 0;
-                while($leatherinfo[amount] > 0 & $act_do[actives] > 0)
+                while($leatherinfo['amount'] > 0 & $act_do['actives'] > 0)
                 {
                     $greaves += 1;
-                    $leatherinfo[amount] -= 2;
-                    $act_do[actives] -= 1;
+                    $leatherinfo['amount'] -= 2;
+                    $act_do['actives'] -= 1;
 
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$greaves' WHERE tribeid = '$tribe[goods_tribe]' and long_name = 'leathergreaves'");
@@ -247,7 +252,7 @@ while( !$res->EOF )
             }
 
 
-            if($act_do[product] == 'rope')
+            if($act_do['product'] == 'rope')
             {
 
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
@@ -255,12 +260,12 @@ while( !$res->EOF )
                 $leatherinfo = $leather->fields;
 
                 $ropes = 0;
-                while($leatherinfo[amount] > 4 & $act_do[actives] > 1)
+                while($leatherinfo['amount'] > 4 & $act_do['actives'] > 1)
                 {
 
                     $ropes += 1;
-                    $leatherinfo[amount] -= 5;
-                    $act_do[actives] -= 2;
+                    $leatherinfo['amount'] -= 5;
+                    $act_do['actives'] -= 2;
 
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$ropes' WHERE tribeid = '$tribe[goods_tribe]' and long_name = 'rope'");
@@ -273,7 +278,7 @@ while( !$res->EOF )
                   db_op_result($query,__LINE__,__FILE__);
             }
 
-            if($act_do[product] == 'backpack')
+            if($act_do['product'] == 'backpack')
             {
 
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
@@ -281,12 +286,12 @@ while( !$res->EOF )
                 $leatherinfo = $leather->fields;
 
                 $backpacks = 0;
-                while($leatherinfo[amount] > 1 & $act_do[actives] > 1)
+                while($leatherinfo['amount'] > 1 & $act_do['actives'] > 1)
                 {
 
                     $backpacks += 1;
-                    $leatherinfo[amount] -= 2;
-                    $act_do[actives] -= 2;
+                    $leatherinfo['amount'] -= 2;
+                    $act_do['actives'] -= 2;
 
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$backpacks' WHERE tribeid = '$tribe[goods_tribe]' and long_name = 'backpack'");
@@ -299,18 +304,18 @@ while( !$res->EOF )
                db_op_result($query,__LINE__,__FILE__);
             }
 
-            if($act_do[product] == 'whip')
+            if($act_do['product'] == 'whip')
             {
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
                  db_op_result($leather,__LINE__,__FILE__);
                 $leatherinfo = $leather->fields;
                 $whips = 0;
-                while($leatherinfo[amount] > 0 & $act_do[actives] > 0)
+                while($leatherinfo['amount'] > 0 & $act_do['actives'] > 0)
                 {
 
                     $whips += 1;
-                    $leatherinfo[amount] -= 1;
-                    $act_do[actives] -= 1;
+                    $leatherinfo['amount'] -= 1;
+                    $act_do['actives'] -= 1;
 
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$whips' WHERE tribeid = '$tribe[goods_tribe]' and long_name = 'whip'");
@@ -322,18 +327,18 @@ while( !$res->EOF )
                 $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','UPDATE','$stamp','Leatherworking: $whips Whips made.')");
             }
 
-            if($act_do[product] == 'saddlebags')
+            if($act_do['product'] == 'saddlebags')
             {
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
                   db_op_result($leather,__LINE__,__FILE__);
                 $leatherinfo = $leather->fields;
                 $saddlebags = 0;
-                while($leatherinfo[amount] > 3 & $act_do[actives] > 1)
+                while($leatherinfo['amount'] > 3 & $act_do['actives'] > 1)
                 {
 
                     $saddlebags += 1;
-                    $leatherinfo[amount] -= 4;
-                    $act_do[actives] -= 2;
+                    $leatherinfo['amount'] -= 4;
+                    $act_do['actives'] -= 2;
 
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$saddlebags' WHERE tribeid = '$tribe[goods_tribe]' and long_name = 'saddlebags'");
@@ -346,19 +351,19 @@ while( !$res->EOF )
                   db_op_result($query,__LINE__,__FILE__);
             }
 
-            if($act_do[product] == 'saddle')
+            if($act_do['product'] == 'saddle')
             {
 
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
                   db_op_result($leather,__LINE__,__FILE__);
                 $leatherinfo = $leather->fields;
                 $saddles = 0;
-                while($leatherinfo[amount] > 3 & $act_do[actives] > 2)
+                while($leatherinfo['amount'] > 3 & $act_do['actives'] > 2)
                 {
 
                     $saddles += 1;
-                    $leatherinfo[amount] -= 4;
-                    $act_do[actives] -= 3;
+                    $leatherinfo['amount'] -= 4;
+                    $act_do['actives'] -= 3;
 
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$saddles' WHERE tribeid = '$tribe[goods_tribe]' and long_name = 'saddle'");
@@ -371,7 +376,7 @@ while( !$res->EOF )
                 db_op_result($query,__LINE__,__FILE__);
             }
 
-            if($act_do[product] == 'kayak')
+            if($act_do['product'] == 'kayak')
             {
 
                 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'leather' AND tribeid = '$tribe[goods_tribe]'");
@@ -381,12 +386,12 @@ while( !$res->EOF )
                  db_op_result($struct,__LINE__,__FILE__);
                 $structinfo = $struct->fields;
                 $kayaks = 0;
-                while($leatherinfo[amount] > 9 & $act_do[actives] > 5 & $structinfo[amount] > 0)
+                while($leatherinfo['amount'] > 9 & $act_do['actives'] > 5 & $structinfo['amount'] > 0)
                 {
                     $kayaks += 1;
-                    $leatherinfo[amount] -= 10;
-                    $act_do[actives] -= 6;
-                    $structinfo[amount] -= 1;
+                    $leatherinfo['amount'] -= 10;
+                    $act_do['actives'] -= 6;
+                    $structinfo['amount'] -= 1;
 
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] set amount = amount + '$kayaks' WHERE tribeid = '$tribe[goods_tribe]' and long_name = 'kayak'");

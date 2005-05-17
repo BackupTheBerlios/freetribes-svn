@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/scouting.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
@@ -13,7 +18,7 @@ while( !$res->EOF )
                          ."AND abbr = 'sct'");
      db_op_result($skill,__LINE__,__FILE__);
     $skillinfo = $skill->fields;
-    $movement = $skillinfo[level];
+    $movement = $skillinfo['level'];
     $nsct = $db->Execute("SELECT * FROM $dbtables[scouts] "
                         ."WHERE tribeid = '$tribe[tribeid]' "
                         ."AND direction = 'n' "
@@ -24,7 +29,7 @@ while( !$res->EOF )
     while( !$nsct->EOF )
     {
         $scout = $nsct->fields;
-        if( $scout[mounted] == 'Y' )
+        if( $scout['mounted'] == 'Y' )
         {
             $movepts = 7 + $movement;
         }
@@ -32,8 +37,8 @@ while( !$res->EOF )
         {
             $movepts = 3 + ($movement/2);
         }
-        $scoutedhex = $tribe[hex_id];
-        $direction = $scout[direction];
+        $scoutedhex = $tribe['hex_id'];
+
         $move = 0;
         while( $movepts > 0 )
         {
@@ -41,33 +46,30 @@ while( !$res->EOF )
                                ."WHERE hex_id = '$scoutedhex'");
               db_op_result($hex,__LINE__,__FILE__);
             $hexinfo = $hex->fields;
-            $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
-                               ."WHERE hex_id = '$hexinfo[$direction]'");
-            db_op_result($hex,__LINE__,__FILE__);
-            $hexinfo = $hex->fields;
-            if( $movepts < $hexinfo[move] )
+
+            if( $movepts < $tribe['hex_id'] )
             {
                 $movepts = 0;
                 $moved = 1;
             }
             if( $move > 0 )
             {
-                $movepts -= $hexinfo[move];
+                $movepts -= $tribe['hex_id'];
             }
             else
             {
                 $move++;
             }
             /////////////move the scouts 1 tile//////////////
-            $scoutedhex = $hexinfo[hex_id];
+            $scoutedhex = $hexinfo['hex_id'];
             //////////////add the tile to the map/////////////////
             if( !$moved )
             {
                 $scoutfind = rand( 1,500 );
-                if( $scoutfind >  ( 490 + $skillinfo[level] ) )
+                if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
                 {
-                    $numbermissed = rand( 1, $scout[actives] );
-                    if( $scout[actives] <= $numbermissed )
+                    $numbermissed = rand( 1, $scout['actives'] );
+                    if( $scout['actives'] <= $numbermissed )
                     {
                         $query = $db->Execute("DELETE FROM $dbtables[scouts] "
                                     ."WHERE direction = 'n' "
@@ -121,9 +123,9 @@ while( !$res->EOF )
                         }
                     }
                 }
-                elseif( $scoutfind < $skillinfo[level] )
+                elseif( $scoutfind < $skillinfo['level'] )
                 {
-                    $whatfind = (rand(1,100) + $skillinfo[level]);
+                    $whatfind = (rand(1,100) + $skillinfo['level']);
                     if( $whatfind > 75 )
                     {
                         $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
@@ -134,7 +136,7 @@ while( !$res->EOF )
                         db_op_result($find,__LINE__,__FILE__);
                         $findwhat = $find->fields;
                         $what = rand( 0, $findwhat[count] );
-                        $many = rand( 1, $skillinfo[level] );
+                        $many = rand( 1, $skillinfo['level'] );
                         $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
                                              ."WHERE skill_abbr != 'shw' "
                                  ."AND include = 'Y' "
@@ -164,7 +166,7 @@ while( !$res->EOF )
                     else
                     {
                         $what = rand( 0, $findwhat[count] );
-                        $many = rand( 1, $skillinfo[level] + 5 );
+                        $many = rand( 1, $skillinfo['level'] + 5 );
                         $found = $db->Execute("SELECT * FROM $dbtables[livestock] "
                                              ."WHERE tribeid = '$tribe[goods_tribe]' "
                                              ."LIMIT $what, 1");
@@ -244,7 +246,7 @@ while( !$res->EOF )
         while( !$nesct->EOF )
         {
             $scout = $nesct->fields;
-            if( $scout[mounted] == 'Y' )
+            if( $scout['mounted'] == 'Y' )
             {
                 $movepts = 7 + $movement;
             }
@@ -252,8 +254,8 @@ while( !$res->EOF )
             {
                 $movepts = 3 + ($movement/2);
             }
-            $scoutedhex = $tribe[hex_id];
-            $direction = $scout[direction];
+            $scoutedhex = $tribe['hex_id'];
+            $direction = $tribe['hex_id'];
             $move = 0;
             while( $movepts > 0 )
             {
@@ -261,33 +263,30 @@ while( !$res->EOF )
                                    ."WHERE hex_id = '$scoutedhex'");
                 db_op_result($hex,__LINE__,__FILE__);
                 $hexinfo = $hex->fields;
-                $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
-                                   ."WHERE hex_id = '$hexinfo[$direction]'");
-                  db_op_result($hex,__LINE__,__FILE__);
-                $hexinfo = $hex->fields;
-                if( $movepts < $hexinfo[move] )
+
+                if( $movepts < $tribe['hex_id'] )
                 {
                     $movepts = 0;
                     $moved = 1;
                 }
                 if( $move > 0 )
                 {
-                    $movepts -= $hexinfo[move];
+                    $movepts -= $tribe['hex_id'];
                 }
                 else
                 {
                     $move++;
                 }
                 /////////////move the scouts 1 tile//////////////
-                $scoutedhex = $hexinfo[hex_id];
+                $scoutedhex = $hexinfo['hex_id'];
                 //////////////add the tile to the map/////////////////
                 if( !$moved )
                 {
                     $scoutfind = rand( 1, 500 );
-                    if( $scoutfind >  ( 490 + $skillinfo[level] ) )
+                    if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
                     {
-                        $numbermissed = rand( 1, $scout[actives] );
-                        if( $scout[actives] == $numbermissed )
+                        $numbermissed = rand( 1, $scout['actives'] );
+                        if( $scout['actives'] == $numbermissed )
                         {
                             $query = $db->Execute("DELETE FROM $dbtables[scouts] "
                                         ."WHERE direction = 'ne' "
@@ -335,9 +334,9 @@ while( !$res->EOF )
                           db_op_result($query,__LINE__,__FILE__);
                         }
                     }
-                    elseif( $scoutfind < $skillinfo[level] )
+                    elseif( $scoutfind < $skillinfo['level'] )
                     {
-                        $whatfind = ( rand( 1, 100 ) + $skillinfo[level] );
+                        $whatfind = ( rand( 1, 100 ) + $skillinfo['level'] );
                         if( $whatfind > 75 )
                         {
                             $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
@@ -348,7 +347,7 @@ while( !$res->EOF )
                            db_op_result($find,__LINE__,__FILE__);
                             $findwhat = $find->fields;
                             $what = rand( 0, $findwhat[count] );
-                            $many = rand( 1, $skillinfo[level] );
+                            $many = rand( 1, $skillinfo['level'] );
                             $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
                                                  ."WHERE skill_abbr != 'shw' "
                                                  ."AND long_name != 'totem' "
@@ -365,7 +364,7 @@ while( !$res->EOF )
            }
          else{
            $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo[level] + 5 );
+           $many = rand( 1, $skillinfo['level'] + 5 );
            $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
            db_op_result($found,__LINE__,__FILE__);
            $findwhat = $found->fields;
@@ -417,41 +416,39 @@ while( !$res->EOF )
  $moved = 0;
   while(!$esct->EOF){
   $scout = $esct->fields;
-    if($scout[mounted] == 'Y'){
+    if($scout['mounted'] == 'Y'){
      $movepts = 7 + $movement;
      }
      else{
      $movepts = 3 + ($movement/2);
      }
- $scoutedhex = $tribe[hex_id];
- $direction = $scout[direction];
+ $scoutedhex = $tribe['hex_id'];
+ $direction = $tribe['hex_id'];
  $move = 0;
  while($movepts > 0){
   $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
   db_op_result($hex,__LINE__,__FILE__);
   $hexinfo = $hex->fields;
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$hexinfo[$direction]'");
-  db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-  if($movepts < $hexinfo[move]){
+
+  if($movepts < $tribe['hex_id']){
   $movepts = 0;
   $moved = 1;
    }
   if($move > 0){
-   $movepts -= $hexinfo[move];
+   $movepts -= $tribe['hex_id'];
    }
   else{
    $move++;
    }
   /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo[hex_id];
+  $scoutedhex = $hexinfo['hex_id'];
   //////////////add the tile to the map/////////////////
   if(!$moved){
    $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo[level] ) )
+      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
    {
-       $numbermissed = rand( 1, $scout[actives] );
-       if( $scout[actives] == $numbermissed )
+       $numbermissed = rand( 1, $scout['actives'] );
+       if( $scout['actives'] == $numbermissed )
        {
            $query = $db->Execute("DELETE FROM $dbtables[scouts] "
                        ."WHERE direction = 'e' "
@@ -500,8 +497,8 @@ while( !$res->EOF )
 
        }
    }
-   elseif($scoutfind < $skillinfo[level]){
-         $whatfind = (rand(1,100) + $skillinfo[level]);
+   elseif($scoutfind < $skillinfo['level']){
+         $whatfind = (rand(1,100) + $skillinfo['level']);
          if($whatfind > 75){
            $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
                                ."WHERE skill_abbr != 'shw' "
@@ -511,7 +508,7 @@ while( !$res->EOF )
               db_op_result($find,__LINE__,__FILE__);
            $findwhat = $find->fields;
              $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo[level]);
+             $many = rand(1, $skillinfo['level']);
            $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
                                 ."WHERE skill_abbr != 'shw' "
                                 ."AND long_name != 'totem' "
@@ -528,7 +525,7 @@ while( !$res->EOF )
            }
          else{
            $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo[level] + 5 );
+           $many = rand( 1, $skillinfo['level'] + 5 );
            $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
              db_op_result($found,__LINE__,__FILE__);
            $findwhat = $found->fields;
@@ -585,41 +582,39 @@ while( !$res->EOF )
  $moved = 0;
   while(!$sesct->EOF){
   $scout = $sesct->fields;
-    if($scout[mounted] == 'Y'){
+    if($scout['mounted'] == 'Y'){
      $movepts = 7 + $movement;
      }
      else{
      $movepts = 3 + ($movement/2);
      }
- $scoutedhex = $tribe[hex_id];
- $direction = $scout[direction];
+ $scoutedhex = $tribe['hex_id'];
+ $direction = $tribe['hex_id'];
  $move = 0;
  while($movepts > 0){
   $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
    db_op_result($hex,__LINE__,__FILE__);
   $hexinfo = $hex->fields;
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$hexinfo[$direction]'");
-  db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-  if($movepts < $hexinfo[move]){
+
+  if($movepts < $tribe['hex_id']){
   $movepts = 0;
   $moved = 1;
    }
   if($move > 0){
-   $movepts -= $hexinfo[move];
+   $movepts -= $tribe['hex_id'];
    }
   else{
    $move++;
    }
   /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo[hex_id];
+  $scoutedhex = $hexinfo['hex_id'];
   //////////////add the tile to the map/////////////////
   if(!$moved){
    $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo[level] ) )
+      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
    {
-       $numbermissed = rand( 1, $scout[actives] );
-       if( $scout[actives] == $numbermissed )
+       $numbermissed = rand( 1, $scout['actives'] );
+       if( $scout['actives'] == $numbermissed )
        {
            $query = $db->Execute("DELETE FROM $dbtables[scouts] "
                        ."WHERE direction = 'se' "
@@ -668,8 +663,8 @@ while( !$res->EOF )
           db_op_result($query,__LINE__,__FILE__);
        }
    }
-   elseif($scoutfind < $skillinfo[level]){
-         $whatfind = (rand(1,100) + $skillinfo[level]);
+   elseif($scoutfind < $skillinfo['level']){
+         $whatfind = (rand(1,100) + $skillinfo['level']);
          if($whatfind > 75){
            $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
                                ."WHERE skill_abbr != 'shw' "
@@ -679,7 +674,7 @@ while( !$res->EOF )
                    db_op_result($find,__LINE__,__FILE__);
            $findwhat = $find->fields;
              $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo[level]);
+             $many = rand(1, $skillinfo['level']);
            $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
                                 ."WHERE skill_abbr != 'shw' "
                                 ."AND include = 'Y' "
@@ -696,7 +691,7 @@ while( !$res->EOF )
            }
          else{
            $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo[level] + 5 );
+           $many = rand( 1, $skillinfo['level'] + 5 );
            $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
             db_op_result($found,__LINE__,__FILE__);
            $findwhat = $found->fields;
@@ -748,41 +743,39 @@ while( !$res->EOF )
  $moved = 0;
   while(!$ssct->EOF){
   $scout = $ssct->fields;
-    if($scout[mounted] == 'Y'){
+    if($scout['mounted'] == 'Y'){
      $movepts = 7 + $movement;
      }
      else{
      $movepts = 3 + ($movement/2);
      }
- $scoutedhex = $tribe[hex_id];
- $direction = $scout[direction];
+ $scoutedhex = $tribe['hex_id'];
+ $direction = $tribe['hex_id'];
  $move = 0;
  while($movepts > 0){
   $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
      db_op_result($hex,__LINE__,__FILE__);
   $hexinfo = $hex->fields;
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$hexinfo[$direction]'");
-    db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-  if($movepts < $hexinfo[move]){
+
+  if($movepts < $tribe['hex_id']){
   $movepts = 0;
   $moved = 1;
    }
   if($move > 0){
-   $movepts -= $hexinfo[move];
+   $movepts -= $tribe['hex_id'];
    }
   else{
    $move++;
    }
   /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo[hex_id];
+  $scoutedhex = $hexinfo['hex_id'];
   //////////////add the tile to the map/////////////////
   if(!$moved){
    $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo[level] ) )
+      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
    {
-       $numbermissed = rand( 1, $scout[actives] );
-       if( $scout[actives] == $numbermissed )
+       $numbermissed = rand( 1, $scout['actives'] );
+       if( $scout['actives'] == $numbermissed )
        {
            $query = $db->Execute("DELETE FROM $dbtables[scouts] "
                        ."WHERE direction = 's' "
@@ -832,8 +825,8 @@ while( !$res->EOF )
 
        }
    }
-   elseif($scoutfind < $skillinfo[level]){
-         $whatfind = (rand(1,100) + $skillinfo[level]);
+   elseif($scoutfind < $skillinfo['level']){
+         $whatfind = (rand(1,100) + $skillinfo['level']);
          if($whatfind > 75){
            $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
                                ."WHERE skill_abbr != 'shw' "
@@ -843,7 +836,7 @@ while( !$res->EOF )
                 db_op_result($find,__LINE__,__FILE__);
            $findwhat = $find->fields;
              $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo[level]);
+             $many = rand(1, $skillinfo['level']);
            $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
                                 ."WHERE skill_abbr != 'shw' "
                                 ."AND include = 'Y' "
@@ -860,7 +853,7 @@ while( !$res->EOF )
            }
          else{
            $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo[level] + 5 );
+           $many = rand( 1, $skillinfo['level'] + 5 );
            $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
               db_op_result($found,__LINE__,__FILE__);
            $findwhat = $found->fields;
@@ -910,41 +903,39 @@ while( !$res->EOF )
  $moved = 0;
   while(!$swsct->EOF){
   $scout = $swsct->fields;
-    if($scout[mounted] == 'Y'){
+    if($scout['mounted'] == 'Y'){
      $movepts = 7 + $movement;
      }
      else{
      $movepts = 3 + ($movement/2);
      }
- $scoutedhex = $tribe[hex_id];
- $direction = $scout[direction];
+ $scoutedhex = $tribe['hex_id'];
+ $direction = $tribe['hex_id'];
  $move = 0;
  while($movepts > 0){
   $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
    db_op_result($hex,__LINE__,__FILE__);
   $hexinfo = $hex->fields;
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$hexinfo[$direction]'");
-  db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-  if($movepts < $hexinfo[move]){
+
+  if($movepts < $tribe['hex_id']){
   $movepts = 0;
   $moved = 1;
    }
   if($move > 0){
-   $movepts -= $hexinfo[move];
+   $movepts -= $tribe['hex_id'];
    }
   else{
    $move++;
    }
   /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo[hex_id];
+  $scoutedhex = $hexinfo['hex_id'];
   //////////////add the tile to the map/////////////////
   if(!$moved){
    $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo[level] ) )
+      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
    {
-       $numbermissed = rand( 1, $scout[actives] );
-       if( $scout[actives] == $numbermissed )
+       $numbermissed = rand( 1, $scout['actives'] );
+       if( $scout['actives'] == $numbermissed )
        {
            $query = $db->Execute("DELETE FROM $dbtables[scouts] "
                        ."WHERE direction = 'sw' "
@@ -994,8 +985,8 @@ while( !$res->EOF )
 
        }
    }
-   elseif($scoutfind < $skillinfo[level]){
-         $whatfind = (rand(1,100) + $skillinfo[level]);
+   elseif($scoutfind < $skillinfo['level']){
+         $whatfind = (rand(1,100) + $skillinfo['level']);
          if($whatfind > 75){
            $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
                                ."WHERE skill_abbr != 'shw' "
@@ -1005,7 +996,7 @@ while( !$res->EOF )
               db_op_result($find,__LINE__,__FILE__);
            $findwhat = $find->fields;
              $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo[level]);
+             $many = rand(1, $skillinfo['level']);
            $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
                                 ."WHERE skill_abbr != 'shw' "
                                 ."AND include = 'Y' "
@@ -1022,7 +1013,7 @@ while( !$res->EOF )
            }
          else{
            $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo[level] + 5 );
+           $many = rand( 1, $skillinfo['level'] + 5 );
            $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
             db_op_result($found,__LINE__,__FILE__);
            $findwhat = $found->fields;
@@ -1072,41 +1063,39 @@ while( !$res->EOF )
   $moved = 0;
   while(!$wsct->EOF){
   $scout = $wsct->fields;
-    if($scout[mounted] == 'Y'){
+    if($scout['mounted'] == 'Y'){
      $movepts = 7 + $movement;
      }
      else{
      $movepts = 3 + ($movement/2);
      }
- $scoutedhex = $tribe[hex_id];
- $direction = $scout[direction];
+ $scoutedhex = $tribe['hex_id'];
+ $direction = $tribe['hex_id'];
  $move = 0;
  while($movepts > 0){
   $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
   db_op_result($hex,__LINE__,__FILE__);
   $hexinfo = $hex->fields;
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$hexinfo[$direction]'");
-   db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-  if($movepts < $hexinfo[move]){
+
+  if($movepts < $tribe['hex_id']){
   $movepts = 0;
   $moved = 1;
    }
   if($move > 0){
-   $movepts -= $hexinfo[move];
+   $movepts -= $tribe['hex_id'];
    }
   else{
    $move++;
    }
   /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo[hex_id];
+  $scoutedhex = $hexinfo['hex_id'];
   //////////////add the tile to the map/////////////////
   if(!$moved){
    $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo[level] ) )
+      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
    {
-       $numbermissed = rand( 1, $scout[actives] );
-       if( $scout[actives] == $numbermissed )
+       $numbermissed = rand( 1, $scout['actives'] );
+       if( $scout['actives'] == $numbermissed )
        {
            $query = $db->Execute("DELETE FROM $dbtables[scouts] "
                        ."WHERE direction = 'w' "
@@ -1156,8 +1145,8 @@ while( !$res->EOF )
 
        }
    }
-   elseif($scoutfind < $skillinfo[level]){
-         $whatfind = (rand(1,100) + $skillinfo[level]);
+   elseif($scoutfind < $skillinfo['level']){
+         $whatfind = (rand(1,100) + $skillinfo['level']);
          if($whatfind > 75){
            $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
                                ."WHERE skill_abbr != 'shw' "
@@ -1167,7 +1156,7 @@ while( !$res->EOF )
              db_op_result($find,__LINE__,__FILE__);
            $findwhat = $find->fields;
              $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo[level]);
+             $many = rand(1, $skillinfo['level']);
            $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
                                 ."WHERE skill_abbr != 'shw' "
                                 ."AND include = 'Y' "
@@ -1184,7 +1173,7 @@ while( !$res->EOF )
            }
          else{
            $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo[level] + 5 );
+           $many = rand( 1, $skillinfo['level'] + 5 );
            $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
            db_op_result($found,__LINE__,__FILE__);
            $findwhat = $found->fields;
@@ -1238,41 +1227,39 @@ while( !$res->EOF )
   $moved = 0;
   while(!$nwsct->EOF){
   $scout = $nwsct->fields;
-    if($scout[mounted] == 'Y'){
+    if($scout['mounted'] == 'Y'){
      $movepts = 7 + $movement;
      }
      else{
      $movepts = 3 + ($movement/2);
      }
- $scoutedhex = $tribe[hex_id];
- $direction = $scout[direction];
+ $scoutedhex = $tribe['hex_id'];
+ $direction = $tribe['hex_id'];
  $move = 0;
  while($movepts > 0){
   $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
     db_op_result($hex,__LINE__,__FILE__);
   $hexinfo = $hex->fields;
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$hexinfo[$direction]'");
-   db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-  if($movepts < $hexinfo[move]){
+
+  if($movepts < $tribe['hex_id']){
   $movepts = 0;
   $moved = 1;
    }
   if($move > 0){
-   $movepts -= $hexinfo[move];
+   $movepts -= $tribe['hex_id'];
    }
   else{
    $move++;
    }
   /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo[hex_id];
+  $scoutedhex = $hexinfo['hex_id'];
   //////////////add the tile to the map/////////////////
   if(!$moved){
    $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo[level] ) )
+      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
    {
-       $numbermissed = rand( 1, $scout[actives] );
-       if( $scout[actives] == $numbermissed )
+       $numbermissed = rand( 1, $scout['actives'] );
+       if( $scout['actives'] == $numbermissed )
        {
            $query = $db->Execute("DELETE FROM $dbtables[scouts] "
                        ."WHERE direction = 'nw' "
@@ -1320,8 +1307,8 @@ while( !$res->EOF )
          db_op_result($query,__LINE__,__FILE__);
        }
    }
-   elseif($scoutfind < $skillinfo[level]){
-         $whatfind = (rand(1,100) + $skillinfo[level]);
+   elseif($scoutfind < $skillinfo['level']){
+         $whatfind = (rand(1,100) + $skillinfo['level']);
          if($whatfind > 75){
            $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
                                ."WHERE skill_abbr != 'shw' "
@@ -1331,7 +1318,7 @@ while( !$res->EOF )
                 db_op_result($find,__LINE__,__FILE__);
            $findwhat = $find->fields;
              $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo[level]);
+             $many = rand(1, $skillinfo['level']);
            $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
                                 ."WHERE skill_abbr != 'shw' "
                                 ."AND include = 'Y' "
@@ -1348,7 +1335,7 @@ while( !$res->EOF )
            }
          else{
            $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo[level] + 5 );
+           $many = rand( 1, $skillinfo['level'] + 5 );
            $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
             db_op_result($found,__LINE__,__FILE__);
            $findwhat = $found->fields;

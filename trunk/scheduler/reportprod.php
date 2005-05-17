@@ -1,5 +1,11 @@
 <?php
-require_once("../config.php"); //we dont need THESE do we? this stuff is already included in the calling file.. but oh well
+error_reporting  (E_ALL);
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php"); //we dont need THESE do we? this stuff is already included in the calling file.. but oh well
 $time_start = getmicrotime();
 include("game_time.php");
 connectdb();

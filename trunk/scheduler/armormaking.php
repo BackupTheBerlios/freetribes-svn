@@ -5,11 +5,15 @@
 // option) any later version.
 //
 // File: armormaking.php
-
-require_once("../config.php");
+ $pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
 connectdb();
-include("game_time.php");
+include("scheduler/game_time.php");
 $act = $db->Execute("SELECT * FROM $dbtables[activities] "
                    ."WHERE skill_abbr = 'arm'");
   db_op_result($act,__LINE__,__FILE__);
@@ -20,7 +24,7 @@ while( !$act->EOF )
                        ."WHERE tribeid = '$act_do[tribeid]'");
         db_op_result($res,__LINE__,__FILE__);
     $tribe = $res->fields;
-    if( $act_do[product] == 'woodenshield' )
+    if( $act_do['product'] == 'woodenshield' )
     {
         $logs = $db->Execute("SELECT * FROM $dbtables[products] "
                             ."WHERE long_name = 'logs' "
@@ -29,15 +33,15 @@ while( !$act->EOF )
         $loginfo = $logs->fields;
         $logsused = 0;
         $shields = 0;
-        $startlog = $loginfo[amount];
-        while( $loginfo[amount] > 0 && $act_do[actives] > 1 )
+        $startlog = $loginfo['amount'];
+        while( $loginfo['amount'] > 0 && $act_do['actives'] > 1 )
         {
             $shields += 1;
-            $loginfo[amount] -= 1;
+            $loginfo['amount'] -= 1;
             $logsused += 1;
-            $act_do[actives] -= 2;
+            $act_do['actives'] -= 2;
         }
-        $logdelta = $startlog - $loginfo[amount];
+        $logdelta = $startlog - $loginfo['amount'];
         $res = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount + '$shields' "
                     ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -66,7 +70,7 @@ while( !$act->EOF )
           db_op_result($res,__LINE__,__FILE__);
     }
 
-    if( $act_do[product] == 'haube' )
+    if( $act_do['product'] == 'haube' )
     {
         $brnz = $db->Execute("SELECT * FROM $dbtables[resources] "
                             ."WHERE long_name = 'Bronze' "

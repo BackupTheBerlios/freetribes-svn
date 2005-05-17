@@ -1,5 +1,10 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
@@ -13,7 +18,7 @@ while( !$res->EOF )
     while( !$struct->EOF )
     {
         $structinfo = $struct->fields;
-        if( !$structinfo[hex_id] == $tribe[hex_id] )
+        if( !$structinfo['hex_id'] == $tribe['hex_id'] )
         {
             $abandon = rand(1,100);
             if( $abandon < 21 | $structinfo[long_name] == 'tradepost' )

@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/seeking.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
@@ -19,6 +24,8 @@ while( !$res->EOF )
         db_op_result($query,__LINE__,__FILE__);
     }
 */
+    $scout = array();
+    $seek = array();
     $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
                        ."WHERE hex_id = '$tribe[hex_id]'");
        db_op_result($hex,__LINE__,__FILE__);
@@ -35,7 +42,7 @@ while( !$res->EOF )
     $seek = $skill->fields;
     $ter = $db->Execute("SELECT $hexinfo[terrain] FROM $dbtables[combat_terrain_mods]");
     $terrain = $ter->fields;
-    $terrain_type = $hexinfo[terrain];
+    $terrain_type = $hexinfo['terrain'];
     $terrain_mod = $terrain[$terrain_type];
     $log_text = 'Seeking: We found';
     $log_tracker = 0;
@@ -44,18 +51,18 @@ while( !$res->EOF )
     {
         $act_do = $act->fields;
 
-        if( $act_do[target] == 'wax' )
+        if( $act_do['target'] == 'wax' )
         {
-            if( $act_do[horses] > 100 )
+            if( $act_do['horses'] > 100 )
             {
-                $act_do[horses] = 100;
+                $act_do['horses'] = 100;
             }
-            $horse_bonus = $act_do[horses] * 1.3;
-            $backpacks = $act_do[backpacks] * 1.0;
-            $saddlebags = $act_do[saddlebags] * 1.3;
-            $wagons = $act_do[wagons] * 3;
-            $seek_carry = $act_do[actives] + $horse_bonus + $backpacks + $saddlebags + $wagons;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $backpacks = $act_do['backpacks'] * 1.0;
+            $saddlebags = $act_do['saddlebags'] * 1.3;
+            $wagons = $act_do['wagons'] * 3;
+            $seek_carry = $act_do['actives'] + $horse_bonus + $backpacks + $saddlebags + $wagons;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(($seek_carry * $level_bonus) / 7 );
             $wax_terrain = round( $items * $terrain_mod);
             $poss_wax = round( $wax_terrain / 10 );
@@ -99,14 +106,14 @@ while( !$res->EOF )
             }
         }
 
-        if( $act_do[target] == 'hives' )
+        if( $act_do['target'] == 'hives' )
         {
-            $horse_bonus = $act_do[horses] * 1.3;
-            $backpacks = $act_do[backpacks] * 1.0;
-            $saddlebags = $act_do[saddlebags] * 1.3;
-            $wagons = $act_do[wagons] * 3;
-            $seek_carry = $act_do[actives] + $horse_bonus + $backpacks + $saddlebags + $wagons;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $backpacks = $act_do['backpacks'] * 1.0;
+            $saddlebags = $act_do['saddlebags'] * 1.3;
+            $wagons = $act_do['wagons'] * 3;
+            $seek_carry = $act_do['actives'] + $horse_bonus + $backpacks + $saddlebags + $wagons;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(( $seek_carry * $level_bonus) / 35 );
             $hive_terrain = round( $items * $terrain_mod);
             $poss_hive = round( $hive_terrain / 10 );
@@ -151,14 +158,14 @@ while( !$res->EOF )
 
         }
 
-        if( $act_do[target] == 'spice' )
+        if( $act_do['target'] == 'spice' )
         {
-            $horse_bonus = $act_do[horses] * 1.3;
-            $backpacks = $act_do[backpacks] * 1.0;
-            $saddlebags = $act_do[saddlebags] * 1.3;
-            $wagons = $act_do[wagons] * 3;
-            $seek_carry = $act_do[actives] + $horse_bonus + $backpacks + $saddlebags + $wagons;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $backpacks = $act_do['backpacks'] * 1.0;
+            $saddlebags = $act_do['saddlebags'] * 1.3;
+            $wagons = $act_do['wagons'] * 3;
+            $seek_carry = $act_do['actives'] + $horse_bonus + $backpacks + $saddlebags + $wagons;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(($seek_carry * $level_bonus) / 30 );
             $spice_terrain = round( $items * $terrain_mod);
             $poss_spice = round( $spice_terrain / 10 );
@@ -203,11 +210,11 @@ while( !$res->EOF )
 
         }
 
-        if( $act_do[target] == 'recruit' )
+        if( $act_do['target'] == 'recruit' )
         {
-            $horse_bonus = $act_do[horses] * 1.3;
-            $seek_carry = $act_do[actives] + $horse_bonus;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $seek_carry = $act_do['actives'] + $horse_bonus;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(($seek_carry * $level_bonus) / 22 );
             $recruit_terrain = round( $items * $terrain_mod);
             $poss_recruit = round( $recruit_terrain / 10 );
@@ -251,14 +258,14 @@ while( !$res->EOF )
 
         }
 
-        if( $act_do[target] == 'honey' )
+        if( $act_do['target'] == 'honey' )
         {
-            $horse_bonus = $act_do[horses] * 1.3;
-            $backpacks = $act_do[backpacks] * 1.0;
-            $saddlebags = $act_do[saddlebags] * 1.3;
-            $wagons = $act_do[wagons] * 3;
-            $seek_carry = $act_do[actives] + $horse_bonus + $backpacks + $saddlebags + $wagons;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $backpacks = $act_do['backpacks'] * 1.0;
+            $saddlebags = $act_do['saddlebags'] * 1.3;
+            $wagons = $act_do['wagons'] * 3;
+            $seek_carry = $act_do['actives'] + $horse_bonus + $backpacks + $saddlebags + $wagons;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(($seek_carry * $level_bonus) / 3 );
             $honey_terrain = round( $items * $terrain_mod);
             $poss_honey = round( $honey_terrain / 10 );
@@ -303,14 +310,14 @@ while( !$res->EOF )
 
         }
 
-        if( $act_do[target] == 'herbs' )
+        if( $act_do['target'] == 'herbs' )
         {
-            $horse_bonus = $act_do[horses] * 1.3;
-            $backpacks = $act_do[backpacks] * 1.0;
-            $saddlebags = $act_do[saddlebags] * 1.3;
-            $wagons = $act_do[wagons] * 3;
-            $seek_carry = $act_do[actives] + $horse_bonus + $backpacks + $saddlebags + $wagons;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $backpacks = $act_do['backpacks'] * 1.0;
+            $saddlebags = $act_do['saddlebags'] * 1.3;
+            $wagons = $act_do['wagons'] * 3;
+            $seek_carry = $act_do['actives'] + $horse_bonus + $backpacks + $saddlebags + $wagons;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(($seek_carry * $level_bonus) / 1.5 );
             $herbs_terrain = round( $items * $terrain_mod);
             $poss_herbs = round( $herbs_terrain / 10 );
@@ -355,11 +362,11 @@ while( !$res->EOF )
 
         }
 
-        if( $act_do[target] == 'Goats' )
+        if( $act_do['target'] == 'Goats' )
         {
-            $horse_bonus = $act_do[horses] * 1.3;
-            $seek_carry = $act_do[actives] + $horse_bonus;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $seek_carry = $act_do['actives'] + $horse_bonus;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(($seek_carry * $level_bonus) / 2.5 );
             $goats_terrain = round( $items * $terrain_mod);
             $poss_goats = round( $goats_terrain / 10 );
@@ -404,11 +411,11 @@ while( !$res->EOF )
 
         }
 
-        if( $act_do[target] == 'Cattle' )
+        if( $act_do['target'] == 'Cattle' )
         {
-            $horse_bonus = $act_do[horses] * 1.3;
-            $seek_carry = $act_do[actives] + $horse_bonus;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $seek_carry = $act_do['actives'] + $horse_bonus;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(($seek_carry * $level_bonus) / 15 );
             $cattle_terrain = round( $items * $terrain_mod);
             $poss_cattle = round( $cattle_terrain / 10 );
@@ -454,11 +461,11 @@ while( !$res->EOF )
 
         }
 
-        if( $act_do[target] == 'Elephants' )
+        if( $act_do['target'] == 'Elephants' )
         {
-            $horse_bonus = $act_do[horses] * 1.3;
-            $seek_carry = $act_do[actives] + $horse_bonus;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $seek_carry = $act_do['actives'] + $horse_bonus;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(($seek_carry * $level_bonus) / 37 );
             $elephant_terrain = round( $items * $terrain_mod);
             $poss_elephant = round( $elephant_terrain / 10 );
@@ -504,11 +511,11 @@ while( !$res->EOF )
 
         }
 
-        if( $act_do[target] == 'Horses' )
+        if( $act_do['target'] == 'Horses' )
         {
-            $horse_bonus = $act_do[horses] * 1.3;
-            $seek_carry = $act_do[actives] + $horse_bonus;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $seek_carry = $act_do['actives'] + $horse_bonus;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(($seek_carry * $level_bonus) / 30 );
             $horse_terrain = round( $items * $terrain_mod);
             $poss_horse = round( $horse_terrain / 10 );
@@ -554,11 +561,11 @@ while( !$res->EOF )
 
         }
 
-        if( $act_do[target] == 'Dogs' )
+        if( $act_do['target'] == 'Dogs' )
         {
-            $horse_bonus = $act_do[horses] * 1.3;
-            $seek_carry = $act_do[actives] + $horse_bonus;
-            $level_bonus = ( 1 + ( $scout[level] / 3 ) + ( $seek[level] / 2 )) * 2;
+            $horse_bonus = $act_do['horses'] * 1.3;
+            $seek_carry = $act_do['actives'] + $horse_bonus;
+            $level_bonus = ( 1 + ( $scout['level'] / 3 ) + ( $seek['level'] / 2 )) * 2;
             $items = round(($seek_carry * $level_bonus) / 47 );
             $dog_terrain = round( $items * $terrain_mod);
             $poss_dog = round( $dog_terrain / 10 );

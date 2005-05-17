@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/sewing.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
   $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
     db_op_result($res,__LINE__,__FILE__);
@@ -14,7 +19,7 @@ $act = $db->Execute("SELECT * FROM $dbtables[activities] WHERE tribeid = '$tribe
  db_op_result($act,__LINE__,__FILE__);
 $act_do = $act->fields;
 
-if($act_do[product] == 'bladder'){
+if($act_do['product'] == 'bladder'){
 
 $gut = $db->Execute("SELECT * FROM $dbtables[products] WHERE tribeid = '$tribe[goods_tribe]' AND long_name = 'gut'");
 db_op_result($gut,__LINE__,__FILE__);
@@ -22,19 +27,19 @@ $gutinfo = $gut->fields;
 $leather = $db->Execute("SELECT * FROM $dbtables[products] WHERE tribeid = '$tribe[goods_tribe]' AND long_name = 'leather'");
  db_op_result($leather,__LINE__,__FILE__);
 $leatherinfo = $leather->fields;
-$startgut = $gutinfo[amount];
-$startltr = $leatherinfo[amount];
+$startgut = $gutinfo['amount'];
+$startltr = $leatherinfo['amount'];
 
 $bladder = 0;
 
-while($act_do[actives] > 0 & $leatherinfo[amount] > 0 & $gutinfo[amount] > 1){
-$gutinfo[amount] -= 2;
-$act_do[actives] -= 1;
-$leatherinfo[amount] -= 1;
+while($act_do['actives'] > 0 & $leatherinfo['amount'] > 0 & $gutinfo['amount'] > 1){
+$gutinfo['amount'] -= 2;
+$act_do['actives'] -= 1;
+$leatherinfo['amount'] -= 1;
 $bladder += 2;
 }
-$deltagut = $startgut - $gutinfo[amount];
-$deltaltr = $startltr - $leatherinfo[amount];
+$deltagut = $startgut - $gutinfo['amount'];
+$deltaltr = $startltr - $leatherinfo['amount'];
 
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $bladder WHERE tribeid = '$tribe[goods_tribe]' AND long_name = 'bladder'");
    db_op_result($query,__LINE__,__FILE__);
@@ -52,7 +57,7 @@ $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$y
 }
 }
 
-if( $act_do[product] == 'scalebarding' )
+if( $act_do['product'] == 'scalebarding' )
 {
     $arm = $db->Execute("SELECT * FROM $dbtables[skills] "
                        ."WHERE tribeid = '$tribe[tribeid]' "
@@ -83,21 +88,21 @@ if( $act_do[product] == 'scalebarding' )
         $jerkinfo = $jerk->fields;
         $coalinfo = $coal->fields;
         $mtlinfo = $mtl->fields;
-        $startjerk = $jerkinfo[amount];
-        $startcoal = $coalinfo[amount];
-        $startmtl = $mtlinfo[amount];
+        $startjerk = $jerkinfo['amount'];
+        $startcoal = $coalinfo['amount'];
+        $startmtl = $mtlinfo['amount'];
         $scale = 0;
-        while( $act_do[actives] > 3 && $jerkinfo[amount] > 0 && $coalinfo[amount] > 19 && $mtlinfo[amount] > 14 )
+        while( $act_do['actives'] > 3 && $jerkinfo['amount'] > 0 && $coalinfo['amount'] > 19 && $mtlinfo['amount'] > 14 )
         {
-            $act_do[actives] -= 4;
-            $jerkinfo[amount] -= 1;
-            $coalinfo[amount] -= 20;
-            $mtlinfo[amount] -= 15;
+            $act_do['actives'] -= 4;
+            $jerkinfo['amount'] -= 1;
+            $coalinfo['amount'] -= 20;
+            $mtlinfo['amount'] -= 15;
             $scale += 1;
         }
-        $deltajerk = $startjerk - $jerkinfo[amount];
-        $deltacoal = $startcoal - $coalinfo[amount];
-        $deltamtl = $startmtl - $mtlinfo[amount];
+        $deltajerk = $startjerk - $jerkinfo['amount'];
+        $deltacoal = $startcoal - $coalinfo['amount'];
+        $deltamtl = $startmtl - $mtlinfo['amount'];
         $query = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount + $scale "
                     ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -159,7 +164,7 @@ if( $act_do[product] == 'scalebarding' )
 
 
 
-if($act_do[product] == 'scale'){
+if($act_do['product'] == 'scale'){
 $arm = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$tribe[tribeid]' AND abbr = 'arm' AND level > 2");
  db_op_result($arm,__LINE__,__FILE__);
 if(!$arm->EOF){
@@ -177,20 +182,20 @@ if( $mtl->EOF )
 $jerkinfo = $jerk->fields;
 $coalinfo = $coal->fields;
 $mtlinfo = $mtl->fields;
-$startjerk = $jerkinfo[amount];
-$startcoal = $coalinfo[amount];
-$startmtl = $mtlinfo[amount];
+$startjerk = $jerkinfo['amount'];
+$startcoal = $coalinfo['amount'];
+$startmtl = $mtlinfo['amount'];
 $scale = 0;
-while($act_do[actives] > 1 & $jerkinfo[amount] > 0 & $coalinfo[amount] > 14 & $mtlinfo[amount] > 9){
-$act_do[actives] -= 2;
-$jerkinfo[amount] -= 1;
-$coalinfo[amount] -= 15;
-$mtlinfo[amount] -= 10;
+while($act_do['actives'] > 1 & $jerkinfo['amount'] > 0 & $coalinfo['amount'] > 14 & $mtlinfo['amount'] > 9){
+$act_do['actives'] -= 2;
+$jerkinfo['amount'] -= 1;
+$coalinfo['amount'] -= 15;
+$mtlinfo['amount'] -= 10;
 $scale += 1;
 }
-$deltajerk = $startjerk - $jerkinfo[amount];
-$deltacoal = $startcoal - $coalinfo[amount];
-$deltamtl = $startmtl - $mtlinfo[amount];
+$deltajerk = $startjerk - $jerkinfo['amount'];
+$deltacoal = $startcoal - $coalinfo['amount'];
+$deltamtl = $startmtl - $mtlinfo['amount'];
 
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $scale WHERE tribeid = '$tribe[goods_tribe]' AND long_name = 'scale'");
  db_op_result($query,__LINE__,__FILE__);
@@ -216,7 +221,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
  db_op_result($query,__LINE__,__FILE__);
 }
 }
-if( $act_do[product] == 'ringbarding' )
+if( $act_do['product'] == 'ringbarding' )
 {
     $arm = $db->Execute("SELECT * FROM $dbtables[skills] "
                        ."WHERE tribeid = '$tribe[tribeid]' "
@@ -248,20 +253,20 @@ if( $act_do[product] == 'ringbarding' )
 $jerkinfo = $jerk->fields;
 $coalinfo = $coal->fields;
 $mtlinfo = $mtl->fields;
-$startjerk = $jerkinfo[amount];
-$startcoal = $coalinfo[amount];
-$startmtl = $mtlinfo[amount];
+$startjerk = $jerkinfo['amount'];
+$startcoal = $coalinfo['amount'];
+$startmtl = $mtlinfo['amount'];
 $ring = 0;
-while( $act_do[actives] > 3 && $jerkinfo[amount] > 0 && $coalinfo[amount] > 29 && $mtlinfo[amount] > 11 ){
-$act_do[actives] -= 4;
-$jerkinfo[amount] -= 1;
-$coalinfo[amount] -= 30;
-$mtlinfo[amount] -= 12;
+while( $act_do['actives'] > 3 && $jerkinfo['amount'] > 0 && $coalinfo['amount'] > 29 && $mtlinfo['amount'] > 11 ){
+$act_do['actives'] -= 4;
+$jerkinfo['amount'] -= 1;
+$coalinfo['amount'] -= 30;
+$mtlinfo['amount'] -= 12;
 $ring += 1;
 }
-$deltajerk = $startjerk - $jerkinfo[amount];
-$deltacoal = $startcoal - $coalinfo[amount];
-$deltamtl = $startmtl - $mtlinfo[amount];
+$deltajerk = $startjerk - $jerkinfo['amount'];
+$deltacoal = $startcoal - $coalinfo['amount'];
+$deltamtl = $startmtl - $mtlinfo['amount'];
 
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $ring WHERE tribeid = '$tribe[goods_tribe]' AND long_name = 'ringbarding'");
   db_op_result($query,__LINE__,__FILE__);
@@ -303,7 +308,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
 }
 
 
-if($act_do[product] == 'ring')
+if($act_do['product'] == 'ring')
 {
     $arm = $db->Execute("SELECT * FROM $dbtables[skills] "
                        ."WHERE tribeid = '$tribe[tribeid]' "
@@ -335,20 +340,20 @@ if($act_do[product] == 'ring')
 $jerkinfo = $jerk->fields;
 $coalinfo = $coal->fields;
 $mtlinfo = $mtl->fields;
-$startjerk = $jerkinfo[amount];
-$startcoal = $coalinfo[amount];
-$startmtl = $mtlinfo[amount];
+$startjerk = $jerkinfo['amount'];
+$startcoal = $coalinfo['amount'];
+$startmtl = $mtlinfo['amount'];
 $ring = 0;
-while($act_do[actives] > 1 & $jerkinfo[amount] > 0 & $coalinfo[amount] > 19 & $mtlinfo[amount] > 7){
-$act_do[actives] -= 2;
-$jerkinfo[amount] -= 1;
-$coalinfo[amount] -= 20;
-$mtlinfo[amount] -= 8;
+while($act_do['actives'] > 1 & $jerkinfo['amount'] > 0 & $coalinfo['amount'] > 19 & $mtlinfo['amount'] > 7){
+$act_do['actives'] -= 2;
+$jerkinfo['amount'] -= 1;
+$coalinfo['amount'] -= 20;
+$mtlinfo['amount'] -= 8;
 $ring += 1;
 }
-$deltajerk = $startjerk - $jerkinfo[amount];
-$deltacoal = $startcoal - $coalinfo[amount];
-$deltamtl = $startmtl - $mtlinfo[amount];
+$deltajerk = $startjerk - $jerkinfo['amount'];
+$deltacoal = $startcoal - $coalinfo['amount'];
+$deltamtl = $startmtl - $mtlinfo['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $ring WHERE tribeid = '$tribe[goods_tribe]' AND long_name = 'ring'");
      db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $deltajerk WHERE tribeid = '$tribe[goods_tribe]' AND long_name = 'jerkin'");
@@ -374,18 +379,18 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
 }
 }
 
-if($act_do[product] == 'cloth'){
+if($act_do['product'] == 'cloth'){
 $parch = $db->Execute("SELECT * FROM $dbtables[products] WHERE tribeid = '$tribe[goods_tribe]' AND long_name = 'parchment'");
   db_op_result($parch,__LINE__,__FILE__);
 $parchment = $parch->fields;
-$startparch = $parchment[amount];
+$startparch = $parchment['amount'];
 $cloth = 0;
-while($parchment[amount] > 19 & $act_do[actives] > 4){
+while($parchment['amount'] > 19 & $act_do['actives'] > 4){
 $cloth += 1;
-$parchment[amount] -= 20;
-$act_do[actives] -= 5;
+$parchment['amount'] -= 20;
+$act_do['actives'] -= 5;
 }
-$deltaparch = $startparch - $parchment[amount];
+$deltaparch = $startparch - $parchment['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $cloth WHERE tribeid = '$tribe[goods_tribe]' AND long_name = 'cloth'");
   db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $deltaparch WHERE tribeid = '$tribe[goods_tribe]' AND long_name = 'parchment'");

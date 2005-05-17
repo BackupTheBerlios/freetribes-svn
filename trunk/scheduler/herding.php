@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/herding.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
@@ -15,7 +20,7 @@ while( !$res->EOF )
                        ."AND skill_abbr = 'herd'");
       db_op_result($act,__LINE__,__FILE__);
     $act_do = $act->fields;
-    if($act_do[actives] > 0){
+    if($act_do['actives'] > 0){
     }
 
     $liv1 = $db->Execute("SELECT * FROM $dbtables[livestock] "
@@ -61,32 +66,32 @@ while( !$res->EOF )
        db_op_result($skill,__LINE__,__FILE__);
     $skillinfo = $skill->fields;
 
-    $denominator = 10 + $skillinfo[level];
-    $denominator2 = 5 + $skillinfo[level];
-    $denominator3 = 20 + $skillinfo[level];
+    $denominator = 10 + $skillinfo['level'];
+    $denominator2 = 5 + $skillinfo['level'];
+    $denominator3 = 20 + $skillinfo['level'];
     $required_herders = 0;
-    $required_herders = round($mounts1[amount]/$denominator);
-    $required_herders = $required_herders + round($mounts2[amount]/$denominator);
-    $required_herders = $required_herders + round($mounts3[amount]/$denominator2);
-    $required_herders = $required_herders + round($mounts4[amount]/$denominator3);
-    $required_herders = $required_herders + round($mounts5[amount]/$denominator);
-    $required_herders = $required_herders + round($mounts6[amount]/$denominator3);
-    $required_herders = $required_herders + round($mounts7[amount]/$denominator3);
+    $required_herders = round($mounts1['amount']/$denominator);
+    $required_herders = $required_herders + round($mounts2['amount']/$denominator);
+    $required_herders = $required_herders + round($mounts3['amount']/$denominator2);
+    $required_herders = $required_herders + round($mounts4['amount']/$denominator3);
+    $required_herders = $required_herders + round($mounts5['amount']/$denominator);
+    $required_herders = $required_herders + round($mounts6['amount']/$denominator3);
+    $required_herders = $required_herders + round($mounts7['amount']/$denominator3);
 
 
-if($required_herders <= $act_do[actives] && $required_herders > 0 ){
-        if( $skillinfo[level] < 1 )
+if($required_herders <= $act_do['actives'] && $required_herders > 0 ){
+        if( $skillinfo['level'] < 1 )
         {
-            $skillinfo[level] = .5;
+            $skillinfo['level'] = .5;
         }
-        $popbonus = (.015 * $skillinfo[level]);
-        $horses = $mounts2[amount];
-        $pig    = $mounts6[amount];
-        $goat   = $mounts4[amount];
-        $sheep  = $mounts7[amount];
-        $dog    = $mounts5[amount];
-        $cattle = $mounts1[amount];
-        $elephant = $mounts3[amount];
+        $popbonus = (.015 * $skillinfo['level']);
+        $horses = $mounts2['amount'];
+        $pig    = $mounts6['amount'];
+        $goat   = $mounts4['amount'];
+        $sheep  = $mounts7['amount'];
+        $dog    = $mounts5['amount'];
+        $cattle = $mounts1['amount'];
+        $elephant = $mounts3['amount'];
 
         $horsesbred = round(($horses * $popbonus)/5);
         $pigbred = round(($pig * $popbonus)/3);

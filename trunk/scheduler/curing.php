@@ -1,7 +1,13 @@
 <?php
-require_once("../config.php");
+error_reporting  (E_ALL);
+$pos = (strpos($_SERVER['PHP_SELF'], "/curing.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
   $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
   db_op_result($res,__LINE__,__FILE__);
@@ -13,15 +19,15 @@ $act = $db->Execute("SELECT * FROM $dbtables[activities] WHERE tribeid = '$tribe
 while(!$act->EOF){
 $act_do = $act->fields;
 
-if($act_do[skill_abbr] == 'cur'){
+if($act_do['skill_abbr'] == 'cur'){
 $curskl = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$tribe[tribeid]' AND abbr = 'cur'");
 db_op_result($curskl,__LINE__,__FILE__);
 $skill = $curskl->fields;
 
-$curcurers = $act_do[actives];
-$maxcurers = $act_do[actives];
-if($skill[level] < 10){
-$maxcurers = $skill[level] * 10;
+$curcurers = $act_do['actives'];
+$maxcurers = $act_do['actives'];
+if($skill['level'] < 10){
+$maxcurers = $skill['level'] * 10;
 }
 if($maxcurers < $curcurers){
 $curcurers = $maxcurers;
@@ -29,11 +35,11 @@ $curcurers = $maxcurers;
 $skn = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'skins' AND tribeid = '$tribe[goods_tribe]'");
 db_op_result($skn,__LINE__,__FILE__);
 $skininfo = $skn->fields;
-$skins = $skininfo[amount];
+$skins = $skininfo['amount'];
 $gt = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'gut' AND tribeid = '$tribe[goods_tribe]'");
  db_op_result($gt,__LINE__,__FILE__);
 $gutinfo = $gt->fields;
-$gut = $gutinfo[amount];
+$gut = $gutinfo['amount'];
 $startskins = $skins;
 $startgut = $gut;
 $leather = 0;
@@ -47,7 +53,7 @@ $deltaskins = $startskins - $skins;
 $fur = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'furs' AND tribeid = '$tribe[goods_tribe]'");
  db_op_result($fur,__LINE__,__FILE__);
 $furinfo = $fur->fields;
-$furs = $furinfo[amount];
+$furs = $furinfo['amount'];
 $startfurs = $furs;
 while($curcurers > 0 & $gut > 4 & $furs > 1){
 $leather += 2;

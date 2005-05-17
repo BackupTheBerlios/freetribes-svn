@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/bonework.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
   $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
    db_op_result($res,__LINE__,__FILE__);
@@ -13,7 +18,7 @@ db_op_result($act,__LINE__,__FILE__);
 while(!$act->EOF){
 $act_do = $act->fields;
 
-if($act_do[skill_abbr] == 'bnw'){
+if($act_do['skill_abbr'] == 'bnw'){
 $bone = $db->Execute("SELECT * FROM $dbtables[products] WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
 db_op_result($bone,__LINE__,__FILE__);
 $bones = $bone->fields;
@@ -28,13 +33,13 @@ db_op_result($shaft,__LINE__,__FILE__);
 $shaftinfo = $shaft->fields;
 
 $boneaxe = 0;
-if($act_do[product] == 'boneaxe'){
+if($act_do['product'] == 'boneaxe'){
 
-while($bones[amount] > 0 & $act_do[actives] > 1 & $clubinfo[amount] > 0 & $leather[amount] > 0){
-$bones[amount] -= 1;
-$act_do[actives] -= 2;
-$clubinfo[amount] -= 1;
-$leather[amount] -= 1;
+while($bones['amount'] > 0 & $act_do['actives'] > 1 & $clubinfo['amount'] > 0 & $leather['amount'] > 0){
+$bones['amount'] -= 1;
+$act_do['actives'] -= 2;
+$clubinfo['amount'] -= 1;
+$leather['amount'] -= 1;
 $boneaxe += 1;
 }
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
@@ -51,12 +56,12 @@ $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$y
 db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'bonespear'){
+if($act_do['product'] == 'bonespear'){
 $bonespear = 0;
-while ($bones[amount] > 0 & $act_do[actives] > 0 & $shaftinfo[amount] > 0){
-$bones[amount] -= 1;
-$act_do[actives] -= 1;
-$shaftinfo[amount] -= 1;
+while ($bones['amount'] > 0 & $act_do['actives'] > 0 & $shaftinfo['amount'] > 0){
+$bones['amount'] -= 1;
+$act_do['actives'] -= 1;
+$shaftinfo['amount'] -= 1;
 $bonespear += 1;
 }
 
@@ -72,11 +77,11 @@ $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$y
 db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'boneframe'){
+if($act_do['product'] == 'boneframe'){
 $boneframe = 0;
-while($bones[amount] > 2 & $act_do[actives] > 1){
-$bones[amount] -= 3;
-$act_do[actives] -= 2;
+while($bones['amount'] > 2 & $act_do['actives'] > 1){
+$bones['amount'] -= 3;
+$act_do['actives'] -= 2;
 $boneframe += 1;
 }
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
@@ -89,12 +94,12 @@ $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$y
 db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'bonearmor'){
+if($act_do['product'] == 'bonearmor'){
 $bonearmor = 0;
-while($bones[amount] > 9 & $act_do[actives] > 3 & $leather[amount] > 1){
-$bones[amount] -= 10;
-$act_do[actives] -= 4;
-$leather[amount] -= 2;
+while($bones['amount'] > 9 & $act_do['actives'] > 3 & $leather['amount'] > 1){
+$bones['amount'] -= 10;
+$act_do['actives'] -= 4;
+$leather['amount'] -= 2;
 $bonearmor += 1;
 }
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = '$bones[amount]' WHERE tribeid = '$tribe[goods_tribe]' AND proper = 'Bones'");
@@ -110,20 +115,20 @@ db_op_result($query,__LINE__,__FILE__);
 }
 
 
-if( $act_do[product] == 'cuirboillibone' )
+if( $act_do['product'] == 'cuirboillibone' )
 {
     $bonearmor = 0;
-    $startbone = $bones[amount];
-    $startltr = $leather[amount];
-    while( $bones[amount] > 19 && $act_do[actives] > 3 && $leather[amount] > 3 )
+    $startbone = $bones['amount'];
+    $startltr = $leather['amount'];
+    while( $bones['amount'] > 19 && $act_do['actives'] > 3 && $leather['amount'] > 3 )
     {
-        $bones[amount] -= 20;
-        $act_do[actives] -= 4;
-        $leather[amount] -= 4;
+        $bones['amount'] -= 20;
+        $act_do['actives'] -= 4;
+        $leather['amount'] -= 4;
         $bonearmor += 1;
     }
-    $deltabone = $startbone - $bones[amount];
-    $deltaltr = $startltr - $leather[amount];
+    $deltabone = $startbone - $bones['amount'];
+    $deltaltr = $startltr - $leather['amount'];
     $query = $db->Execute("UPDATE $dbtables[products] "
                 ."SET amount = amount - $deltabone "
                 ."WHERE tribeid = '$tribe[goods_tribe]' "

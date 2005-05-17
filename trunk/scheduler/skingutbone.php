@@ -1,7 +1,12 @@
 <?php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/skingutbone.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
 while( !$res->EOF )
@@ -14,7 +19,7 @@ while( !$res->EOF )
     while( !$act->EOF )
     {
         $act_do = $act->fields;
-        if( $act_do[skill_abbr] == 'skn' )
+        if( $act_do['skill_abbr'] == 'skn' )
         {
             $gskill = $db->Execute("SELECT * FROM $dbtables[skills] "
                                   ."WHERE level > 0 "
@@ -36,57 +41,57 @@ while( !$res->EOF )
             $sskill = $sskill->fields;
             if( $gskill->EOF )
             {
-                $gskill[level] = 0;
+                $gskill['level'] = 0;
             }
             if( $bskill->EOF )
             {
-                $bskill[level] = 0;
+                $bskill['level'] = 0;
             }
             if( $sskill->EOF )
             {
-                $sskill[level] = 0;
+                $sskill['level'] = 0;
             }
-            $gutters = $act_do[actives];
-            $boners = $act_do[actives];
-            $skinners = $act_do[actives];
-            $maxgutters = $act_do[actives];
-            $maxboners = $act_do[actives];
-            $maxskinners = $act_do[actives];
-            if( $gskill[level] < 10 )
+            $gutters = $act_do['actives'];
+            $boners = $act_do['actives'];
+            $skinners = $act_do['actives'];
+            $maxgutters = $act_do['actives'];
+            $maxboners = $act_do['actives'];
+            $maxskinners = $act_do['actives'];
+            if( $gskill['level'] < 10 )
             {
-                $maxgutters = $gskill[level] * 10;
+                $maxgutters = $gskill['level'] * 10;
             }
-            if( $maxgutters < $act_do[actives] )
+            if( $maxgutters < $act_do['actives'] )
             {
                 $gutters = $maxgutters;
             }
             else
             {
-                $gutters = $act_do[actives];
+                $gutters = $act_do['actives'];
             }
-            if( $bskill[level] < 10 )
+            if( $bskill['level'] < 10 )
             {
-                $maxboners = $bskill[level] * 10;
+                $maxboners = $bskill['level'] * 10;
             }
-            if( $maxboners < $act_do[actives] )
+            if( $maxboners < $act_do['actives'] )
             {
                 $boners = $maxboners;
             }
             else
             {
-                $boners = $act_do[actives];
+                $boners = $act_do['actives'];
             }
-            if( $sskill[level] < 10 )
+            if( $sskill['level'] < 10 )
             {
-                $maxskinners = $sskill[level] * 10;
+                $maxskinners = $sskill['level'] * 10;
             }
-            if( $maxskinners < $act_do[actives] )
+            if( $maxskinners < $act_do['actives'] )
             {
                 $skinners = $maxskinners;
             }
             else
             {
-                $skinners = $act_do[actives];
+                $skinners = $act_do['actives'];
             }
             $numanim = $db->Execute("SELECT * FROM $dbtables[livestock] "
                                    ."WHERE amount > 0 "
@@ -170,7 +175,7 @@ while( !$res->EOF )
             $lognum = 0;
             $checkspeed = $speed - 1;
             $totalanimals = 0;
-            $totalanimals = $animals[amount];
+            $totalanimals = $animals['amount'];
             while( $totalanimals > $checkspeed && $skinners > 0 )
             {
                 $skins += ($posskins * $speed);
@@ -189,10 +194,10 @@ while( !$res->EOF )
                  db_op_result($query,__LINE__,__FILE__);
             $bones = 0;
             $reclaim = 0;
-            if( $sskill[level] == 0 )
+            if( $sskill['level'] == 0 )
             {
                 $reclaim = 1;
-                $numboned = $animals[amount];
+                $numboned = $animals['amount'];
             }
             else
             {
@@ -206,7 +211,7 @@ while( !$res->EOF )
                 $bones += 12;
                 $boners -= 1;
                 $numboned -= $possboned;
-                if( $sskill[level] < 1 )
+                if( $sskill['level'] < 1 )
                 {
                     $lognum += $possboned;
                 }
@@ -215,7 +220,7 @@ while( !$res->EOF )
                     $provs += $posprovs * $possboned;
                 }
             }
-            if( $sskill[level] < 1 )
+            if( $sskill['level'] < 1 )
             {
                 $totalanimals -= $numboned;
             }
@@ -227,10 +232,10 @@ while( !$res->EOF )
              db_op_result($query,__LINE__,__FILE__);
             $gut = 0;
             $reclaim = 0;
-            if( $sskill[level] < 1 && $bskill[level] < 1 )
+            if( $sskill['level'] < 1 && $bskill['level'] < 1 )
             {
                 $reclaim = 1;
-                $numgutted = $animals[amount];
+                $numgutted = $animals['amount'];
             }
             else
             {
@@ -244,7 +249,7 @@ while( !$res->EOF )
                 $gut += 12;
                 $gutters -= 1;
                 $numgutted -= $possgut;
-                if( $sskill[level] < 1 && $bskill[level] < 1 )
+                if( $sskill['level'] < 1 && $bskill['level'] < 1 )
                 {
                     $lognum += $possboned;
                 }
@@ -253,7 +258,7 @@ while( !$res->EOF )
                     $provs += $posprovs * $possgut;
                 }
             }
-            if( $sskill[level] < 1 && $bskill[level] < 1 )
+            if( $sskill['level'] < 1 && $bskill['level'] < 1 )
             {
                 $totalanimals = $numgutted;
             }

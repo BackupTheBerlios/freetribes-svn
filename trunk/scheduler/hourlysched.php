@@ -1,39 +1,22 @@
 <?php
 error_reporting  (E_ALL);
-include_once('../config.php');
-$time_start = getmicrotime();
-include("game_time.php");
-connectdb();
-$res = $db->Execute("OPTIMIZE TABLE products_used, farming, farm_activities, mapping, outbox, alliances, activities, armor, chiefs, game_date, hexes, ip_bans, livestock, logs, messages, product_table, products, resources, skills, seeking, scouts, poptrans, skill_table, structures, tribes, weather, fair, fair_tribe, clans");
-db_op_result($res,__LINE__,__FILE__);
-include("reportprod.php");
-include("weight.php");
-if( $_SERVER[REMOTE_ADDR] != $_SERVER[SERVER_ADDR] )
+$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
 
-$now = date("i");//minutes leading 0
-if($now == "00")//only on the hour
-{
- //JUST FOR DEVELOPMENT
- if($day['count'] == 6 || $day['count'] == 12 || $day['count'] == 18)
- {
-    $day['count'] = 0;
- }
-  //REMOVE IN RELEASE CODE
- //$day['count'] gotten from game_time
+include_once('config.php');
 
-if( $day['count'] == 0)
-{
-    $month['count']++;
-}
-if( $month['count'] > 12 )
-{
-    $month['count'] = 1;
-    $year['count']++;
-}
-}
+$res = $db->Execute("OPTIMIZE TABLE products_used, farming, farm_activities, mapping, outbox, alliances, activities, armor, chiefs, game_date, hexes, ip_bans, livestock, logs, messages, product_table, products, resources, skills, seeking, scouts, poptrans, skill_table, structures, tribes, weather, fair, fair_tribe, clans");
+db_op_result($res,__LINE__,__FILE__);
+
+include("scheduler/reportprod.php");
+include("scheduler/weight.php");
+
+//convert scheduler to run off db only when required, set this file to be non php_self
+//game time update moved to scheduler(daily))
+
 if($month['count'] == '3' || $month['count'] == '4' || $month['count'] == '5')
 {
     $season = 1;
@@ -130,12 +113,9 @@ elseif($month['count'] == '12' || $month['count'] == '1' || $month['count'] == '
     $res = $db->Execute("UPDATE $dbtables[skill_table] SET auto = 'Y' WHERE abbr = 'seek'");
     db_op_result($res,__LINE__,__FILE__);
 }
-$res = $db->Execute("UPDATE $dbtables[game_date] SET count = '$day[count]' WHERE type = 'day'");
+$res = $db->Execute("UPDATE $dbtables[game_date] SET count = count +1 WHERE type = 'day'");
 db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[game_date] SET count = '$month[count]' WHERE type = 'month'");
-db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("UPDATE $dbtables[game_date] SET count = '$year[count]' WHERE type = 'year'");
-db_op_result($res,__LINE__,__FILE__);
+
 $res = $db->Execute("UPDATE $dbtables[game_date] SET count = '$season' WHERE type = 'season'");
 db_op_result($res,__LINE__,__FILE__);
 $seasons = $db->Execute("Select * from $dbtables[game_date] WHERE type = 'season'");
@@ -145,7 +125,7 @@ $weather_roll = rand(1,100);
 $months = $db->Execute("SELECT * FROM $dbtables[game_date] WHERE type = 'month'");
 db_op_result($months,__LINE__,__FILE__);
 $month = $months->fields;
-if( $month[count] < 3 || $month['count'] > 10 )
+if( $month['count'] < 3 || $month['count'] > 10 )
 {
     $weather_roll = $weather_roll - 10;
 }
@@ -160,7 +140,7 @@ elseif( $weather_roll < 0 )
 
 $res = $db->Execute("UPDATE $dbtables[weather] SET current_type = 'N'");
 db_op_result($res,__LINE__,__FILE__);
-if( $season[count] == '1' )
+if( $season['count'] == '1' )
 { ///Spring
     if( $weather_roll < 10 )
     {

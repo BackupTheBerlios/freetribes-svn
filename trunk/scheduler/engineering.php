@@ -5,9 +5,14 @@
 // option) any later version.
 //
 // File: engineering.php
-require_once("../config.php");
+$pos = (strpos($_SERVER['PHP_SELF'], "/engineering.php"));
+if ($pos !== false)
+{
+    die("You cannot access this page directly!");
+}
+require_once("config.php");
 $time_start = getmicrotime();
-include("game_time.php");
+include("scheduler/game_time.php");
 connectdb();
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
     db_op_result($res,__LINE__,__FILE__);
@@ -20,7 +25,7 @@ while( !$res->EOF )
     while( !$act->EOF )
     {
         $act_do = $act->fields;
-        if( $act_do[skill_abbr] == 'eng' )
+        if( $act_do['skill_abbr'] == 'eng' )
         {
             $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
                                 ."WHERE complete = 'Y' "
@@ -35,7 +40,7 @@ while( !$res->EOF )
                                 ."AND hex_id = '$tribe[hex_id]'");
                  db_op_result($tpp,__LINE__,__FILE__);
 
-            if( $act_do[product] == 'tradepost' )
+            if( $act_do['product'] == 'tradepost' )
             {
 
                 if( !$mhp->EOF && $tpp->EOF )
@@ -46,11 +51,11 @@ while( !$res->EOF )
                           db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
-                    while( $loginfo[amount] > 0 && $act_do[actives] > 0 && logs_installed < 100 )
+                    while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 100 )
                     {
                         $logs_installed += 2;
-                        $act_do[actives] -= 1;
-                        $loginfo[amount] -= 2;
+                        $act_do['actives'] -= 1;
+                        $loginfo['amount'] -= 2;
                     }
 
                     $tradepost = $db->Execute("SELECT * FROM $dbtables[structures] "
@@ -62,7 +67,7 @@ while( !$res->EOF )
                     if( !$tradepost->EOF )
                     {
                         $tradepostinfo = $tradepost->fields;
-                        if( $logs_installed + $tradepostinfo[struct_pts] >= 100 )
+                        if( $logs_installed + $tradepostinfo['struct_pts'] >= 100 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET complete = 'Y',"
@@ -73,7 +78,7 @@ while( !$res->EOF )
                                          ."AND struct_id = '$tradepostinfo[struct_id]'");
                                 db_op_result($query,__LINE__,__FILE__);
                         }
-                        elseif( $logs_installed + $tradepostinfo[struct_pts] < 100 )
+                        elseif( $logs_installed + $tradepostinfo['struct_pts'] < 100 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET "
@@ -149,7 +154,7 @@ while( !$res->EOF )
                       db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'meetinghouse' )
+            if( $act_do['product'] == 'meetinghouse' )
             {
                 if( $mhp->EOF )
                 {
@@ -159,11 +164,11 @@ while( !$res->EOF )
                             db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
-                    while( $loginfo[amount] > 0 && $act_do[actives] > 0 && logs_installed < 100 )
+                    while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 100 )
                     {
                         $logs_installed += 2;
-                        $act_do[actives] -= 1;
-                        $loginfo[amount] -= 2;
+                        $act_do['actives'] -= 1;
+                        $loginfo['amount'] -= 2;
                     }
 
                     $meetinghouse = $db->Execute("SELECT * FROM $dbtables[structures] "
@@ -174,7 +179,7 @@ while( !$res->EOF )
                     if( !$meetinghouse->EOF )
                     {
                         $meetinghouseinfo = $meetinghouse->fields;
-                        if( $logs_installed + $meetinghouseinfo[struct_pts] > 99 )
+                        if( $logs_installed + $meetinghouseinfo['struct_pts'] > 99 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET complete = 'Y', "
@@ -184,7 +189,7 @@ while( !$res->EOF )
                                          ."AND long_name = 'meetinghouse'");
                               db_op_result($query,__LINE__,__FILE__);
                         }
-                        elseif( $logs_installed + $meetinghouseinfo[struct_pts] < 100 )
+                        elseif( $logs_installed + $meetinghouseinfo['struct_pts'] < 100 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
@@ -256,7 +261,7 @@ while( !$res->EOF )
                      db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'sq. yards moat' )
+            if( $act_do['product'] == 'sq. yards moat' )
             {
                 if( !$mhp->EOF )
                 {
@@ -266,9 +271,9 @@ while( !$res->EOF )
                                          ."AND hex_id = '$tribe[hex_id]'");
                          db_op_result($moat,__LINE__,__FILE__);
                     $moat_length = 0;
-                    while( $act_do[actives] > 1 )
+                    while( $act_do['actives'] > 1 )
                     {
-                        $act_do[actives] -= 2;
+                        $act_do['actives'] -= 2;
                         $moat_length += 1;
                     }
                     if( !$moat->EOF )
@@ -328,7 +333,7 @@ while( !$res->EOF )
                      db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'gate' )
+            if( $act_do['product'] == 'gate' )
             {
                 if( !$mhp->EOF )
                 {
@@ -353,7 +358,7 @@ while( !$res->EOF )
                                             ."AND tribeid = '$tribe[goods_tribe]'");
                                 db_op_result($log,__LINE__,__FILE__);
                         $loginfo = $log->fields;
-                        if( $loginfo[amount] >= 10 && $act_do[actives] >= 5 )
+                        if( $loginfo['amount'] >= 10 && $act_do['actives'] >= 5 )
                         {
                             $query = $db->Execute("INSERT INTO $dbtables[structures] "
                                          ."VALUES("
@@ -384,7 +389,7 @@ while( !$res->EOF )
                     db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'refinery' )
+            if( $act_do['product'] == 'refinery' )
             {
                 if( !$mhp->EOF )
                 {
@@ -394,11 +399,11 @@ while( !$res->EOF )
                        db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
-                    while( $loginfo[amount] > 0 && $act_do[actives] > 0 && $logs_installed < 100 )
+                    while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 100 )
                     {
                         $logs_installed += 2;
-                        $act_do[actives] -= 1;
-                        $loginfo[amount] -= 2;
+                        $act_do['actives'] -= 1;
+                        $loginfo['amount'] -= 2;
                     }
                     $refine = $db->Execute("SELECT * FROM $dbtables[structures] "
                                            ."WHERE long_name = 'refinery' "
@@ -409,7 +414,7 @@ while( !$res->EOF )
                     if( !$refine->EOF )
                     {
                         $refineinfo = $refine->fields;
-                        if( $logs_installed + $refineinfo[struct_pts] >= 100 )
+                        if( $logs_installed + $refineinfo['struct_pts'] >= 100 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET complete = 'Y',"
@@ -420,7 +425,7 @@ while( !$res->EOF )
                                          ."AND long_name = 'refinery'");
                                 db_op_result($query,__LINE__,__FILE__);
                         }
-                        elseif( $logs_installed + $refineinfo[struct_pts] < 100 && $logs_installed > 1 )
+                        elseif( $logs_installed + $refineinfo['struct_pts'] < 100 && $logs_installed > 1 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
@@ -493,7 +498,7 @@ while( !$res->EOF )
                   db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'smelters' )
+            if( $act_do['product'] == 'smelters' )
             {
                 $refine = $db->Execute("SELECT * FROM $dbtables[structures] "
                                        ."WHERE clanid = '$tribe[clanid]' "
@@ -506,7 +511,7 @@ while( !$res->EOF )
 
                 if( !$refine->EOF )
                 {
-                    $maxsmelt = 100 - $refineinfo[number];
+                    $maxsmelt = 100 - $refineinfo['number'];
                     $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
                                         ."WHERE clanid = '$tribe[clanid]' "
                                         ."AND long_name = 'meetinghouse' "
@@ -532,21 +537,21 @@ while( !$res->EOF )
                         }
                         $coalinfo = $coal->fields;
                         $metalinfo = $metal->fields;
-                        $startcoal = $coalinfo[amount];
-                        $startmetal = $metalinfo[amount];
+                        $startcoal = $coalinfo['amount'];
+                        $startmetal = $metalinfo['amount'];
                         $smelters = 0;
 
-                        while( $smelters < $maxsmelt && $metalinfo[amount] > 49 && $coalinfo[amount] > 199 && $act_do[actives] > 4 )
+                        while( $smelters < $maxsmelt && $metalinfo['amount'] > 49 && $coalinfo['amount'] > 199 && $act_do['actives'] > 4 )
                         {
-                            $metalinfo[amount] -= 50;
-                            $coalinfo[amount] -= 200;
-                            $act_do[actives] -= 5;
+                            $metalinfo['amount'] -= 50;
+                            $coalinfo['amount'] -= 200;
+                            $act_do['actives'] -= 5;
                             $smelters += 1;
                         }
                         $deltacoal = 0;
                         $deltametal = 0;
-                        $deltacoal = $startcoal - $coalinfo[amount];
-                        $deltametal = $startmetal - $metalinfo[amount];
+                        $deltacoal = $startcoal - $coalinfo['amount'];
+                        $deltametal = $startmetal - $metalinfo['amount'];
 
                         if( $smelters < 0 )
                         {
@@ -593,7 +598,7 @@ while( !$res->EOF )
                    db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'ovens' )
+            if( $act_do['product'] == 'ovens' )
             {
                 $bake = $db->Execute("SELECT * FROM $dbtables[structures] "
                                      ."WHERE clanid = '$tribe[clanid]' "
@@ -606,7 +611,7 @@ while( !$res->EOF )
 
                 if( !$bake->EOF )
                 {
-                    $maxoven = 100 - $bakeinfo[number];
+                    $maxoven = 100 - $bakeinfo['number'];
                     $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
                                         ."WHERE clanid = '$tribe[clanid]' "
                                         ."AND long_name = 'meetinghouse' "
@@ -632,20 +637,20 @@ while( !$res->EOF )
                         }
                         $coalinfo = $coal->fields;
                         $metalinfo = $metal->fields;
-                        $startcoal = $coalinfo[amount];
-                        $startmetal = $metalinfo[amount];
+                        $startcoal = $coalinfo['amount'];
+                        $startmetal = $metalinfo['amount'];
                         $ovens = 0;
-                        while( $ovens < $maxoven && $metalinfo[amount] > 99 && $coalinfo[amount] > 199 && $act_do[actives] > 9 )
+                        while( $ovens < $maxoven && $metalinfo['amount'] > 99 && $coalinfo['amount'] > 199 && $act_do['actives'] > 9 )
                         {
-                            $metalinfo[amount] -= 100;
-                            $coalinfo[amount] -= 200;
-                            $act_do[actives] -= 10;
+                            $metalinfo['amount'] -= 100;
+                            $coalinfo['amount'] -= 200;
+                            $act_do['actives'] -= 10;
                             $ovens += 1;
                         }
                         $deltacoal = 0;
                         $deltametal = 0;
-                        $deltacoal = $startcoal - $coalinfo[amount];
-                        $deltametal = $startmetal - $metalinfo[amount];
+                        $deltacoal = $startcoal - $coalinfo['amount'];
+                        $deltametal = $startmetal - $metalinfo['amount'];
 
                         if( $ovens < 0 )
                         {
@@ -691,7 +696,7 @@ while( !$res->EOF )
                    db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'stills' )
+            if( $act_do['product'] == 'stills' )
             {
                 $distill = $db->Execute("SELECT * FROM $dbtables[structures] "
                                         ."WHERE clanid = '$tribe[clanid]' "
@@ -704,7 +709,7 @@ while( !$res->EOF )
 
                 if( !$distill->EOF )
                 {
-                    $maxstill = 100 - $distillinfo[number];
+                    $maxstill = 100 - $distillinfo['number'];
                     $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
                                         ."WHERE clanid = '$tribe[clanid]' "
                                         ."AND long_name = 'meetinghouse' "
@@ -723,20 +728,20 @@ while( !$res->EOF )
                             db_op_result($metal,__LINE__,__FILE__);
                         $coalinfo = $coal->fields;
                         $metalinfo = $metal->fields;
-                        $startcoal = $coalinfo[amount];
-                        $startmetal = $metalinfo[amount];
+                        $startcoal = $coalinfo['amount'];
+                        $startmetal = $metalinfo['amount'];
                         $stills = 0;
-                        while( $stills < $maxstill && $metalinfo[amount] > 99 && $coalinfo[amount] > 499 && $act_do[actives] > 9 )
+                        while( $stills < $maxstill && $metalinfo['amount'] > 99 && $coalinfo['amount'] > 499 && $act_do['actives'] > 9 )
                         {
-                            $metalinfo[amount] -= 100;
-                            $coalinfo[amount] -= 500;
-                            $act_do[actives] -= 10;
+                            $metalinfo['amount'] -= 100;
+                            $coalinfo['amount'] -= 500;
+                            $act_do['actives'] -= 10;
                             $stills += 1;
                         }
                         $deltacoal = 0;
                         $deltametal = 0;
-                        $deltacoal = $startcoal - $coalinfo[amount];
-                        $deltametal = $startmetal - $metalinfo[amount];
+                        $deltacoal = $startcoal - $coalinfo['amount'];
+                        $deltametal = $startmetal - $metalinfo['amount'];
                         if( $stills < 0 )
                         {
                             $stills = 0;
@@ -783,7 +788,7 @@ while( !$res->EOF )
             }
 
 
-            if( $act_do[product] == 'apiary' )
+            if( $act_do['product'] == 'apiary' )
             {
                 $sec = $db->Execute("SELECT * FROM $dbtables[skills] "
                                     ."WHERE tribeid = '$tribe[tribeid]' "
@@ -848,7 +853,7 @@ while( !$res->EOF )
                         $metal = true;
                     }
                 }
-                elseif( $secinfo[abbr] == 'wd' )
+                elseif( $secinfo['abbr'] == 'wd' )
                 {
                     if( !$soft->EOF )
                     {
@@ -869,11 +874,11 @@ while( !$res->EOF )
                     $logs_installed = 0;
                     if( $metal )
                     {
-                        while( $loginfo[amount] > 0 && $act_do[actives] > 0 && $logs_installed < 100 )
+                        while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 100 )
                         {
                             $logs_installed += 2;
-                            $act_do[actives] -= 1;
-                            $loginfo[amount] -= 2;
+                            $act_do['actives'] -= 1;
+                            $loginfo['amount'] -= 2;
                         }
                         $struct_points = $logs_installed;
                         $softinfo = $soft->fields;
@@ -883,7 +888,7 @@ while( !$res->EOF )
                                      ."AND long_name = '$softinfo[long_name]'");
                              db_op_result($query,__LINE__,__FILE__);
                         $mtlinfo = $mtl->fields;
-                        $mtlinfo[amount] -= 20;
+                        $mtlinfo['amount'] -= 20;
                         $mtlamount = 20;
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - $mtlamount "
@@ -900,11 +905,11 @@ while( !$res->EOF )
                     }
                     else
                     {
-                        while( $loginfo[amount] > 0 && $act_do[actives] > 0 && $logs_installed < 160 )
+                        while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 160 )
                         {
                             $logs_installed += 2;
-                            $act_do[actives] -= 1;
-                            $loginfo[amount] -= 2;
+                            $act_do['actives'] -= 1;
+                            $loginfo['amount'] -= 2;
                         }
                         $struct_points = round($logs_installed * .625);
                         $softinfo = $soft->fields;
@@ -923,7 +928,7 @@ while( !$res->EOF )
                     if( !$apiary->EOF )
                     {
                         $apiaryinfo = $apiary->fields;
-                        if( $struct_points + $apiaryinfo[struct_pts] >= 100 )
+                        if( $struct_points + $apiaryinfo['struct_pts'] >= 100 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET complete = 'Y',"
@@ -934,7 +939,7 @@ while( !$res->EOF )
                                          ."AND long_name = 'apiary'");
                                db_op_result($query,__LINE__,__FILE__);
                         }
-                        elseif( $struct_points + $apiaryinfo[struct_pts] < 100 && $logs_installed > 1 )
+                        elseif( $struct_points + $apiaryinfo['struct_pts'] < 100 && $logs_installed > 1 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$struct_points' "
@@ -970,7 +975,7 @@ while( !$res->EOF )
                             if( !$hiv->EOF )
                             {
                                 $hive = $hiv->fields;
-                                if( $hive[amount] > 19 )
+                                if( $hive['amount'] > 19 )
                                 {
                                     $query = $db->Execute("UPDATE $dbtables[structures] "
                                                  ."SET number = 20 "
@@ -987,7 +992,7 @@ while( !$res->EOF )
                                                  ."AND long_name = 'hives'");
                                         db_op_result($query,__LINE__,__FILE__);
                                 }
-                                elseif( $hive[amount] > 1 && $hive[amount] < 20 )
+                                elseif( $hive['amount'] > 1 && $hive['amount'] < 20 )
                                 {
                                     $query = $db->Execute("UPDATE $dbtables[structures] "
                                                  ."SET number = $hive[amount] "
@@ -1051,7 +1056,7 @@ while( !$res->EOF )
                  db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'bakery' )
+            if( $act_do['product'] == 'bakery' )
             {
                 if( !$mhp->EOF )
                 {
@@ -1061,11 +1066,11 @@ while( !$res->EOF )
                        db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
-                    while( $loginfo[amount] > 1 && $act_do[actives] > 0 && $logs_installed < 40)
+                    while( $loginfo['amount'] > 1 && $act_do['actives'] > 0 && $logs_installed < 40)
                     {
                         $logs_installed += 2;
-                        $act_do[actives] -= 1;
-                        $loginfo[amount] -= 2;
+                        $act_do['actives'] -= 1;
+                        $loginfo['amount'] -= 2;
                     }
                     $bakery = $db->Execute("SELECT * FROM $dbtables[structures] "
                                            ."WHERE long_name = 'bakery' "
@@ -1076,7 +1081,7 @@ while( !$res->EOF )
                     if( !$bakery->EOF )
                     {
                         $bakeryinfo = $bakery->fields;
-                        if( $logs_installed + $bakeryinfo[struct_pts] >= 40 )
+                        if( $logs_installed + $bakeryinfo['struct_pts'] >= 40 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET complete = 'Y',"
@@ -1087,7 +1092,7 @@ while( !$res->EOF )
                                          ."AND long_name = 'bakery'");
                                db_op_result($query,__LINE__,__FILE__);
                         }
-                        elseif( $logs_installed + $bakeryinfo[struct_pts] < 40 && $logs_installed > 1 )
+                        elseif( $logs_installed + $bakeryinfo['struct_pts'] < 40 && $logs_installed > 1 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
@@ -1159,7 +1164,7 @@ while( !$res->EOF )
                   db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'distillery' )
+            if( $act_do['product'] == 'distillery' )
             {
                 if( !$mhp->EOF )
                 {
@@ -1169,11 +1174,11 @@ while( !$res->EOF )
                         db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
-                    while( $loginfo[amount] > 1 && $act_do[actives] > 0 && $logs_installed < 80)
+                    while( $loginfo['amount'] > 1 && $act_do['actives'] > 0 && $logs_installed < 80)
                     {
                         $logs_installed += 2;
-                        $act_do[actives] -= 1;
-                        $loginfo[amount] -= 2;
+                        $act_do['actives'] -= 1;
+                        $loginfo['amount'] -= 2;
                     }
                     $distillery = $db->Execute("SELECT * FROM $dbtables[structures] "
                                                ."WHERE long_name = 'distillery' "
@@ -1184,7 +1189,7 @@ while( !$res->EOF )
                     if( !$distillery->EOF )
                     {
                         $distilleryinfo = $distillery->fields;
-                        if( $logs_installed + $distilleryinfo[struct_pts] >= 80 )
+                        if( $logs_installed + $distilleryinfo['struct_pts'] >= 80 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET complete = 'Y',"
@@ -1195,7 +1200,7 @@ while( !$res->EOF )
                                          ."AND long_name = 'distillery'");
                                db_op_result($query,__LINE__,__FILE__);
                         }
-                        elseif( $logs_installed + $distilleryinfo[struct_pts] < 80 && $logs_installed > 1 )
+                        elseif( $logs_installed + $distilleryinfo['struct_pts'] < 80 && $logs_installed > 1 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
@@ -1266,7 +1271,7 @@ while( !$res->EOF )
                              ."'Engineering: Distillery Construction using $logs_installed logs.')");
                   db_op_result($query,__LINE__,__FILE__);
             }
-            if( $act_do[product] == 'brickworks' )
+            if( $act_do['product'] == 'brickworks' )
             {
                 if( !$mhp->EOF )
                 {
@@ -1276,11 +1281,11 @@ while( !$res->EOF )
                          db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
-                    while( $loginfo[amount] > 0 && $act_do[actives] > 0 && $logs_installed < 100 )
+                    while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 100 )
                     {
                         $logs_installed += 2;
-                        $act_do[actives] -= 1;
-                        $loginfo[amount] -= 2;
+                        $act_do['actives'] -= 1;
+                        $loginfo['amount'] -= 2;
                     }
                     $bricked = $db->Execute("SELECT * FROM $dbtables[structures] "
                                             ."WHERE long_name = 'brickworks' "
@@ -1291,7 +1296,7 @@ while( !$res->EOF )
                     if( !$bricked->EOF )
                     {
                         $brickinfo = $bricked->fields;
-                        if( $logs_installed + $brickinfo[struct_pts] >= 100 )
+                        if( $logs_installed + $brickinfo['struct_pts'] >= 100 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET complete = 'Y',"
@@ -1302,7 +1307,7 @@ while( !$res->EOF )
                                          ."AND long_name = 'brickworks'");
                                db_op_result($query,__LINE__,__FILE__);
                         }
-                        elseif( $logs_installed + $brickinfo[struct_pts] < 100 && $logs_installed > 1 )
+                        elseif( $logs_installed + $brickinfo['struct_pts'] < 100 && $logs_installed > 1 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
@@ -1375,7 +1380,7 @@ while( !$res->EOF )
                  db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'brickworkoven' )
+            if( $act_do['product'] == 'brickworkoven' )
             {
                 $bricked = $db->Execute("SELECT * FROM $dbtables[structures] "
                                         ."WHERE clanid = '$tribe[clanid]' "
@@ -1388,7 +1393,7 @@ while( !$res->EOF )
 
                 if( !$bricked->EOF )
                 {
-                    $maxoven = 100 - $brickinfo[number];
+                    $maxoven = 100 - $brickinfo['number'];
                     $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
                                         ."WHERE clanid = '$tribe[clanid]' "
                                         ."AND long_name = 'meetinghouse' "
@@ -1414,21 +1419,21 @@ while( !$res->EOF )
                         }
                         $coalinfo = $coal->fields;
                         $metalinfo = $metal->fields;
-                        $startcoal = $coalinfo[amount];
-                        $startmetal = $metalinfo[amount];
+                        $startcoal = $coalinfo['amount'];
+                        $startmetal = $metalinfo['amount'];
                         $ovens = 0;
 
-                        while( $ovens < $maxoven && $metalinfo[amount] > 3 && $coalinfo[amount] > 19 && $act_do[actives] > 0 )
+                        while( $ovens < $maxoven && $metalinfo['amount'] > 3 && $coalinfo['amount'] > 19 && $act_do['actives'] > 0 )
                         {
-                            $metalinfo[amount] -= 4;
-                            $coalinfo[amount] -= 20;
-                            $act_do[actives] -= 1;
+                            $metalinfo['amount'] -= 4;
+                            $coalinfo['amount'] -= 20;
+                            $act_do['actives'] -= 1;
                             $ovens += 1;
                         }
                         $deltacoal = 0;
                         $deltametal = 0;
-                        $deltacoal = $startcoal - $coalinfo[amount];
-                        $deltametal = $startmetal - $metalinfo[amount];
+                        $deltacoal = $startcoal - $coalinfo['amount'];
+                        $deltametal = $startmetal - $metalinfo['amount'];
 
                         if( $ovens < 0 )
                         {
@@ -1475,7 +1480,7 @@ while( !$res->EOF )
                   db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'charhouse' )
+            if( $act_do['product'] == 'charhouse' )
             {
                 if( !$mhp->EOF )
                 {
@@ -1485,11 +1490,11 @@ while( !$res->EOF )
                        db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
-                    while( $loginfo[amount] > 0 && $act_do[actives] > 0 && $logs_installed < 100 )
+                    while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 100 )
                     {
                         $logs_installed += 2;
-                        $act_do[actives] -= 1;
-                        $loginfo[amount] -= 2;
+                        $act_do['actives'] -= 1;
+                        $loginfo['amount'] -= 2;
                     }
                     $charred = $db->Execute("SELECT * FROM $dbtables[structures] "
                                             ."WHERE long_name = 'charhouse' "
@@ -1500,7 +1505,7 @@ while( !$res->EOF )
                     if( !$charred->EOF )
                     {
                         $charinfo = $charred->fields;
-                        if( $logs_installed + $charinfo[struct_pts] >= 100 )
+                        if( $logs_installed + $charinfo['struct_pts'] >= 100 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET complete = 'Y',"
@@ -1511,7 +1516,7 @@ while( !$res->EOF )
                                          ."AND long_name = 'charhouse'");
                               db_op_result($query,__LINE__,__FILE__);
                         }
-                        elseif( $logs_installed + $charinfo[struct_pts] < 100 && $logs_installed > 1 )
+                        elseif( $logs_installed + $charinfo['struct_pts'] < 100 && $logs_installed > 1 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
@@ -1584,7 +1589,7 @@ while( !$res->EOF )
                 db_op_result($query,__LINE__,__FILE__);
             }
 
-            if( $act_do[product] == 'burner' )
+            if( $act_do['product'] == 'burner' )
             {
                 $charred = $db->Execute("SELECT * FROM $dbtables[structures] "
                                         ."WHERE clanid = '$tribe[clanid]' "
@@ -1597,7 +1602,7 @@ while( !$res->EOF )
 
                 if( !$charred->EOF )
                 {
-                    $maxburn = 100 - $charinfo[number];
+                    $maxburn = 100 - $charinfo['number'];
                     $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
                                         ."WHERE clanid = '$tribe[clanid]' "
                                         ."AND long_name = 'meetinghouse' "
@@ -1623,21 +1628,21 @@ while( !$res->EOF )
                         }
                         $coalinfo = $coal->fields;
                         $metalinfo = $metal->fields;
-                        $startcoal = $coalinfo[amount];
-                        $startmetal = $metalinfo[amount];
+                        $startcoal = $coalinfo['amount'];
+                        $startmetal = $metalinfo['amount'];
                         $burners = 0;
 
-                        while( $burners < $maxburn && $metalinfo[amount] > 3 && $coalinfo[amount] > 19 && $act_do[actives] > 0 )
+                        while( $burners < $maxburn && $metalinfo['amount'] > 3 && $coalinfo['amount'] > 19 && $act_do['actives'] > 0 )
                         {
-                            $metalinfo[amount] -= 4;
-                            $coalinfo[amount] -= 20;
-                            $act_do[actives] -= 1;
+                            $metalinfo['amount'] -= 4;
+                            $coalinfo['amount'] -= 20;
+                            $act_do['actives'] -= 1;
                             $burners += 1;
                         }
                         $deltacoal = 0;
                         $deltametal = 0;
-                        $deltacoal = $startcoal - $coalinfo[amount];
-                        $deltametal = $startmetal - $metalinfo[amount];
+                        $deltacoal = $startcoal - $coalinfo['amount'];
+                        $deltametal = $startmetal - $metalinfo['amount'];
 
                         if( $burners < 0 )
                         {
