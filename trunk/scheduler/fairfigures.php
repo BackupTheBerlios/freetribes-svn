@@ -1,5 +1,5 @@
 <?php
-$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+$pos = (strpos($_SERVER['PHP_SELF'], "/fairfigures.php"));
 if ($pos !== false)
 {
     die("You cannot access this page directly!");
@@ -17,9 +17,9 @@ $reslt = $db->Execute("SELECT * FROM $dbtables[tribes]");
 while( !$reslt->EOF )
 {
     $tribe = $reslt->fields;
+     $admin_logs = '';
 
-
-    if( $month[count] == '4' | $month[count] == '10' )
+    if( $month['count'] == '4' | $month['count'] == '10' )
     {
         /////////////////////Tribes participating in the fair can only conduct limited activities.///////
         $involve = $db->Execute("SELECT * FROM $dbtables[fair_tribe] "
@@ -121,22 +121,22 @@ while( !$reslt->EOF )
         while( !$sell->EOF )
         {
             $sellinfo = $sell->fields;
-            if( $sellinfo[product] == 'Slaves' )
+            if( $sellinfo['product'] == 'Slaves' )
             {
                 $slave = $db->Execute("SELECT * FROM $dbtables[tribes] "
                                      ."WHERE tribeid = '$tribe[tribeid]'");
                      db_op_result($slave,__LINE__,__FILE__);
                 $slaveinfo = $slave->fields;
-                if( $slaveinfo[slavepop] < $sellinfo[quantity] )
+                if( $slaveinfo['slavepop'] < $sellinfo['quantity'] )
                 {
-                    $sellinfo[quantity] = $slaveinfo[slavepop];
+                    $sellinfo['quantity'] = $slaveinfo['slavepop'];
                 }
-                $slaveinfo[slavepop] -= $sellinfo[quantity];
+                $slaveinfo[slavepop] -= $sellinfo['quantity'];
                 $sp = $db->Execute("SELECT * FROM $dbtables[fair] "
                                   ."WHERE proper_name = 'Slaves'");
                     db_op_result($sp,__LINE__,__FILE__);
                 $slaveprice = $sp->fields;
-                $totalprice = $slaveprice[price_sell] * $sellinfo[quantity];
+                $totalprice = $slaveprice['price_sell'] * $sellinfo['quantity'];
                 $res = $db->Execute("UPDATE $dbtables[tribes] "
                             ."SET slavepop = '$slaveinfo[slavepop]' "
                             ."WHERE tribeid = '$tribe[tribeid]'");
@@ -152,9 +152,9 @@ while( !$reslt->EOF )
             {
                 $productinfo = $product->fields;
                 $admin_logs .= "$productinfo[amount] $productinfo[long_name] $productinfo[tribeid]";
-                if( $productinfo[amount] < $sellinfo[quantity] )
+                if( $productinfo['amount'] < $sellinfo['quantity'] )
                 {
-                    $sellinfo[quantity] = $productinfo[amount];
+                    $sellinfo['quantity'] = $productinfo['amount'];
                 }
             }
             $resource = $db->Execute("SELECT * FROM $dbtables[resources] "
@@ -165,9 +165,9 @@ while( !$reslt->EOF )
             {
                 $productinfo = $resource->fields;
                 $admin_logs .= "$productinfo[amount] $productinfo[long_name] $productinfo[tribeid]";
-                if( $productinfo[amount] < $sellinfo[quantity] )
+                if( $productinfo['amount'] < $sellinfo['quantity'] )
                 {
-                    $sellinfo[quantity] = $productinfo[amount];
+                    $sellinfo['quantity'] = $productinfo['amount'];
                 }
             }
             $livestock = $db->Execute("SELECT * FROM $dbtables[livestock] "
@@ -178,9 +178,9 @@ while( !$reslt->EOF )
             {
                 $productinfo = $livestock->fields;
                 $admin_logs .= "$productinfo[amount] $productinfo[long_name] $productinfo[tribeid]";
-                if( $productinfo[amount] < $sellinfo[quantity] )
+                if( $productinfo['amount'] < $sellinfo['quantity'] )
                 {
-                    $sellinfo[quantity] = $productinfo[amount];
+                    $sellinfo['quantity'] = $productinfo['amount'];
                 }
             }
             $price = $db->Execute("SELECT * FROM $dbtables[fair] "
@@ -202,7 +202,7 @@ while( !$reslt->EOF )
                         ."WHERE tribeid = '$tribe[tribeid]' "
                         ."AND type = '$sellinfo[product]'");
                db_op_result($res,__LINE__,__FILE__);
-            $silver = $sellinfo[quantity] * $priceinfo[price_sell];
+            $silver = $sellinfo['quantity'] * $priceinfo['price_sell'];
             $res = $db->Execute("UPDATE $dbtables[resources] "
                         ."SET amount = amount + $silver "
                         ."WHERE tribeid = '$tribe[tribeid]' "
@@ -253,7 +253,8 @@ while( !$reslt->EOF )
            db_op_result($buy,__LINE__,__FILE__);
         $logbuy = "Fair Buys: ";
         $buycount = 0;
-
+        $buyinfo['amount'] = 0;
+        $buyingo['long_name'] = 0;
         while( !$buy->EOF )
         {
             $buyinfo = $buy->fields;
@@ -264,7 +265,7 @@ while( !$reslt->EOF )
             $sil = $db->Execute("SELECT * FROM $dbtables[resources] "
                                ."WHERE tribeid = '$tribe[tribeid]' "
                                ."AND long_name = 'Silver'");
-               db_op_result($silver,__LINE__,__FILE__);
+               db_op_result($sil,__LINE__,__FILE__);
             $silinfo = $sil->fields;
             $price = $db->Execute("SELECT * FROM $dbtables[fair] "
                                  ."WHERE proper_name = '$buyinfo[product]' "
@@ -273,22 +274,22 @@ while( !$reslt->EOF )
             $priceinfo = $price->fields;
 
             $admin_logs .= "$buyinfo[amount] $buyinfo[long_name] $buyinfo[tribeid] $silinfo[amount] silver ";
-            if( $buyinfo[quantity] > $priceinfo[amount] )
+            if( $buyinfo['quantity'] > $priceinfo['amount'] )
             {
-                $buyinfo[quantity] = $priceinfo[amount];
+                $buyinfo['quantity'] = $priceinfo['amount'];
             }
-            if( $buyinfo[quantity] < 0 )
+            if( $buyinfo['quantity'] < 0 )
             {
-                $buyinfo[quantity] = 0;
+                $buyinfo['quantity'] = 0;
             }
 
-            $totalcost = $priceinfo[price_buy] * $buyinfo[quantity];
-            $afford = round($silinfo[amount]/$priceinfo[price_buy]);
+            $totalcost = $priceinfo['price_buy'] * $buyinfo['quantity'];
+            $afford = round($silinfo['amount']/$priceinfo['price_buy']);
 
-            if( $totalcost > $silinfo[amount] )
+            if( $totalcost > $silinfo['amount'] )
             {
-                $buyinfo[quantity] = $afford;
-                $totalcost = $priceinfo[price_buy] * $buyinfo[quantity];
+                $buyinfo['quantity'] = $afford;
+                $totalcost = $priceinfo['price_buy'] * $buyinfo['quantity'];
             }
 
             if( $buyinfo[product] == 'Slaves' )
@@ -297,8 +298,8 @@ while( !$reslt->EOF )
                                      ."WHERE tribeid = '$tribe[tribeid]'");
                    db_op_result($slave,__LINE__,__FILE__);
                 $slaveinfo = $slave->fields;
-                $slaves = $slaveinfo[slavepop];
-                $slaves += $buyinfo[quantity];
+                $slaves = $slaveinfo['slavepop'];
+                $slaves += $buyinfo['quantity'];
                 $res = $db->Execute("UPDATE $dbtables[tribes] "
                             ."SET slavepop = '$slaves' "
                             ."WHERE tribeid = '$tribe[tribeid]'");
@@ -403,8 +404,8 @@ $res = $db->Execute("INSERT INTO $dbtables[logs] "
             ."'Fair Debug: $admin_logs')");
    db_op_result($res,__LINE__,__FILE__);
 
-$admin_logs = '';
 
+    $admin_logs = '';
 
 
 }
