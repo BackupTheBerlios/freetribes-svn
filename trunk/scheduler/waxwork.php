@@ -24,7 +24,7 @@ connectdb();
          db_op_result($res,__LINE__,__FILE__);
         $tribe = $res->fields;
 
-        if( $act_do[product] == 'parchment' )
+        if( $act_do['product'] == 'parchment' )
         {
             $wax = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -38,20 +38,20 @@ connectdb();
               db_op_result($skin,__LINE__,__FILE__);
             $skininfo = $skin->fields;
 
-            $waxstart = $waxinfo[amount];
-            $skinstart = $skininfo[amount];
+            $waxstart = $waxinfo['amount'];
+            $skinstart = $skininfo['amount'];
             $parchment = 0;
 
-            while( $act_do[actives] > 0 & $skininfo[amount] > 4 & $waxinfo[amount] > 1 )
+            while( $act_do['actives'] > 0 & $skininfo['amount'] > 4 & $waxinfo['amount'] > 1 )
             {
                 $parchment += 5;
-                $act_do[actives] -= 1;
-                $skininfo[amount] -= 5;
-                $waxinfo[amount] -= 1;
+                $act_do['actives'] -= 1;
+                $skininfo['amount'] -= 5;
+                $waxinfo['amount'] -= 1;
             }
 
-            $waxdelta = $waxstart - $waxinfo[amount];
-            $skindelta = $skinstart - $skininfo[amount];
+            $waxdelta = $waxstart - $waxinfo['amount'];
+            $skindelta = $skinstart - $skininfo['amount'];
 
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $skindelta "
@@ -103,20 +103,20 @@ connectdb();
             }
 
             $secinfo = $sec->fields;
-            $waxstart = $waxinfo[amount];
-            $secstart = $secinfo[amount];
+            $waxstart = $waxinfo['amount'];
+            $secstart = $secinfo['amount'];
             $string = 0;
 
-            while( $act_do[actives] > 0 & $secinfo[amount] > 0 & $waxinfo[amount] > 0 )
+            while( $act_do['actives'] > 0 & $secinfo['amount'] > 0 & $waxinfo['amount'] > 0 )
             {
                 $string += 5;
-                $act_do[actives] -= 1;
-                $secinfo[amount] -= 1;
-                $waxinfo[amount] -= 1;
+                $act_do['actives'] -= 1;
+                $secinfo['amount'] -= 1;
+                $waxinfo['amount'] -= 1;
             }
 
-            $waxdelta = $waxstart - $waxinfo[amount];
-            $secdelta = $secstart - $secinfo[amount];
+            $waxdelta = $waxstart - $waxinfo['amount'];
+            $secdelta = $secstart - $secinfo['amount'];
 
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $secdelta "
@@ -147,7 +147,7 @@ connectdb();
         }
 
 
-        if( $act_do[product] == 'candles' )
+        if( $act_do['product'] == 'candles' )
         {
             $cal = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -173,23 +173,23 @@ connectdb();
               db_op_result($query,__LINE__,__FILE__);
             $coalinfo = $coal->fields;
 
-            $waxstart = $waxinfo[amount];
-            $startcot = $cotton[amount];
-            $startcol = $coalinfo[amount];
+            $waxstart = $waxinfo['amount'];
+            $startcot = $cotton['amount'];
+            $startcol = $coalinfo['amount'];
             $candle = 0;
 
-            while( $caldron[amount] > 0 & $act_do[actives] > 3 & $waxinfo[amount] > 19 & $cotton[amount] > 0 & $coalinfo[amount] > 4 )
+            while( $caldron['amount'] > 0 & $act_do['actives'] > 3 & $waxinfo['amount'] > 19 & $cotton['amount'] > 0 & $coalinfo['amount'] > 4 )
             {
                 $candle += 1;
-                $act_do[actives] -= 4;
-                $waxinfo[amount] -= 20;
-                $cotton[amount] -= 1;
-                $coalinfo[amount] -= 5;
+                $act_do['actives'] -= 4;
+                $waxinfo['amount'] -= 20;
+                $cotton['amount'] -= 1;
+                $coalinfo['amount'] -= 5;
             }
 
-            $waxdelta = $waxstart - $waxinfo[amount];
-            $cotdelta = $startcot - $cotton[amount];
-            $coaldelta = $startcol - $coalinfo[amount];
+            $waxdelta = $waxstart - $waxinfo['amount'];
+            $cotdelta = $startcot - $cotton['amount'];
+            $coaldelta = $startcol - $coalinfo['amount'];
 
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $waxdelta "
@@ -224,7 +224,7 @@ connectdb();
               db_op_result($query,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'cuirboilli' )
+        if( $act_do['product'] == 'cuirboilli' )
         {
             $cal = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -250,29 +250,29 @@ connectdb();
                db_op_result($leat,__LINE__,__FILE__);
             $leather = $leat->fields;
 
-            $waxstart = $waxinfo[amount];
-            $startcol = $coalinfo[amount];
-            $startleather = $leather[amount];
+            $waxstart = $waxinfo['amount'];
+            $startcol = $coalinfo['amount'];
+            $startleather = $leather['amount'];
 
-            if( $waxinfo[amount] > 11 & $coalinfo[amount] > 1 & $leather[amount] > 1 & $cauldron[amount] > 0 )
+            if( $waxinfo['amount'] > 11 & $coalinfo['amount'] > 1 & $leather['amount'] > 1 & $cauldron['amount'] > 0 )
             {
-                $waxinfo[amount] -= 10;
+                $waxinfo['amount'] -= 10;
             }
 
             $armor = 0;
 
-            while( $act_do[actives] > 1 && $waxinfo[amount] > 1 && $coalinfo[amount] > 1 && $leather[amount] > 1 && $cauldron[amount] > 0 )
+            while( $act_do['actives'] > 1 && $waxinfo['amount'] > 1 && $coalinfo['amount'] > 1 && $leather['amount'] > 1 && $cauldron['amount'] > 0 )
             {
                 $armor += 1;
-                $act_do[actives] -= 2;
-                $waxinfo[amount] -= 2;
-                $coalinfo[amount] -= 2;
-                $leather[amount] -= 2;
+                $act_do['actives'] -= 2;
+                $waxinfo['amount'] -= 2;
+                $coalinfo['amount'] -= 2;
+                $leather['amount'] -= 2;
             }
 
-            $waxdelta = $waxstart - $waxinfo[amount];
-            $coaldelta = $startcol - $coalinfo[amount];
-            $leatherdelta = $startleather - $leather[amount];
+            $waxdelta = $waxstart - $waxinfo['amount'];
+            $coaldelta = $startcol - $coalinfo['amount'];
+            $leatherdelta = $startleather - $leather['amount'];
 
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $waxdelta "

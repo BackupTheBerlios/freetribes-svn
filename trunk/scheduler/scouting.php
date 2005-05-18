@@ -8,6 +8,7 @@ require_once("config.php");
 $time_start = getmicrotime();
 include("scheduler/game_time.php");
 connectdb();
+//STUDY database- for some reason this file does not work correctly, consistently.. Why? Add Debug
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
 while( !$res->EOF )

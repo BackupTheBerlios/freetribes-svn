@@ -1,5 +1,5 @@
 <?php
-$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+$pos = (strpos($_SERVER['PHP_SELF'], "/fairfigures2.php"));
 if ($pos !== false)
 {
     die("You cannot access this page directly!");
@@ -12,7 +12,7 @@ $time_start = getmicrotime();
 include("scheduler/game_time.php");
 connectdb();
 
-if( $month[count] == '5' | $month[count] == '11' )
+if( $month['count'] == '5' | $month['count'] == '11' )
 {
 
     $level = $db->Execute("SELECT * FROM $dbtables[fair] "
@@ -43,15 +43,15 @@ if( $month[count] == '5' | $month[count] == '11' )
     while( !$level->EOF )
     {
         $levelinfo = $level->fields;
-        $delta = $levelinfo[amount]/$levelinfo[p_amount];
-        $newsell = $levelinfo[price_sell] * $delta;
+        $delta = $levelinfo['amount']/$levelinfo['p_amount'];
+        $newsell = $levelinfo['price_sell'] * $delta;
         if( $newsell < 1 )
         {
             $newsell = 1;
         }
-        if( $newsell > ($levelinfo[price_sell] * 2))
+        if( $newsell > ($levelinfo['price_sell'] * 2))
         {
-            $newsell = $levelinfo[price_sell] * 2;
+            $newsell = $levelinfo['price_sell'] * 2;
         }
         $res = $db->Execute("UPDATE $dbtables[fair] "
                     ."SET price_sell = '$newsell' "
