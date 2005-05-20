@@ -1304,7 +1304,7 @@ while( !$res->EOF )
                 $cotton_harvest = 0;
                 if( $cropinfo['crop'] == 'cotton' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']) * 2;
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']) * 2;
 
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
@@ -1347,7 +1347,7 @@ while( !$res->EOF )
                      db_op_result($result,__LINE__,__FILE__);
                 }
 
-                if( $cropinfo[crop] == 'grain' )
+                if( $cropinfo['crop'] == 'grain' )
                 {
                     $scy = $db->Execute("SELECT * FROM $dbtables[products] "
                                        ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -1380,7 +1380,7 @@ while( !$res->EOF )
                                db_op_result($result,__LINE__,__FILE__);
                         }
                     }
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']) * 3;
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']) * 3;
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
                     while( $cropinfo['acres'] > 2 && $act_do['actives'] > 1 )
@@ -1422,7 +1422,7 @@ while( !$res->EOF )
 
                 if( $cropinfo['crop'] == 'grapes' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
@@ -1497,7 +1497,7 @@ while( !$res->EOF )
                              db_op_result($result,__LINE__,__FILE__);
                         }
                     }
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']) * 2;
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']) * 2;
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
@@ -1541,7 +1541,7 @@ while( !$res->EOF )
 
                 if( $cropinfo['crop'] == 'tobacco' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
@@ -1584,7 +1584,7 @@ while( !$res->EOF )
                 }
                 if( $cropinfo['crop'] == 'flax' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']) * 3;
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']) * 3;
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
@@ -1628,7 +1628,7 @@ while( !$res->EOF )
 
                 if( $cropinfo['crop'] == 'hemp' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
@@ -1672,7 +1672,7 @@ while( !$res->EOF )
 
                 if( $cropinfo['crop'] == 'potatoes' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
@@ -1716,7 +1716,7 @@ while( !$res->EOF )
 
                 if( $cropinfo['crop'] == 'corn' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']) * 3;
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']) * 3;
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
@@ -1760,7 +1760,7 @@ while( !$res->EOF )
 
                 if( $cropinfo['crop'] == 'herbs' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
@@ -1803,7 +1803,7 @@ while( !$res->EOF )
                 }
                 if( $cropinfo['crop'] == 'spice' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo['acres']);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 

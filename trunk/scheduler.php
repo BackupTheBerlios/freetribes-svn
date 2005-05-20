@@ -43,7 +43,7 @@ while(!$sched_run->EOF)
 
 $time_end = getmicrotime();
 $time = $time_end - $time_start;
-echo "<br> Scheduler completed in $time seconds at ".date("Y-m-d H:i:s")."<br>";
+echo "<br>Scheduler completed in $time seconds at ".date("Y-m-d H:i:s")."\n Game Time is (d m y) $day[count] $month[count] $year[count]<br>";
 
 //$test = $db->Execute("SELECT * frmo tstr_loopus WHERE id=3");
 //db_op_result($test,__LINE__,__FILE__);

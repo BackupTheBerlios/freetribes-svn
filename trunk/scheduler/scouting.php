@@ -8,168 +8,175 @@ require_once("config.php");
 $time_start = getmicrotime();
 include("scheduler/game_time.php");
 connectdb();
-//STUDY database- for some reason this file does not work correctly, consistently.. Why? Add Debug
-$res = $db->Execute("SELECT * FROM $dbtables[tribes]");
- db_op_result($res,__LINE__,__FILE__);
-while( !$res->EOF )
+
+#OK. total overhaul, hitting this one first . let's use some real logic.
+#Basically what we want to do is loop through every scouting activity in activities table
+# and handle just those- why loop tribes table? just get the ones where activity = scheduler event
+#Next up, we want to determine what direction we are scouting in, see how far our scouts can move
+# and reveal squares that they are capable of getting to, then we return scout to base
+# and update map table to uncover squares, determine if anything is found..
+# do away with checking each direction individually, just loop on each row from scouts where that order is set.
+#scouts table contains scoutid,tribeid,actives(integer),direction(n.s.e.w.ne,nw,se,sw),mounted (Y,N),orders(P,L,M)
+$res = $db->Execute("SELECT * from $dbtables[scouts]");
+db_op_result($res,__LINE__,__FILE__);
+while(!$res->EOF)
 {
-    $tribe = $res->fields;
-    $skill = $db->Execute("SELECT * FROM $dbtables[skills] "
-                         ."WHERE tribeid = '$tribe[tribeid]' "
-                         ."AND abbr = 'sct'");
-     db_op_result($skill,__LINE__,__FILE__);
-    $skillinfo = $skill->fields;
-    $movement = $skillinfo['level'];
-    $nsct = $db->Execute("SELECT * FROM $dbtables[scouts] "
-                        ."WHERE tribeid = '$tribe[tribeid]' "
-                        ."AND direction = 'n' "
-                        ."AND orders != 'M' "
-                        ."LIMIT 1");
-     db_op_result($nsct,__LINE__,__FILE__);
-    $moved = 0;
-    while( !$nsct->EOF )
-    {
-        $scout = $nsct->fields;
-        if( $scout['mounted'] == 'Y' )
-        {
-            $movepts = 7 + $movement;
-        }
-        else
-        {
-            $movepts = 3 + ($movement/2);
-        }
-        $scoutedhex = $tribe['hex_id'];
+    $scouting = $res->fields;
+    $tribe_id = $scouting['tribeid'];
+    $num_scouts = $scouting['actives'];
+    $direction = $scouting['direction'];
+    $mounted = $scouting['mounted'];
+    $orders = $scouting['orders']; //P,L,M and I guess we'll switch it when we need . right now they just map so 'M'
+    $party = $scouting['scoutid'];
+    //TEMPORARY FOR NOW
+    $orders = 'M'; //mappers - db table needs this added to the enum
 
-        $move = 0;
-        while( $movepts > 0 )
+    //OK let's find out what hex this scouting party is on
+    $sql = $db->Prepare("SELECT hex_id,tribeid,clanid,goods_tribe from $dbtables[tribes] WHERE tribeid =?");
+    $info = $db->Execute($sql,array($tribe_id));
+    db_op_result($info,__LINE__,__FILE__);
+    $tribeinfo = $info->fields;
+    $cur_hex = $tribeinfo['hex_id'];
+    $clan_id = $tribeinfo['clanid'];
+    $goods_tribe = $tribeinfo['goods_tribe'];
+    //we set them to recognizable vars so we dont have to carry the load of an array, and we can recognize vars where needed
+   //OK we got it all ready, now lets get the skill information and see how far we can go..
+    $sql = $db->Prepare("SELECT level FROM $dbtables[skills] WHERE abbr = 'sct' and tribeid =?");
+    //note- we go where abbr = sct cause it's fewer rows to check once sql indexed properly
+    $info = $db->Execute($sql,array($tribe_id));
+    db_op_result($info,__LINE__,__FILE__);
+    $skl = $info->fields;
+    $skill_level = $skl['level'];
+    //OK, let's see how many move points we have available, then we loop through hexes until we're outta moves
+     //handle bonus  mapping gets 7 mounted 3 on foot
+     //prospectors and spies take longer, once we have this coded up.
+     $bonus = array('mount'=>7,'foot'=>3);
+     if($orders == 'P')
+     {
+        $bonus = array('mount'=>5,'foot'=>2); //prospectors
+     }
+     if($orders == 'L')
+     {
+        $bonus = array('mount'=>4,'foot'=>1);//L?? Spies? who knows?
+     }
+     if($mounted == 'Y')
+     {
+         $movepts = $bonus['mount'] + $skill_level; //riding horsies, lose carry cap, move much faster
+     }
+     else
+     {
+         $movepts = $bonus['foot'] + ($skill_level/2); //walk out and walk back
+     }
+     //OK Now we start the main loop and handle events if a move occurs for each square (finding shit)
+     while($movepts > 0)
+     {
+        $sql = $db->Prepare("SELECT * from $dbtables[hexes] WHERE hex_id =?");
+        $query = $db->Execute($sql,array($cur_hex));
+        db_op_result($query,__LINE__,__FILE__);
+        $hexinfo = $query->fields;
+        $move_to = $hexinfo[$direction];//hex id we're gonna deal with
+        $move_cost = $hexinfo['move'];
+        if($move_cost <= $movepts)
         {
-            $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
-                               ."WHERE hex_id = '$scoutedhex'");
-              db_op_result($hex,__LINE__,__FILE__);
-            $hexinfo = $hex->fields;
-
-            if( $movepts < $tribe['hex_id'] )
-            {
-                $movepts = 0;
-                $moved = 1;
-            }
-            if( $move > 0 )
-            {
-                $movepts -= $tribe['hex_id'];
-            }
-            else
-            {
-                $move++;
-            }
-            /////////////move the scouts 1 tile//////////////
-            $scoutedhex = $hexinfo['hex_id'];
-            //////////////add the tile to the map/////////////////
-            if( !$moved )
-            {
-                $scoutfind = rand( 1,500 );
-                if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
-                {
-                    $numbermissed = rand( 1, $scout['actives'] );
-                    if( $scout['actives'] <= $numbermissed )
-                    {
-                        $query = $db->Execute("DELETE FROM $dbtables[scouts] "
-                                    ."WHERE direction = 'n' "
-                                    ."AND tribeid = '$tribe[tribeid]'");
-                        db_op_result($query,__LINE__,__FILE__);
-                        if( $game_debug_scouting )
-                        {
-                            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                        ."VALUES("
-                                        ."'',"
-                                        ."'$month[count]',"
-                                        ."'$year[count]',"
-                                        ."'0000',"
-                                        ."'0000.00',"
-                                        ."'SCOUT',"
-                                        ."'$stamp',"
-                                        ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-                         db_op_result($query,__LINE__,__FILE__);
-                        }
-                    }
-                    else
-                    {
-                        $query = $db->Execute("UPDATE $dbtables[scouts] "
-                                    ."SET actives = actives - $numbermissed "
-                                    ."WHERE scoutid = '$scout[scoutid]'");
-                        db_op_result($query,__LINE__,__FILE__);
+             //we move to this hex, deduct cost from points
+             $movepts = $movepts - $move_cost;
+            // echo "Scouts for $tribe_id moving $direction checking $cur_hex<br>";
+             //update the map
+             $query = $db->Execute("UPDATE $dbtables[mapping] SET clanid_{$clan_id} = '1' WHERE"
+                           ." hex_id = '$move_to' AND clanid_{$clan_id} < 1");
+             db_op_result($query,__LINE__,__FILE__);
+             $query = $db->Execute("UPDATE $dbtables[mapping] SET admin_0000 = '1' WHERE"
+                                ." hex_id = '$move_to'");
+             db_op_result($query,__LINE__,__FILE__);
+             //check to see if there's anyone there//////////////
+             $ct = $db->Execute("SELECT tribeid FROM $dbtables[tribes] WHERE "
+                                ."hex_id = '$move_to' AND clanid != '$clan_id'");
+             db_op_result($ct,__LINE__,__FILE__);
+             $count = $ct->fields;
+             if($count['tribeid'] > 0)
+             {
+                 $logtext = "Scouting: $tribe_id's scouting party $party headed $direction detected ";
+                 $logtext .= "$count[tribeid] ";
+                 $query = $db->Execute("INSERT INTO $dbtables[logs] "
+                                    ."VALUES("
+                                    ."'',"
+                                    ."'$month[count]',"
+                                    ."'$year[count]',"
+                                    ."'$clan_id',"
+                                    ."'$tribe_id',"
+                                    ."'SCOUT',"
+                                    ."'$stamp',"
+                                    ."'$logtext')");
+                  db_op_result($query,__LINE__,__FILE__);
+              }//end scouts found other player
+              //OK scout attrition - do we lose any? lets calculate
+              $scoutfind = abs(ceil(mt_rand( 1,500 )));//whole positive integer
+              if($scoutfind >  (490 + $skill_level))// level 10 scouts never desert or get lost
+              {
+                  $numbermissed = abs(floor(mt_rand( 1, $num_scouts)));//get a minimum number
+                  if($num_scouts <= $numbermissed)
+                  {
+                      $sql = $db->Prepare("DELETE FROM $dbtables[scouts] WHERE scoutid = ?");
+                      $logmessage = "Scouting Party LOST! All scouts from $direction Party ID $party have been lost or deserted you!";
+                  }
+                  else
+                  {
+                      $sql = $db->Prepare("UPDATE $dbtables[scouts] SET actives = actives - $numbermissed WHERE scoutid = ?");
+                      $logmessage = "It appears that $numbermissed scouts did not return from $direction Party ID $party.";
+                  }
+                  if($numbermissed > 0)
+                  {
                         $query = $db->Execute("INSERT INTO $dbtables[logs] "
                                     ."VALUES("
                                     ."'',"
                                     ."'$month[count]',"
                                     ."'$year[count]',"
-                                    ."'$tribe[clanid]',"
-                                    ."'$tribe[tribeid]',"
+                                    ."'$clan_id',"
+                                    ."'$tribe_id',"
                                     ."'SCOUT',"
                                     ."'$stamp',"
                                     ."'Scouting: It appears that $numbermissed scouts did not return.')");
                         db_op_result($query,__LINE__,__FILE__);
-                        if( $game_debug_scouting )
-                        {
-                            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                        ."VALUES("
-                                        ."'',"
-                                        ."'$month[count]',"
-                                        ."'$year[count]',"
-                                        ."'0000',"
-                                        ."'0000.00',"
-                                        ."'SCOUT',"
-                                        ."'$stamp',"
-                                        ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-                           db_op_result($query,__LINE__,__FILE__);
-                        }
-                    }
-                }
-                elseif( $scoutfind < $skillinfo['level'] )
-                {
-                    $whatfind = (rand(1,100) + $skillinfo['level']);
+                  }//end dealing with missing scouts
+               }
+               elseif($scoutfind < $skill_level)//we find something
+               {
+                   $whatfind = (rand(1,100) + $skill_level);
                     if( $whatfind > 75 )
                     {
-                        $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
+                        $find = $db->Execute("SELECT COUNT(*) AS count,long_name,proper FROM $dbtables[product_table] "
                                             ."WHERE skill_abbr != 'shw' "
                                             ."AND long_name != 'totem' "
-                                            ."AND skill_level < '$skillinfo[level]' "
-                                            ."AND include = 'Y'");
+                                            ."AND skill_level < '$skill_level' "
+                                            ."AND include = 'Y' group by long_name");
                         db_op_result($find,__LINE__,__FILE__);
                         $findwhat = $find->fields;
-                        $what = rand( 0, $findwhat[count] );
-                        $many = rand( 1, $skillinfo['level'] );
-                        $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
-                                             ."WHERE skill_abbr != 'shw' "
-                                 ."AND include = 'Y' "
-                                             ."AND long_name != 'totem' "
-                                             ."AND skill_level < '$skillinfo[level]' "
-                                             ."LIMIT $what, 1");
-                         db_op_result($found,__LINE__,__FILE__);
-                        $foundwhat = $found->fields;
-
+                        $what = abs(ceil(mt_rand( 0, $findwhat['count'])));
+                        $many = abs(ceil(mt_rand( 1, $skill_level )));
                         $query = $db->Execute("INSERT INTO $dbtables[logs] "
                                     ."VALUES("
                                     ."'',"
                                     ."'$month[count]',"
                                     ."'$year[count]',"
-                                    ."'$tribe[clanid]',"
-                                    ."'$tribe[tribeid]',"
+                                    ."'$clan_id',"
+                                    ."'$tribe_id',"
                                     ."'SCOUT',"
                                     ."'$stamp',"
-                                    ."'North Scouting: We have found $many $foundwhat[proper].')");
-                   db_op_result($query,__LINE__,__FILE__);
-                    $query = $db->Execute("UPDATE $dbtables[products] "
+                                    ."'North Scouting: We have found $many $findwhat[proper].')");
+                        db_op_result($query,__LINE__,__FILE__);
+                        $query = $db->Execute("UPDATE $dbtables[products] "
                                     ."SET amount = amount + $many "
-                                    ."WHERE long_name = '$foundwhat[long_name]' "
-                                    ."AND tribeid = '$tribe[goods_tribe]'");
-                      db_op_result($query,__LINE__,__FILE__);
+                                    ."WHERE long_name = '$findwhat[long_name]' "
+                                    ."AND tribeid = '$goods_tribe'");
+                        db_op_result($query,__LINE__,__FILE__);
                     }
                     else
                     {
-                        $what = rand( 0, $findwhat[count] );
-                        $many = rand( 1, $skillinfo['level'] + 5 );
-                        $found = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+
+                        $what = abs(ceil(mt_rand( 0, $whatfind)));
+                        $many = abs(ceil(mt_rand( 1, $skill_level + 5)));
+                        $found = $db->Execute("SELECT type FROM $dbtables[livestock] "
+                                             ."WHERE tribeid = '$goods_tribe' "
                                              ."LIMIT $what, 1");
                         db_op_result($found,__LINE__,__FILE__);
                         $findwhat = $found->fields;
@@ -178,1209 +185,31 @@ while( !$res->EOF )
                                     ."'',"
                                     ."'$month[count]',"
                                     ."'$year[count]',"
-                                    ."'$tribe[clanid]',"
-                                    ."'$tribe[tribeid]',"
+                                    ."'$clan_id',"
+                                    ."'$tribe_id',"
                                     ."'SCOUT',"
                                     ."'$stamp',"
                                     ."'North Scouting: We have found $many $findwhat[type].')");
                        db_op_result($query,__LINE__,__FILE__);
-                    $query = $db->Execute("UPDATE $dbtables[livestock] "
+                       $query = $db->Execute("UPDATE $dbtables[livestock] "
                                     ."SET amount = amount + $many "
                                     ."WHERE type = '$findwhat[type]' "
-                                    ."AND tribeid = '$tribe[goods_tribe]'");
-                     db_op_result($query,__LINE__,__FILE__);
-                }
-                }
-                     $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `clanid_$tribe[clanid]` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `clanid_$tribe[clanid]` < 1");
-                    db_op_result($query,__LINE__,__FILE__);
-                    $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `admin_0000` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `admin_0000` < 1");
-                    db_op_result($query,__LINE__,__FILE__);
-                    ///////////////check to see if there's anyone there//////////////
-                    $ct = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[tribes] "
-                                      ."WHERE hex_id = '$scoutedhex' "
-                                      ."AND clanid != '$tribe[clanid]'");
-                    db_op_result($ct,__LINE__,__FILE__);
-                    $count = $ct->fields;
-                    if( $count[count] > 0 )
-                    {
-                        $squat = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                                             ."WHERE hex_id = '$scoutedhex' "
-                                             ."AND clanid != '$tribe[clanid]'");
-                     db_op_result($squat,__LINE__,__FILE__);
-                        $logtext = "North Scouting: $tribe[tribeid]'s $scout[direction] scouts detected ";
-                        while( !$squat->EOF )
-                        {
-                            $squatters = $squat->fields;
-                            $logtext .= "$squatters[tribeid] ";
-                            $squat->MoveNext();
-                        }
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                    ."VALUES("
-                                    ."'',"
-                                    ."'$month[count]',"
-                                    ."'$year[count]',"
-                                    ."'$tribe[clanid]',"
-                                    ."'$tribe[tribeid]',"
-                                    ."'SCOUT',"
-                                    ."'$stamp',"
-                                    ."'$logtext')");
-                 db_op_result($query,__LINE__,__FILE__);
+                                    ."AND tribeid = '$goods_tribe'");
+                       db_op_result($query,__LINE__,__FILE__);
                     }
-                }
-            }
-            $nsct->MoveNext();
-        }
-
-        $nesct = $db->Execute("SELECT * FROM $dbtables[scouts] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
-                             ."AND direction = 'ne' "
-                             ."AND orders != 'M' "
-                             ."LIMIT 1");
-        db_op_result($nesct,__LINE__,__FILE__);
-        $moved = 0;
-        while( !$nesct->EOF )
+               }//end scouts find something
+           $cur_hex = $move_to;   //set up the next move to hex and re-query
+        }//end handling this hex
+        else
         {
-            $scout = $nesct->fields;
-            if( $scout['mounted'] == 'Y' )
-            {
-                $movepts = 7 + $movement;
-            }
-            else
-            {
-                $movepts = 3 + ($movement/2);
-            }
-            $scoutedhex = $tribe['hex_id'];
-            $direction = $tribe['hex_id'];
-            $move = 0;
-            while( $movepts > 0 )
-            {
-                $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
-                                   ."WHERE hex_id = '$scoutedhex'");
-                db_op_result($hex,__LINE__,__FILE__);
-                $hexinfo = $hex->fields;
+           $movepts = 0;
+        }
+     }//end hex move loop
 
-                if( $movepts < $tribe['hex_id'] )
-                {
-                    $movepts = 0;
-                    $moved = 1;
-                }
-                if( $move > 0 )
-                {
-                    $movepts -= $tribe['hex_id'];
-                }
-                else
-                {
-                    $move++;
-                }
-                /////////////move the scouts 1 tile//////////////
-                $scoutedhex = $hexinfo['hex_id'];
-                //////////////add the tile to the map/////////////////
-                if( !$moved )
-                {
-                    $scoutfind = rand( 1, 500 );
-                    if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
-                    {
-                        $numbermissed = rand( 1, $scout['actives'] );
-                        if( $scout['actives'] == $numbermissed )
-                        {
-                            $query = $db->Execute("DELETE FROM $dbtables[scouts] "
-                                        ."WHERE direction = 'ne' "
-                                        ."AND tribeid = '$tribe[tribeid]'");
-                           db_op_result($query,__LINE__,__FILE__);
-                            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                        ."VALUES("
-                                        ."'',"
-                                        ."'$month[count]',"
-                                        ."'$year[count]',"
-                                        ."'0000',"
-                                        ."'0000.00',"
-                                        ."'SCOUT',"
-                                        ."'$stamp',"
-                                        ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-                           db_op_result($query,__LINE__,__FILE__);
-                        }
-                        else
-                        {
-                            $query = $db->Execute("UPDATE $dbtables[scouts] "
-                                        ."SET actives = actives - $numbermissed "
-                                        ."WHERE scoutid = '$scout[scoutid]'");
-                            db_op_result($query,__LINE__,__FILE__);
-                            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                        ."VALUES("
-                                        ."'',"
-                                        ."'$month[count]',"
-                                        ."'$year[count]',"
-                                        ."'$tribe[clanid]',"
-                                        ."'$tribe[tribeid]',"
-                                        ."'SCOUT',"
-                                        ."'$stamp',"
-                                        ."'Scouting: It appears that $numbermissed scouts did not return.')");
-                            db_op_result($query,__LINE__,__FILE__);
-                            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                        ."VALUES("
-                                        ."'',"
-                                        ."'$month[count]',"
-                                        ."'$year[count]',"
-                                        ."'0000',"
-                                        ."'0000.00',"
-                                        ."'SCOUT',"
-                                        ."'$stamp',"
-                                        ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-                          db_op_result($query,__LINE__,__FILE__);
-                        }
-                    }
-                    elseif( $scoutfind < $skillinfo['level'] )
-                    {
-                        $whatfind = ( rand( 1, 100 ) + $skillinfo['level'] );
-                        if( $whatfind > 75 )
-                        {
-                            $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
-                                                ."WHERE skill_abbr != 'shw' "
-                                                ."AND long_name != 'totem' "
-                                                ."AND skill_level < '$skillinfo[level]' "
-                                                ."AND include = 'Y'");
-                           db_op_result($find,__LINE__,__FILE__);
-                            $findwhat = $find->fields;
-                            $what = rand( 0, $findwhat[count] );
-                            $many = rand( 1, $skillinfo['level'] );
-                            $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
-                                                 ."WHERE skill_abbr != 'shw' "
-                                                 ."AND long_name != 'totem' "
-                                                 ."AND skill_level < '$skillinfo[level]' "
-                                                 ."AND include = 'Y' "
-                                                 ."LIMIT $what, 1");
-                               db_op_result($found,__LINE__,__FILE__);
-              $foundwhat = $found->fields;
-
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','Northeast Scouting: We have found $many $foundwhat[proper].')");
-           db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $many WHERE long_name = '$foundwhat[long_name]' AND tribeid = '$tribe[goods_tribe]'");
-           db_op_result($query,__LINE__,__FILE__);
-           }
-         else{
-           $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo['level'] + 5 );
-           $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
-           db_op_result($found,__LINE__,__FILE__);
-           $findwhat = $found->fields;
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','Northeast Scouting: We have found $many $findwhat[type].')");
-           db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[livestock] SET amount = amount + $many WHERE type = '$findwhat[type]' AND tribeid = '$tribe[goods_tribe]'");
-          db_op_result($query,__LINE__,__FILE__);
-           }
-    }
+     $res->MoveNext();
+}//End of main loop
 
 
-
-   $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `clanid_$tribe[clanid]` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `clanid_$tribe[clanid]` < 1");
-           db_op_result($query,__LINE__,__FILE__);
-                    $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `admin_0000` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `admin_0000` < 1");   ///////////////check to see if there's anyone there//////////////
-      db_op_result($query,__LINE__,__FILE__);
-  $ct = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-     db_op_result($ct,__LINE__,__FILE__);
-  $count = $ct->fields;
-  if($count[count] > 0){
-  $squat = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-    db_op_result($squat,__LINE__,__FILE__);
-  $logtext = "Northeast Scouting: $tribe[tribeid]'s $scout[direction] scouts detected ";
-  while(!$squat->EOF){
-  $squatters = $squat->fields;
-  $logtext .= "$squatters[tribeid] ";
-  $squat->MoveNext();
-  }
-  $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','$logtext')");
-  db_op_result($query,__LINE__,__FILE__);
-  }
-  }
-  }
-  $nesct->MoveNext();
-  }
-
-  $esct = $db->Execute("SELECT * FROM $dbtables[scouts] "
-                      ."WHERE tribeid = '$tribe[tribeid]' "
-                      ."AND direction = 'e' "
-                      ."AND orders != 'M' "
-                      ."LIMIT 1");
-   db_op_result($esct,__LINE__,__FILE__);
- $moved = 0;
-  while(!$esct->EOF){
-  $scout = $esct->fields;
-    if($scout['mounted'] == 'Y'){
-     $movepts = 7 + $movement;
-     }
-     else{
-     $movepts = 3 + ($movement/2);
-     }
- $scoutedhex = $tribe['hex_id'];
- $direction = $tribe['hex_id'];
- $move = 0;
- while($movepts > 0){
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
-  db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-
-  if($movepts < $tribe['hex_id']){
-  $movepts = 0;
-  $moved = 1;
-   }
-  if($move > 0){
-   $movepts -= $tribe['hex_id'];
-   }
-  else{
-   $move++;
-   }
-  /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo['hex_id'];
-  //////////////add the tile to the map/////////////////
-  if(!$moved){
-   $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
-   {
-       $numbermissed = rand( 1, $scout['actives'] );
-       if( $scout['actives'] == $numbermissed )
-       {
-           $query = $db->Execute("DELETE FROM $dbtables[scouts] "
-                       ."WHERE direction = 'e' "
-                       ."AND tribeid = '$tribe[tribeid]'");
-           db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-                  db_op_result($query,__LINE__,__FILE__);
-       }
-       else
-       {
-           $query = $db->Execute("UPDATE $dbtables[scouts] "
-                       ."SET actives = actives - $numbermissed "
-                       ."WHERE scoutid = '$scout[scoutid]'");
-            db_op_result($query,__LINE__,__FILE__);
-            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                        ."VALUES("
-                        ."'',"
-                        ."'$month[count]',"
-                        ."'$year[count]',"
-                        ."'$tribe[clanid]',"
-                        ."'$tribe[tribeid]',"
-                        ."'SCOUT',"
-                        ."'$stamp',"
-                        ."'Scouting: It appears that $numbermissed scouts did not return.')");
-            db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-           db_op_result($query,__LINE__,__FILE__);
-
-       }
-   }
-   elseif($scoutfind < $skillinfo['level']){
-         $whatfind = (rand(1,100) + $skillinfo['level']);
-         if($whatfind > 75){
-           $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
-                               ."WHERE skill_abbr != 'shw' "
-                               ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                               ."AND include = 'Y'");
-              db_op_result($find,__LINE__,__FILE__);
-           $findwhat = $find->fields;
-             $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo['level']);
-           $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
-                                ."WHERE skill_abbr != 'shw' "
-                                ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                                ."AND include = 'Y' "
-                                ."LIMIT $what, 1");
-                         db_op_result($found,__LINE__,__FILE__);
-           $foundwhat = $found->fields;
-
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','East Scouting: We have found $many $foundwhat[proper].')");
-            db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $many WHERE long_name = '$foundwhat[long_name]' AND tribeid = '$tribe[goods_tribe]'");
-            db_op_result($query,__LINE__,__FILE__);
-           }
-         else{
-           $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo['level'] + 5 );
-           $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
-             db_op_result($found,__LINE__,__FILE__);
-           $findwhat = $found->fields;
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','East Scouting: We have found $many $findwhat[type].')");
-           db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[livestock] SET amount = amount + $many WHERE type = '$findwhat[type]' AND tribeid = '$tribe[goods_tribe]'");
-           db_op_result($query,__LINE__,__FILE__);
-           }
-       }
-
-
-   $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `clanid_$tribe[clanid]` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `clanid_$tribe[clanid]` < 1");
-                   db_op_result($query,__LINE__,__FILE__);
-                    $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `admin_0000` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `admin_0000` < 1"); ///////////////check to see if there's anyone there//////////////
-        db_op_result($query,__LINE__,__FILE__);
-  $ct = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-  db_op_result($ct,__LINE__,__FILE__);
-  $count = $ct->fields;
-  if($count[count] > 0){
-  $squat = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-   db_op_result($squat,__LINE__,__FILE__);
-  $logtext = "East Scouting: $tribe[tribeid]'s $scout[direction] scouts detected ";
-  while(!$squat->EOF){
-  $squatters = $squat->fields;
-  $logtext .= "$squatters[tribeid] ";
-  $squat->MoveNext();
-  }
-  $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','$logtext')");
-    db_op_result($query,__LINE__,__FILE__);
-  }
-  }
-  }
-  $esct->MoveNext();
-  }
-
-
-
-
-
-
-
-  $sesct = $db->Execute("SELECT * FROM $dbtables[scouts] "
-                       ."WHERE tribeid = '$tribe[tribeid]' "
-                       ."AND direction = 'se' "
-                       ."AND orders != 'M' "
-                       ."LIMIT 1");
-   db_op_result($sesct,__LINE__,__FILE__);
- $moved = 0;
-  while(!$sesct->EOF){
-  $scout = $sesct->fields;
-    if($scout['mounted'] == 'Y'){
-     $movepts = 7 + $movement;
-     }
-     else{
-     $movepts = 3 + ($movement/2);
-     }
- $scoutedhex = $tribe['hex_id'];
- $direction = $tribe['hex_id'];
- $move = 0;
- while($movepts > 0){
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
-   db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-
-  if($movepts < $tribe['hex_id']){
-  $movepts = 0;
-  $moved = 1;
-   }
-  if($move > 0){
-   $movepts -= $tribe['hex_id'];
-   }
-  else{
-   $move++;
-   }
-  /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo['hex_id'];
-  //////////////add the tile to the map/////////////////
-  if(!$moved){
-   $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
-   {
-       $numbermissed = rand( 1, $scout['actives'] );
-       if( $scout['actives'] == $numbermissed )
-       {
-           $query = $db->Execute("DELETE FROM $dbtables[scouts] "
-                       ."WHERE direction = 'se' "
-                       ."AND tribeid = '$tribe[tribeid]'");
-           db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-           db_op_result($query,__LINE__,__FILE__);
-
-       }
-       else
-       {
-           $query = $db->Execute("UPDATE $dbtables[scouts] "
-                       ."SET actives = actives - $numbermissed "
-                       ."WHERE scoutid = '$scout[scoutid]'");
-            db_op_result($query,__LINE__,__FILE__);
-            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                        ."VALUES("
-                        ."'',"
-                        ."'$month[count]',"
-                        ."'$year[count]',"
-                        ."'$tribe[clanid]',"
-                        ."'$tribe[tribeid]',"
-                        ."'SCOUT',"
-                        ."'$stamp',"
-                        ."'Scouting: It appears that $numbermissed scouts did not return.')");
-             db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-          db_op_result($query,__LINE__,__FILE__);
-       }
-   }
-   elseif($scoutfind < $skillinfo['level']){
-         $whatfind = (rand(1,100) + $skillinfo['level']);
-         if($whatfind > 75){
-           $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
-                               ."WHERE skill_abbr != 'shw' "
-                               ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                               ."AND include = 'Y'");
-                   db_op_result($find,__LINE__,__FILE__);
-           $findwhat = $find->fields;
-             $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo['level']);
-           $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
-                                ."WHERE skill_abbr != 'shw' "
-                                ."AND include = 'Y' "
-                                ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                                ."LIMIT $what, 1");
-                            db_op_result($found,__LINE__,__FILE__);
-           $foundwhat = $found->fields;
-
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','Southeast Scouting: We have found $many $foundwhat[proper].')");
-            db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $many WHERE long_name = '$foundwhat[long_name]' AND tribeid = '$tribe[goods_tribe]'");
-            db_op_result($query,__LINE__,__FILE__);
-           }
-         else{
-           $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo['level'] + 5 );
-           $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
-            db_op_result($found,__LINE__,__FILE__);
-           $findwhat = $found->fields;
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','Southeast Scouting: We have found $many $findwhat[type].')");
-            db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[livestock] SET amount = amount + $many WHERE type = '$findwhat[type]' AND tribeid = '$tribe[goods_tribe]'");
-             db_op_result($query,__LINE__,__FILE__);
-           }
-       }
-
-   $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `clanid_$tribe[clanid]` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `clanid_$tribe[clanid]` < 1");
-                     db_op_result($query,__LINE__,__FILE__);
-                    $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `admin_0000` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `admin_0000` < 1");  ///////////////check to see if there's anyone there//////////////
-    db_op_result($query,__LINE__,__FILE__);
-  $ct = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-    db_op_result($ct,__LINE__,__FILE__);
-  $count = $ct->fields;
-  if($count[count] > 0){
-  $squat = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-     db_op_result($squat,__LINE__,__FILE__);
-  $logtext = "Southeast Scouting: $tribe[tribeid]'s $scout[direction] scouts detected ";
-  while(!$squat->EOF){
-  $squatters = $squat->fields;
-  $logtext .= "$squatters[tribeid] ";
-  $squat->MoveNext();
-  }
-  $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','$logtext')");
-      db_op_result($query,__LINE__,__FILE__);
-  }
-  }
-  }
-  $sesct->MoveNext();
-  }
-
-
-
-  $ssct = $db->Execute("SELECT * FROM $dbtables[scouts] "
-                      ."WHERE tribeid = '$tribe[tribeid]' "
-                      ."AND direction = 's' "
-                      ."AND orders != 'M' "
-                      ."LIMIT 1");
-     db_op_result($ssct,__LINE__,__FILE__);
- $moved = 0;
-  while(!$ssct->EOF){
-  $scout = $ssct->fields;
-    if($scout['mounted'] == 'Y'){
-     $movepts = 7 + $movement;
-     }
-     else{
-     $movepts = 3 + ($movement/2);
-     }
- $scoutedhex = $tribe['hex_id'];
- $direction = $tribe['hex_id'];
- $move = 0;
- while($movepts > 0){
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
-     db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-
-  if($movepts < $tribe['hex_id']){
-  $movepts = 0;
-  $moved = 1;
-   }
-  if($move > 0){
-   $movepts -= $tribe['hex_id'];
-   }
-  else{
-   $move++;
-   }
-  /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo['hex_id'];
-  //////////////add the tile to the map/////////////////
-  if(!$moved){
-   $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
-   {
-       $numbermissed = rand( 1, $scout['actives'] );
-       if( $scout['actives'] == $numbermissed )
-       {
-           $query = $db->Execute("DELETE FROM $dbtables[scouts] "
-                       ."WHERE direction = 's' "
-                       ."AND tribeid = '$tribe[tribeid]'");
-            db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-              db_op_result($query,__LINE__,__FILE__);
-
-       }
-       else
-       {
-           $query = $db->Execute("UPDATE $dbtables[scouts] "
-                       ."SET actives = actives - $numbermissed "
-                       ."WHERE scoutid = '$scout[scoutid]'");
-             db_op_result($query,__LINE__,__FILE__);
-            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                        ."VALUES("
-                        ."'',"
-                        ."'$month[count]',"
-                        ."'$year[count]',"
-                        ."'$tribe[clanid]',"
-                        ."'$tribe[tribeid]',"
-                        ."'SCOUT',"
-                        ."'$stamp',"
-                        ."'Scouting: It appears that $numbermissed scouts did not return.')");
-                      db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-             db_op_result($query,__LINE__,__FILE__);
-
-       }
-   }
-   elseif($scoutfind < $skillinfo['level']){
-         $whatfind = (rand(1,100) + $skillinfo['level']);
-         if($whatfind > 75){
-           $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
-                               ."WHERE skill_abbr != 'shw' "
-                               ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                               ."AND include = 'Y'");
-                db_op_result($find,__LINE__,__FILE__);
-           $findwhat = $find->fields;
-             $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo['level']);
-           $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
-                                ."WHERE skill_abbr != 'shw' "
-                                ."AND include = 'Y' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                                ."AND long_name != 'totem' "
-                                ."LIMIT $what, 1");
-                    db_op_result($found,__LINE__,__FILE__);
-           $foundwhat = $found->fields;
-
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','South Scouting: We have found $many $foundwhat[proper].')");
-             db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $many WHERE long_name = '$foundwhat[long_name]' AND tribeid = '$tribe[goods_tribe]'");
-            db_op_result($query,__LINE__,__FILE__);
-           }
-         else{
-           $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo['level'] + 5 );
-           $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
-              db_op_result($found,__LINE__,__FILE__);
-           $findwhat = $found->fields;
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','South Scouting: We have found $many $findwhat[type].')");
-                db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[livestock] SET amount = amount + $many WHERE type = '$findwhat[type]' AND tribeid = '$tribe[goods_tribe]'");
-              db_op_result($query,__LINE__,__FILE__);
-           }
-          }
-
- $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `clanid_$tribe[clanid]` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `clanid_$tribe[clanid]` < 1");
-                   db_op_result($query,__LINE__,__FILE__);
-                    $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `admin_0000` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `admin_0000` < 1");  ///////////////check to see if there's anyone there//////////////
-                db_op_result($query,__LINE__,__FILE__);
-  $ct = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-   db_op_result($ct,__LINE__,__FILE__);
-  $count = $ct->fields;
-  if($count[count] > 0){
-  $squat = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-   db_op_result($squat,__LINE__,__FILE__);
-  $logtext = "South Scouting: $tribe[tribeid]'s $scout[direction] scouts detected ";
-  while(!$squat->EOF){
-  $squatters = $squat->fields;
-  $logtext .= "$squatters[tribeid] ";
-  $squat->MoveNext();
-  }
-  $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','$logtext')");
-   db_op_result($query,__LINE__,__FILE__);
-  }
-  }
-  }
-  $ssct->MoveNext();
-  }
-
-  $swsct = $db->Execute("SELECT * FROM $dbtables[scouts] "
-                       ."WHERE tribeid = '$tribe[tribeid]' "
-                       ."AND direction = 'sw' "
-                       ."AND orders != 'M' "
-                       ."LIMIT 1");
-   db_op_result($swsct,__LINE__,__FILE__);
- $moved = 0;
-  while(!$swsct->EOF){
-  $scout = $swsct->fields;
-    if($scout['mounted'] == 'Y'){
-     $movepts = 7 + $movement;
-     }
-     else{
-     $movepts = 3 + ($movement/2);
-     }
- $scoutedhex = $tribe['hex_id'];
- $direction = $tribe['hex_id'];
- $move = 0;
- while($movepts > 0){
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
-   db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-
-  if($movepts < $tribe['hex_id']){
-  $movepts = 0;
-  $moved = 1;
-   }
-  if($move > 0){
-   $movepts -= $tribe['hex_id'];
-   }
-  else{
-   $move++;
-   }
-  /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo['hex_id'];
-  //////////////add the tile to the map/////////////////
-  if(!$moved){
-   $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
-   {
-       $numbermissed = rand( 1, $scout['actives'] );
-       if( $scout['actives'] == $numbermissed )
-       {
-           $query = $db->Execute("DELETE FROM $dbtables[scouts] "
-                       ."WHERE direction = 'sw' "
-                       ."AND tribeid = '$tribe[tribeid]'");
-            db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-            db_op_result($query,__LINE__,__FILE__);
-
-       }
-       else
-       {
-           $query = $db->Execute("UPDATE $dbtables[scouts] "
-                       ."SET actives = actives - $numbermissed "
-                       ."WHERE scoutid = '$scout[scoutid]'");
-                 db_op_result($query,__LINE__,__FILE__);
-            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                        ."VALUES("
-                        ."'',"
-                        ."'$month[count]',"
-                        ."'$year[count]',"
-                        ."'$tribe[clanid]',"
-                        ."'$tribe[tribeid]',"
-                        ."'SCOUT',"
-                        ."'$stamp',"
-                        ."'Scouting: It appears that $numbermissed scouts did not return.')");
-            db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-           db_op_result($query,__LINE__,__FILE__);
-
-       }
-   }
-   elseif($scoutfind < $skillinfo['level']){
-         $whatfind = (rand(1,100) + $skillinfo['level']);
-         if($whatfind > 75){
-           $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
-                               ."WHERE skill_abbr != 'shw' "
-                               ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                               ."AND include = 'Y'");
-              db_op_result($find,__LINE__,__FILE__);
-           $findwhat = $find->fields;
-             $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo['level']);
-           $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
-                                ."WHERE skill_abbr != 'shw' "
-                                ."AND include = 'Y' "
-                                ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                                ."LIMIT $what, 1");
-                       db_op_result($found,__LINE__,__FILE__);
-           $foundwhat = $found->fields;
-
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','Southwest Scouting: We have found $many $foundwhat[proper].')");
-              db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $many WHERE long_name = '$foundwhat[long_name]' AND tribeid = '$tribe[goods_tribe]'");
-            db_op_result($query,__LINE__,__FILE__);
-           }
-         else{
-           $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo['level'] + 5 );
-           $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
-            db_op_result($found,__LINE__,__FILE__);
-           $findwhat = $found->fields;
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','Southwest Scouting: We have found $many $findwhat[type].')");
-           db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[livestock] SET amount = amount + $many WHERE type = '$findwhat[type]' AND tribeid = '$tribe[goods_tribe]'");
-             db_op_result($query,__LINE__,__FILE__);
-           }
-    }
-
-   $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `clanid_$tribe[clanid]` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `clanid_$tribe[clanid]` < 1");
-                    db_op_result($query,__LINE__,__FILE__);
-                    $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `admin_0000` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `admin_0000` < 1");  ///////////////check to see if there's anyone there//////////////
-                  db_op_result($query,__LINE__,__FILE__);
-  $ct = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-     db_op_result($ct,__LINE__,__FILE__);
-  $count = $ct->fields;
-  if($count[count] > 0){
-  $squat = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-     db_op_result($squat,__LINE__,__FILE__);
-  $logtext = "Southwest Scouting: $tribe[tribeid]'s $scout[direction] scouts detected ";
-  while(!$squat->EOF){
-  $squatters = $squat->fields;
-  $logtext .= "$squatters[tribeid] ";
-  $squat->MoveNext();
-  }
-  $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','$logtext')");
-    db_op_result($query,__LINE__,__FILE__);
-  }
-  }
-  }
-  $swsct->MoveNext();
-  }
-
-  $wsct = $db->Execute("SELECT * FROM $dbtables[scouts] "
-                      ."WHERE tribeid = '$tribe[tribeid]' "
-                      ."AND direction = 'w' "
-                      ."AND orders != 'M' "
-                      ."LIMIT 1");
-   db_op_result($wsct,__LINE__,__FILE__);
-  $moved = 0;
-  while(!$wsct->EOF){
-  $scout = $wsct->fields;
-    if($scout['mounted'] == 'Y'){
-     $movepts = 7 + $movement;
-     }
-     else{
-     $movepts = 3 + ($movement/2);
-     }
- $scoutedhex = $tribe['hex_id'];
- $direction = $tribe['hex_id'];
- $move = 0;
- while($movepts > 0){
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
-  db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-
-  if($movepts < $tribe['hex_id']){
-  $movepts = 0;
-  $moved = 1;
-   }
-  if($move > 0){
-   $movepts -= $tribe['hex_id'];
-   }
-  else{
-   $move++;
-   }
-  /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo['hex_id'];
-  //////////////add the tile to the map/////////////////
-  if(!$moved){
-   $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
-   {
-       $numbermissed = rand( 1, $scout['actives'] );
-       if( $scout['actives'] == $numbermissed )
-       {
-           $query = $db->Execute("DELETE FROM $dbtables[scouts] "
-                       ."WHERE direction = 'w' "
-                       ."AND tribeid = '$tribe[tribeid]'");
-           db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-           db_op_result($query,__LINE__,__FILE__);
-
-       }
-       else
-       {
-           $query = $db->Execute("UPDATE $dbtables[scouts] "
-                       ."SET actives = actives - $numbermissed "
-                       ."WHERE scoutid = '$scout[scoutid]'");
-            db_op_result($query,__LINE__,__FILE__);
-            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                        ."VALUES("
-                        ."'',"
-                        ."'$month[count]',"
-                        ."'$year[count]',"
-                        ."'$tribe[clanid]',"
-                        ."'$tribe[tribeid]',"
-                        ."'SCOUT',"
-                        ."'$stamp',"
-                        ."'Scouting: It appears that $numbermissed scouts did not return.')");
-              db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-             db_op_result($query,__LINE__,__FILE__);
-
-       }
-   }
-   elseif($scoutfind < $skillinfo['level']){
-         $whatfind = (rand(1,100) + $skillinfo['level']);
-         if($whatfind > 75){
-           $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
-                               ."WHERE skill_abbr != 'shw' "
-                               ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                               ."AND include = 'Y'");
-             db_op_result($find,__LINE__,__FILE__);
-           $findwhat = $find->fields;
-             $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo['level']);
-           $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
-                                ."WHERE skill_abbr != 'shw' "
-                                ."AND include = 'Y' "
-                                ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                                ."LIMIT $what, 1");
-               db_op_result($found,__LINE__,__FILE__);
-           $foundwhat = $found->fields;
-
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','West Scouting: We have found $many $foundwhat[proper].')");
-             db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $many WHERE long_name = '$foundwhat[long_name]' AND tribeid = '$tribe[goods_tribe]'");
-            db_op_result($query,__LINE__,__FILE__);
-           }
-         else{
-           $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo['level'] + 5 );
-           $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
-           db_op_result($found,__LINE__,__FILE__);
-           $findwhat = $found->fields;
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','West Scouting: We have found $many $findwhat[type].')");
-           db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[livestock] SET amount = amount + $many WHERE type = '$findwhat[type]' AND tribeid = '$tribe[goods_tribe]'");
-           db_op_result($query,__LINE__,__FILE__);
-           }
-    }
-
-   $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `clanid_$tribe[clanid]` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `clanid_$tribe[clanid]` < 1");
-                      db_op_result($query,__LINE__,__FILE__);
-                    $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `admin_0000` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `admin_0000` < 1");  ///////////////check to see if there's anyone there//////////////
-                     db_op_result($query,__LINE__,__FILE__);
-  $ct = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-   db_op_result($ct,__LINE__,__FILE__);
-  $count = $ct->fields;
-  if($count[count] > 0){
-  $squat = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-   db_op_result($squat,__LINE__,__FILE__);
-  $logtext = "West Scouting: $tribe[tribeid]'s $scout[direction] scouts detected ";
-  while(!$squat->EOF){
-  $squatters = $squat->fields;
-  $logtext .= "$squatters[tribeid] ";
-  $squat->MoveNext();
-  }
-  $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','$logtext')");
-    db_op_result($query,__LINE__,__FILE__);
-  }
-  }
-  }
-  $wsct->MoveNext();
-  }
-
-
-
-
-
-  $nwsct = $db->Execute("SELECT * FROM $dbtables[scouts] "
-                       ."WHERE tribeid = '$tribe[tribeid]' "
-                       ."AND direction = 'nw' "
-                       ."AND orders != 'M' "
-                       ."LIMIT 1");
-     db_op_result($nwsct,__LINE__,__FILE__);
-  $moved = 0;
-  while(!$nwsct->EOF){
-  $scout = $nwsct->fields;
-    if($scout['mounted'] == 'Y'){
-     $movepts = 7 + $movement;
-     }
-     else{
-     $movepts = 3 + ($movement/2);
-     }
- $scoutedhex = $tribe['hex_id'];
- $direction = $tribe['hex_id'];
- $move = 0;
- while($movepts > 0){
-  $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$scoutedhex'");
-    db_op_result($hex,__LINE__,__FILE__);
-  $hexinfo = $hex->fields;
-
-  if($movepts < $tribe['hex_id']){
-  $movepts = 0;
-  $moved = 1;
-   }
-  if($move > 0){
-   $movepts -= $tribe['hex_id'];
-   }
-  else{
-   $move++;
-   }
-  /////////////move the scouts 1 tile//////////////
-  $scoutedhex = $hexinfo['hex_id'];
-  //////////////add the tile to the map/////////////////
-  if(!$moved){
-   $scoutfind = rand(1,500);
-      if( $scoutfind >  ( 490 + $skillinfo['level'] ) )
-   {
-       $numbermissed = rand( 1, $scout['actives'] );
-       if( $scout['actives'] == $numbermissed )
-       {
-           $query = $db->Execute("DELETE FROM $dbtables[scouts] "
-                       ."WHERE direction = 'nw' "
-                       ."AND tribeid = '$tribe[tribeid]'");
-            db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-            db_op_result($query,__LINE__,__FILE__);
-       }
-       else
-       {
-           $query = $db->Execute("UPDATE $dbtables[scouts] "
-                       ."SET actives = actives - $numbermissed "
-                       ."WHERE scoutid = '$scout[scoutid]'");
-              db_op_result($query,__LINE__,__FILE__);
-            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                        ."VALUES("
-                        ."'',"
-                        ."'$month[count]',"
-                        ."'$year[count]',"
-                        ."'$tribe[clanid]',"
-                        ."'$tribe[tribeid]',"
-                        ."'SCOUT',"
-                        ."'$stamp',"
-                        ."'Scouting: It appears that $numbermissed scouts did not return.')");
-                 db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                       ."VALUES("
-                       ."'',"
-                       ."'$month[count]',"
-                       ."'$year[count]',"
-                       ."'0000',"
-                       ."'0000.00',"
-                       ."'SCOUT',"
-                       ."'$stamp',"
-                       ."'Scouting: $tribe[tribeid] lost $numbermissed scouts from $scout[scoutid].')");
-         db_op_result($query,__LINE__,__FILE__);
-       }
-   }
-   elseif($scoutfind < $skillinfo['level']){
-         $whatfind = (rand(1,100) + $skillinfo['level']);
-         if($whatfind > 75){
-           $find = $db->Execute("SELECT COUNT(distinct long_name) AS count FROM $dbtables[product_table] "
-                               ."WHERE skill_abbr != 'shw' "
-                               ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                               ."AND include = 'Y'");
-                db_op_result($find,__LINE__,__FILE__);
-           $findwhat = $find->fields;
-             $what = rand(0, $findwhat[count] );
-             $many = rand(1, $skillinfo['level']);
-           $found = $db->Execute("SELECT * FROM $dbtables[product_table] "
-                                ."WHERE skill_abbr != 'shw' "
-                                ."AND include = 'Y' "
-                                ."AND long_name != 'totem' "
-                               ."AND skill_level < '$skillinfo[level]' "
-                                ."LIMIT $what, 1");
-             db_op_result($found,__LINE__,__FILE__);
-           $foundwhat = $found->fields;
-
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','Northwest Scouting: We have found $many $foundwhat[proper].')");
-           db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $many WHERE long_name = '$foundwhat[long_name]' AND tribeid = '$tribe[goods_tribe]'");
-            db_op_result($query,__LINE__,__FILE__);
-           }
-         else{
-           $what = rand( 0, 6 );
-           $many = rand( 1, $skillinfo['level'] + 5 );
-           $found = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[goods_tribe]' LIMIT $what, 1");
-            db_op_result($found,__LINE__,__FILE__);
-           $findwhat = $found->fields;
-           $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','Northwest Scouting: We have found $many $findwhat[type].')");
-            db_op_result($query,__LINE__,__FILE__);
-           $query = $db->Execute("UPDATE $dbtables[livestock] SET amount = amount + $many WHERE type = '$findwhat[type]' AND tribeid = '$tribe[goods_tribe]'");
-            db_op_result($query,__LINE__,__FILE__);
-           }
-    }
-
-   $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `clanid_$tribe[clanid]` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `clanid_$tribe[clanid]` < 1");
-                      db_op_result($query,__LINE__,__FILE__);
-                    $query = $db->Execute("UPDATE $dbtables[mapping] "
-                                ."SET `admin_0000` = '1' "
-                                ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                ."AND `admin_0000` < 1");  ///////////////check to see if there's anyone there//////////////
-                     db_op_result($query,__LINE__,__FILE__);
-  $ct = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-   db_op_result($ct,__LINE__,__FILE__);
-  $count = $ct->fields;
-  if($count[count] > 0){
-  $squat = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE hex_id = '$scoutedhex' AND clanid != '$tribe[clanid]'");
-    db_op_result($squat,__LINE__,__FILE__);
-  $logtext = "Northwest Scouting: $tribe[tribeid]'s $scout[direction] scouts detected ";
-  while(!$squat->EOF){
-  $squatters = $squat->fields;
-  $logtext .= "$squatters[tribeid] ";
-  $squat->MoveNext();
-  }
-  $query = $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$tribe[clanid]','$tribe[tribeid]','SCOUT','$stamp','$logtext')");
-   db_op_result($query,__LINE__,__FILE__);
-  }
-  }
-  }
-  $nwsct->MoveNext();
-  }
-
-
-
-$res->MoveNext();
-}
 $time_end = getmicrotime();
 $time = $time_end - $time_start;
 $page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed
@@ -1395,4 +224,6 @@ $res = $db->Execute("INSERT INTO $dbtables[logs] "
             ."'$stamp',"
             ."'$page_name completed in $time seconds.')");
     db_op_result($res,__LINE__,__FILE__);
+
+    echo "Executed in $time seconds";
 ?>

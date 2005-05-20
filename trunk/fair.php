@@ -1,4 +1,4 @@
-<?
+<?php
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2 of the License, or (at your
@@ -16,54 +16,50 @@ page_header("Welcome to the Fair!");
 
 
 echo "<TABLE BORDER=0 CELLSPACING=4>"
-	."<TR>"
-	."<FORM METHOD=POST ACTION=fair.php>"
-	."<TD>"
-	."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
-	."<INPUT TYPE=HIDDEN NAME=transactions VALUE=B>"
-	."<INPUT TYPE=SUBMIT NAME=op VALUE=Buy>"
-	."</TD>"
-	."</FORM>"
-	."<FORM METHOD=POST ACTION=fair.php>"
-	."<TD>"
-	."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
-	."<INPUT TYPE=HIDDEN NAME=transactions VALUE=S>"
-	."<INPUT TYPE=SUBMIT NAME=op VALUE=Sell>"
-	."</TD>"
-	."</FORM>"
-	."<FORM METHOD=POST ACTION=fair.php>"
-	."<TD>"
-	."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
-	."<INPUT TYPE=HIDDEN NAME=fair1 VALUE=YC>"
-	."<INPUT TYPE=SUBMIT NAME=op VALUE=Cultural>"
-	."</TD>"
-	."</FORM>"
-	."<TD VALIGN=TOP>";
+    ."<TR>"
+    ."<FORM METHOD=POST ACTION=fair.php>"
+    ."<TD>"
+    ."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
+    ."<INPUT TYPE=HIDDEN NAME=transactions VALUE=B>"
+    ."<INPUT TYPE=SUBMIT NAME=op VALUE=Buy>"
+    ."</TD>"
+    ."</FORM>"
+    ."<FORM METHOD=POST ACTION=fair.php>"
+    ."<TD>"
+    ."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
+    ."<INPUT TYPE=HIDDEN NAME=transactions VALUE=S>"
+    ."<INPUT TYPE=SUBMIT NAME=op VALUE=Sell>"
+    ."</TD>"
+    ."</FORM>"
+    ."<FORM METHOD=POST ACTION=fair.php>"
+    ."<TD>"
+    ."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
+    ."<INPUT TYPE=HIDDEN NAME=fair1 VALUE=YC>"
+    ."<INPUT TYPE=SUBMIT NAME=op VALUE=Cultural>"
+    ."</TD>"
+    ."</FORM>"
+    ."<TD VALIGN=TOP>";
 
 switch ($_REQUEST['op'])
 {
-	case "Buy":
-		echo "<FONT CLASS=page_subtitle>Buying ...</FONT>";
-		break;
-	case "Sell":
-		echo "<FONT CLASS=page_subtitle>Selling ...</FONT>";
-		break;
-	case "Cultural":
-		echo "<FONT CLASS=page_subtitle>Cultural ...</FONT>";
-		break;
-	default:
+    case "Buy":
+        echo "<FONT CLASS=page_subtitle>Buying ...</FONT>";
+        break;
+    case "Sell":
+        echo "<FONT CLASS=page_subtitle>Selling ...</FONT>";
+        break;
+    case "Cultural":
+        echo "<FONT CLASS=page_subtitle>Cultural ...</FONT>";
+        break;
+    default:
 }
 
 
 echo "</TD>"
-	."</TR>"
-	."</TABLE>";
+    ."</TR>"
+    ."</TABLE>";
 
-/*
-echo "<PRE>";
-print_r ($_REQUEST);
-echo "</PRE>";
-*/
+
 
 function display_transactions()
 {
@@ -75,22 +71,22 @@ function display_transactions()
                         ."ORDER BY trans_id");
 
     echo "<P>"
-		."<CENTER>"
-		."<TABLE CLASS=color_table BORDER=1 CELLPADDING=4 CELLSPACING=0>"
-		."<TR CLASS=color_header>"
-		."<TD>Buy/Sell</TD>"
-		."<TD>Product</TD>"
-		."<TD>Quantity</TD>"
-		."<TD>Price</TD>"
-		."<TD>Total</TD>"
-		."<TD>Cancel</TD>"
-		."</TR>";
+        ."<CENTER>"
+        ."<TABLE CLASS=color_table BORDER=1 CELLPADDING=4 CELLSPACING=0>"
+        ."<TR CLASS=color_header>"
+        ."<TD>Buy/Sell</TD>"
+        ."<TD>Product</TD>"
+        ."<TD>Quantity</TD>"
+        ."<TD>Price</TD>"
+        ."<TD>Total</TD>"
+        ."<TD>Cancel</TD>"
+        ."</TR>";
 
-	$r = 0;
+    $r = 0;
     while( !$res5->EOF )
     {
-		$rc = $r % 2;
-		$r++;
+        $rc = $r % 2;
+        $r++;
         $output = $res5->fields;
         echo "<TR CLASS=color_row$rc>";
 
@@ -114,25 +110,25 @@ function display_transactions()
         }
 
         echo "<TD>$output[product]</TD>"
-			."<TD>$output[quantity]</TD>"
-			."<TD>$output[price]</TD>"
-			."<TD>";
+            ."<TD>$output[quantity]</TD>"
+            ."<TD>$output[price]</TD>"
+            ."<TD>";
         $total = NUMBER($total);
         echo "$total</TD>"
-			."<TD>"
-			."<FORM ACTION=fair.php METHOD=POST><INPUT TYPE=HIDDEN NAME=transaction VALUE=\"$output[buy_sell]\">"
-			."<INPUT TYPE=HIDDEN NAME=quantity VALUE=\"$output[quantity]\">"
-			."<INPUT TYPE=HIDDEN NAME=cancel_trans_id VALUE=\"$output[trans_id]\">"
-			."<INPUT TYPE=HIDDEN NAME=cancel_product VALUE=\"$output[product]\">"
-			."<INPUT TYPE=SUBMIT VALUE=CANCEL>"
-			."</FORM>"
-			."</TD>"
-			."</TR>";
+            ."<TD>"
+            ."<FORM ACTION=fair.php METHOD=POST><INPUT TYPE=HIDDEN NAME=transaction VALUE=\"$output[buy_sell]\">"
+            ."<INPUT TYPE=HIDDEN NAME=quantity VALUE=\"$output[quantity]\">"
+            ."<INPUT TYPE=HIDDEN NAME=cancel_trans_id VALUE=\"$output[trans_id]\">"
+            ."<INPUT TYPE=HIDDEN NAME=cancel_product VALUE=\"$output[product]\">"
+            ."<INPUT TYPE=SUBMIT VALUE=CANCEL>"
+            ."</FORM>"
+            ."</TD>"
+            ."</TR>";
         $res5->MoveNext();
     }
 
     echo "</TABLE>"
-		."</CENTER>";
+        ."</CENTER>";
 }
 
 connectdb();
@@ -159,9 +155,9 @@ $limit = $db->Execute("SELECT * FROM $dbtables[fair_tribe] "
 
 if( !$limit->EOF )
 {
-    $_REQUEST[product] = '';
-    $_REQUEST[buy_sell] = '';
-    $_REQUEST[quantity] = '';
+    $_REQUEST['product'] = '';
+    $_REQUEST['buy_sell'] = '';
+    $_REQUEST['quantity'] = '';
 }
 
 if( !$once->EOF )
@@ -175,7 +171,7 @@ if( !$once->EOF )
     page_footer();
 }
 
-if( !$month[count] == 4 && !$month[count] == 10 )
+if( !$month['count'] == 4 && !$month['count'] == 10 )
 {
     echo "<CENTER>";
     echo "Fairs are conducted on the 4th and 10th month of each year ONLY.<br>";
@@ -183,7 +179,7 @@ if( !$month[count] == 4 && !$month[count] == 10 )
     page_footer();
 }
 
-if( !$tribeinfo[tribeid] == $_SESSION['clanid'] )
+if( !$tribeinfo['tribeid'] == $_SESSION['clanid'] )
 {
     echo "<CENTER>";
     echo "Only your main tribe may participate in a fair.";
@@ -191,25 +187,25 @@ if( !$tribeinfo[tribeid] == $_SESSION['clanid'] )
     page_footer();
 }
 
-if( $_REQUEST[cancel_trans_id] )
+if( $_REQUEST['cancel_trans_id'] )
 {
     $db->Execute("DELETE FROM $dbtables[fair_tribe] "
                 ."WHERE clan_id = '$tribeinfo[clanid]' "
                 ."AND trans_id = '$_REQUEST[cancel_trans_id]'");
 
-    if( $_REQUEST[transaction] == 'B' )
+    if( $_REQUEST['transaction'] == 'B' )
     {
         $db->Execute("UPDATE $dbtables[fair] "
                     ."SET amount = amount + '$_REQUEST[quantity]' "
                     ."WHERE proper_name = '$_REQUEST[product]'");
     }
-    elseif( $_REQUEST[transaction] == 'S' )
+    elseif( $_REQUEST['transaction'] == 'S' )
     {
         $db->Execute("UPDATE $dbtables[fair] "
                     ."SET amount = amount - '$_REQUEST[quantity]' "
                     ."WHERE proper_name = '$_REQUEST[product]'");
     }
-	echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=fair.php\">";
+    echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=fair.php\">";
 }
 
 $res3 = $db->Execute("SELECT count(trans_id) AS transactions FROM $dbtables[fair_tribe] "
@@ -222,7 +218,7 @@ $struct = $db->Execute("SELECT * FROM $dbtables[structures] "
                       ."AND long_name = 'tradepost' "
                       ."AND hex_id = '$tribeinfo[hex_id]'");
 
-if( $skillinfo[level] <= '4' && $struct->EOF )
+if( $skillinfo['level'] <= '4' && $struct->EOF )
 {
     echo "<CENTER>";
     echo "Sorry, but you have not gained enough skill in economics.<BR>";
@@ -239,8 +235,8 @@ if( $skillinfo[level] <= '4' && $struct->EOF )
     display_transactions();
     page_footer();
 }
-	
-if( $transinfo[transactions] >= $skillinfo[level] )
+
+if( $transinfo['transactions'] >= $skillinfo['level'] )
 {
     echo "<CENTER>";
     echo "Sorry, but you have reached the limit of your fair activities.<BR>";
@@ -258,60 +254,60 @@ if( $transinfo[transactions] >= $skillinfo[level] )
     page_footer();
 }
 
-    if( $res3->EOF && $skillinfo[level] > 4 )
+    if( $res3->EOF && $skillinfo['level'] > 4 )
     {
-        $available_trans = $skillinfo[level];
+        $available_trans = $skillinfo['level'];
     }
 
-    if( !$res3->EOF && $skillinfo[level] > $transinfo[transactions] )
+    if( !$res3->EOF && $skillinfo['level'] > $transinfo['transactions'] )
     {
-        $available_trans = $skillinfo[level] - $transinfo[transactions];
+        $available_trans = $skillinfo['level'] - $transinfo['transactions'];
     }
 
 
 
-    if( !ISSET($_REQUEST[culture]) )
+    if( !ISSET($_REQUEST['culture']) )
     {
         echo "<CENTER>"
-			."<TABLE BORDER=0 CELLPADDING=4 CELLSPACING=0 ALIGN=CENTER>"
-			."<FORM ACTION=fair.php METHOD=POST>"
-			."<TR>"
-			."<TD VALIGN=MIDDLE>&nbsp;</TD>"
-			."<TD VALIGN=MIDDLE>&nbsp;</TD>"
-			."</TR>"
-			."</FORM>"
-			."</TABLE>"
-			."</CENTER>";
+            ."<TABLE BORDER=0 CELLPADDING=4 CELLSPACING=0 ALIGN=CENTER>"
+            ."<FORM ACTION=fair.php METHOD=POST>"
+            ."<TR>"
+            ."<TD VALIGN=MIDDLE>&nbsp;</TD>"
+            ."<TD VALIGN=MIDDLE>&nbsp;</TD>"
+            ."</TR>"
+            ."</FORM>"
+            ."</TABLE>"
+            ."</CENTER>";
 
         display_transactions();
         page_footer();
     }
 
-    if( ISSET($_REQUEST[culture]) && $_REQUEST[fair1] == 'YC' && !ISSET($_REQUEST[type]) )
+    if( ISSET($_REQUEST['culture']) && $_REQUEST['fair1'] == 'YC' && !ISSET($_REQUEST['type']) )
     {
 
         echo "<CENTER>"
-			."<TABLE CLASS=color_table BORDER=0 CELLPADDING=4 CELLSPACING=0>"
-			."<FORM ACTION=fair.php METHOD=POST>"
-			."<TR>"
-			."<TD>"
-			."<SELECT NAME=type>"
-			."<OPTION VALUE=tri>Triball</OPTION>"
-			."<OPTION VALUE=art>Art</OPTION>"
-			."<OPTION VALUE=dan>Dance</OPTION>"
-			."<OPTION VALUE=mus>Music</OPTION>"
-			."<OPTION VALUE=cook>Cooking</OPTION>"
-			."</SELECT>"
-			."</TD>"
-			."<TD>"
-			."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
-			."<INPUT TYPE=HIDDEN NAME=fair1 VALUE=YC>"
-			."<INPUT TYPE=SUBMIT VALUE=SUBMIT>"
-			."</TD>"
-			."</TR>"
-			."</FORM>"
-			."</TABLE>"
-			."<P>";
+            ."<TABLE CLASS=color_table BORDER=0 CELLPADDING=4 CELLSPACING=0>"
+            ."<FORM ACTION=fair.php METHOD=POST>"
+            ."<TR>"
+            ."<TD>"
+            ."<SELECT NAME=type>"
+            ."<OPTION VALUE=tri>Triball</OPTION>"
+            ."<OPTION VALUE=art>Art</OPTION>"
+            ."<OPTION VALUE=dan>Dance</OPTION>"
+            ."<OPTION VALUE=mus>Music</OPTION>"
+            ."<OPTION VALUE=cook>Cooking</OPTION>"
+            ."</SELECT>"
+            ."</TD>"
+            ."<TD>"
+            ."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
+            ."<INPUT TYPE=HIDDEN NAME=fair1 VALUE=YC>"
+            ."<INPUT TYPE=SUBMIT VALUE=SUBMIT>"
+            ."</TD>"
+            ."</TR>"
+            ."</FORM>"
+            ."</TABLE>"
+            ."<P>";
 
         display_transactions();
         page_footer();
@@ -325,30 +321,30 @@ if( $transinfo[transactions] >= $skillinfo[level] )
         $cultinfo = $cult->fields;
 
         echo "<CENTER>"
-			."<TABLE CLASS=color_table BORDER=0 CELLPADDING=4 CELLSPACING=0>"
-			."<TR>"
-			."<TD>"
-			."<FORM ACTION=fair.php METHOD=POST>"
-			."<SELECT NAME=participants>"
-			."<OPTION VALUE=50> 50</OPTION>"
-			."<OPTION VALUE=100>100</OPTION>"
-			."<OPTION VALUE=200>200</OPTION>"
-			."<OPTION VALUE=300>300</OPTION>"
-			."<OPTION VALUE=400>400</OPTION>"
-			."<OPTION VALUE=500>500</OPTION>"
-			."</SELECT>"
-			."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
-			."<INPUT TYPE=HIDDEN NAME=type VALUE=$_REQUEST[type]>"
-			."<INPUT TYPE=HIDDEN NAME=fair1 VALUE=YC>"
-			."</TD>"
-			."<TD>"
-			."<INPUT TYPE=SUBMIT VALUE=SUBMIT>"
-			."</TD>"
-			."</TR>"
-			."</FORM>"
-			."</TABLE>"
-			."</CENTER>"
-			."<P>";
+            ."<TABLE CLASS=color_table BORDER=0 CELLPADDING=4 CELLSPACING=0>"
+            ."<TR>"
+            ."<TD>"
+            ."<FORM ACTION=fair.php METHOD=POST>"
+            ."<SELECT NAME=participants>"
+            ."<OPTION VALUE=50> 50</OPTION>"
+            ."<OPTION VALUE=100>100</OPTION>"
+            ."<OPTION VALUE=200>200</OPTION>"
+            ."<OPTION VALUE=300>300</OPTION>"
+            ."<OPTION VALUE=400>400</OPTION>"
+            ."<OPTION VALUE=500>500</OPTION>"
+            ."</SELECT>"
+            ."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
+            ."<INPUT TYPE=HIDDEN NAME=type VALUE=$_REQUEST[type]>"
+            ."<INPUT TYPE=HIDDEN NAME=fair1 VALUE=YC>"
+            ."</TD>"
+            ."<TD>"
+            ."<INPUT TYPE=SUBMIT VALUE=SUBMIT>"
+            ."</TD>"
+            ."</TR>"
+            ."</FORM>"
+            ."</TABLE>"
+            ."</CENTER>"
+            ."<P>";
         display_transactions();
         page_footer();
     }
@@ -358,7 +354,7 @@ if( $transinfo[transactions] >= $skillinfo[level] )
         if( $tribeinfo[curam] < $_REQUEST[participants] )
         {
             echo "<CENTER>Sorry, you do not have that many actives to participate.</CENTER>";
-	        echo "<CENTER>Please try again.</CENTER>";
+            echo "<CENTER>Please try again.</CENTER>";
         page_footer();
         }
 
@@ -422,23 +418,23 @@ if( $transinfo[transactions] >= $skillinfo[level] )
     if( ISSET($_REQUEST[culture]) && !ISSET($_REQUEST[trans_id]) && $_REQUEST[fair1] == 'NC' )
     {
         echo "<CENTER>"
-			."<TABLE CLASS=color_table BORDER=0 CELLPADDING=4 CELLSPACING=0>"
-			."<FORM ACTION=fair.php METHOD=POST>"
-			."<TR>"
-			."<TD>"
-			."<SELECT NAME=transactions>"
-			."<OPTION VALUE=B>Buy</OPTION>"
-			."<OPTION VALUE=S>Sell</OPTION>"
-			."</SELECT>"
-			."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
-			."</TD>"
-			."<TD>"
-			."<INPUT TYPE=SUBMIT VALUE=SUBMIT>"
-			."</TD>"
-			."</TR>"
-			."</FORM>"
-			."</TABLE>"
-			."</CENTER>";
+            ."<TABLE CLASS=color_table BORDER=0 CELLPADDING=4 CELLSPACING=0>"
+            ."<FORM ACTION=fair.php METHOD=POST>"
+            ."<TR>"
+            ."<TD>"
+            ."<SELECT NAME=transactions>"
+            ."<OPTION VALUE=B>Buy</OPTION>"
+            ."<OPTION VALUE=S>Sell</OPTION>"
+            ."</SELECT>"
+            ."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
+            ."</TD>"
+            ."<TD>"
+            ."<INPUT TYPE=SUBMIT VALUE=SUBMIT>"
+            ."</TD>"
+            ."</TR>"
+            ."</FORM>"
+            ."</TABLE>"
+            ."</CENTER>";
         display_transactions();
     }
 
@@ -447,10 +443,10 @@ if( $transinfo[transactions] >= $skillinfo[level] )
 if( ISSET($_REQUEST[culture]) && ISSET($_REQUEST[transactions]) && !ISSET($_REQUEST[product]) )
 {
     echo "<CENTER><TABLE CLASS=color_table BORDER=0 CELLPADDING=4 CELLSPACING=0>"
-		."<FORM ACTION=fair.php METHOD=POST>"
-		."<TR>"
-		."<TD>"
-		."<SELECT NAME=item>";
+        ."<FORM ACTION=fair.php METHOD=POST>"
+        ."<TR>"
+        ."<TD>"
+        ."<SELECT NAME=item>";
 
     if( $_REQUEST[transactions] == 'B' )
     {
@@ -521,17 +517,17 @@ if( ISSET($_REQUEST[culture]) && ISSET($_REQUEST[transactions]) && !ISSET($_REQU
         }
     }
     echo "</SELECT>"
-		."<INPUT TYPE=HIDDEN NAME=transactions VALUE=$_REQUEST[transactions]>"
-		."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
-		."<INPUT TYPE=HIDDEN NAME=product VALUE=1>"
-		."</TD>"
-		."<TD>"
-		."<INPUT TYPE=SUBMIT VALUE=SUBMIT>"
-		."</TD>"
-		."</TR>"
-		."</FORM>"
-		."</TABLE>"
-		."</CENTER>";
+        ."<INPUT TYPE=HIDDEN NAME=transactions VALUE=$_REQUEST[transactions]>"
+        ."<INPUT TYPE=HIDDEN NAME=culture VALUE=1>"
+        ."<INPUT TYPE=HIDDEN NAME=product VALUE=1>"
+        ."</TD>"
+        ."<TD>"
+        ."<INPUT TYPE=SUBMIT VALUE=SUBMIT>"
+        ."</TD>"
+        ."</TR>"
+        ."</FORM>"
+        ."</TABLE>"
+        ."</CENTER>";
     display_transactions();
 }
 
@@ -542,9 +538,9 @@ if( ISSET($_REQUEST[culture]) && ISSET($_REQUEST[transactions]) && ISSET($_REQUE
     $iteminfo = $item->fields;
 
     echo "<CENTER>"
-		."<TABLE CLASS=color_table BORDER=0 CELLPADDING=4 CELLSPACING=0>"
-		."<TR>"
-		."<TD COLSPAN=2>";
+        ."<TABLE CLASS=color_table BORDER=0 CELLPADDING=4 CELLSPACING=0>"
+        ."<TR>"
+        ."<TD COLSPAN=2>";
 
     if( $_REQUEST[transactions] == 'B' )
     {
@@ -558,26 +554,26 @@ if( ISSET($_REQUEST[culture]) && ISSET($_REQUEST[transactions]) && ISSET($_REQUE
     }
 
     echo "$iteminfo[proper_name](s) at $price each with a limit of $iteminfo[limit]"
-		."</TD>"
-		."</TR>";
+        ."</TD>"
+        ."</TR>";
 
     echo "<FORM ACTION=fair.php METHOD=POST>"
-		."<TR>"
-		."<TD>"
-		."<INPUT CLASS=edit_area TYPE=TEXT NAME=quantity VALUE=$iteminfo[limit]>"
-		."</TD>"
-		."<TD>"
-		."<INPUT TYPE=SUBMIT VALUE=SUBMIT>"
-		."<INPUT TYPE=HIDDEN NAME=cost VALUE=$price>"
-		."<INPUT TYPE=HIDDEN NAME=product VALUE=\"$iteminfo[proper_name]\">"
-		."<INPUT TYPE=HIDDEN NAME=culture VALUE=$_REQUEST[culture]>"
-		."<INPUT TYPE=HIDDEN NAME=transactions VALUE=$_REQUEST[transactions]>"
-		."</TD>"
-		."</TR>"
-		."</FORM>"
-		."</TABLE>"
-		."</CENTER>"
-		."<P>";
+        ."<TR>"
+        ."<TD>"
+        ."<INPUT CLASS=edit_area TYPE=TEXT NAME=quantity VALUE=$iteminfo[limit]>"
+        ."</TD>"
+        ."<TD>"
+        ."<INPUT TYPE=SUBMIT VALUE=SUBMIT>"
+        ."<INPUT TYPE=HIDDEN NAME=cost VALUE=$price>"
+        ."<INPUT TYPE=HIDDEN NAME=product VALUE=\"$iteminfo[proper_name]\">"
+        ."<INPUT TYPE=HIDDEN NAME=culture VALUE=$_REQUEST[culture]>"
+        ."<INPUT TYPE=HIDDEN NAME=transactions VALUE=$_REQUEST[transactions]>"
+        ."</TD>"
+        ."</TR>"
+        ."</FORM>"
+        ."</TABLE>"
+        ."</CENTER>"
+        ."<P>";
     display_transactions();
 }
 
@@ -650,4 +646,4 @@ if( ISSET($_REQUEST[quantity]) )
 
 page_footer();
 
-?> 
+?>

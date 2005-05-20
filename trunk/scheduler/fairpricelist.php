@@ -17,14 +17,13 @@ $sk = $db->Execute("SELECT distinct tribeid FROM $dbtables[skills] "
       db_op_result($sk,__LINE__,__FILE__);
 if( !$sk->EOF )
 {
-    $pricelist .= "<TABLE BORDER=0 CELLSPACING=0><TR><TD>";
+    $pricelist = "<TABLE BORDER=0 CELLSPACING=0><TR><TD>";
     $pricelist .= "<FONT SIZE=+1 COLOR=BLACK>&nbsp;Item&nbsp;";
     $pricelist .= "</FONT></TD><TD><FONT SIZE=+1 COLOR=BLACK>";
     $pricelist .= "&nbsp;Sell Price&nbsp;</FONT></TD><TD><FONT ";
     $pricelist .= "SIZE=+1 COLOR=BLACK>&nbsp;Buy Price&nbsp;</FONT></TD></TR>";
 
-    $fp = $db->Execute("SELECT * FROM $dbtables[fair] "
-                      ."ORDER BY proper_name ASC");
+    $fp = $db->Execute("SELECT * FROM $dbtables[fair] ORDER BY proper_name ASC");
         db_op_result($fp,__LINE__,__FILE__);
     while( !$fp->EOF )
     {
@@ -40,8 +39,7 @@ if( !$sk->EOF )
     while( !$sk->EOF )
     {
         $skill = $sk->fields;
-        $res = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                           ."WHERE tribeid = '$skill[tribeid]'");
+        $res = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$skill[tribeid]'");
              db_op_result($res,__LINE__,__FILE__);
         $tribe = $res->fields;
        $res = $db->Execute("INSERT INTO $dbtables[messages] "

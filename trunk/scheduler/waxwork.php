@@ -82,7 +82,7 @@ connectdb();
              db_op_result($query,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'strings' )
+        if( $act_do['product'] == 'strings' )
         {
             $wax = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "

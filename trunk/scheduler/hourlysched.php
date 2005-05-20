@@ -1,6 +1,6 @@
 <?php
 error_reporting  (E_ALL);
-$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+$pos = (strpos($_SERVER['PHP_SELF'], "/hourlysched.php"));
 if ($pos !== false)
 {
     die("You cannot access this page directly!");

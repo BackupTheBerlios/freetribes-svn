@@ -253,8 +253,7 @@ while( !$reslt->EOF )
            db_op_result($buy,__LINE__,__FILE__);
         $logbuy = "Fair Buys: ";
         $buycount = 0;
-        $buyinfo['amount'] = 0;
-        $buyingo['long_name'] = 0;
+
         while( !$buy->EOF )
         {
             $buyinfo = $buy->fields;
@@ -273,7 +272,7 @@ while( !$reslt->EOF )
                 db_op_result($price,__LINE__,__FILE__);
             $priceinfo = $price->fields;
 
-            $admin_logs .= "$buyinfo[amount] $buyinfo[long_name] $buyinfo[tribeid] $silinfo[amount] silver ";
+            $admin_logs .= "$buyinfo[quantity] $buyinfo[product] $buyinfo[tribeid] $silinfo[amount] silver ";
             if( $buyinfo['quantity'] > $priceinfo['amount'] )
             {
                 $buyinfo['quantity'] = $priceinfo['amount'];
@@ -292,7 +291,7 @@ while( !$reslt->EOF )
                 $totalcost = $priceinfo['price_buy'] * $buyinfo['quantity'];
             }
 
-            if( $buyinfo[product] == 'Slaves' )
+            if( $buyinfo['product'] == 'Slaves' )
             {
                 $slave = $db->Execute("SELECT slavepop FROM $dbtables[tribes] "
                                      ."WHERE tribeid = '$tribe[tribeid]'");
