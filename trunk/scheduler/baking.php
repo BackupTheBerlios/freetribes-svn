@@ -1,13 +1,10 @@
 <?php
-$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+$pos = (strpos($_SERVER['PHP_SELF'], "/baking.php"));
 if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
-require_once("config.php");
-$time_start = getmicrotime();
-include("scheduler/game_time.php");
-connectdb();
+
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
 while( !$res->EOF )
@@ -27,12 +24,12 @@ while( !$res->EOF )
                            ."AND abbr = 'bak'");
          db_op_result($skl,__LINE__,__FILE__);
         $skill = $skl->fields;
-        $max_actives = $act_do[actives];
+        $max_actives = $act_do['actives'];
         if( $skill[level] < 10 )
         {
-            $max_actives = $skill[level] * 10;
+            $max_actives = $skill['level'] * 10;
         }
-        $act_do[actives] = $max_actives;
+        $act_do['actives'] = $max_actives;
         $ov = $db->Execute("SELECT * FROM $dbtables[structures] "
                           ."WHERE used = 'N' "
                           ."AND clanid = '$tribe[clanid]' "
@@ -41,13 +38,13 @@ while( !$res->EOF )
                           ."AND number > 0 "
                           ."AND long_name = 'bakery'");
            db_op_result($ov,__LINE__,__FILE__);
-        if( $act_do[product] == 'bread' && !$ov->EOF )
+        if( $act_do['product'] == 'bread' && !$ov->EOF )
         {
             $ovens = $ov->fields;
-            $max_poss_acts = $ovens[number] * 10;
-            if( $act_do[actives] > $max_poss_acts )
+            $max_poss_acts = $ovens['number'] * 10;
+            if( $act_do['actives'] > $max_poss_acts )
             {
-                $act_do[actives] = $max_poss_acts;
+                $act_do['actives'] = $max_poss_acts;
             }
             $grist = $db->Execute("SELECT * FROM $dbtables[products] "
                                  ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -66,19 +63,19 @@ while( !$res->EOF )
                 $prov_number = 10;
             }
             $ingredient = $grist->fields;
-            $startgrain = $ingredient[amount];
-            if( $act_do[actives] > ( $ovens[number] * 10 ) )
+            $startgrain = $ingredient['amount'];
+            if( $act_do['actives'] > ( $ovens['number'] * 10 ) )
             {
-                $act_do[actives] = ( $ovens[number] * 10 );
+                $act_do['actives'] = ( $ovens['number'] * 10 );
             }
             $provs = 0;
-            while( $act_do[actives] > 0 && $ingredient[amount] > ($min_number - 1) )
+            while( $act_do['actives'] > 0 && $ingredient['amount'] > ($min_number - 1) )
             {
-                $act_do[actives] -= 1;
-                $ingredient[amount] -= $min_number;
+                $act_do['actives'] -= 1;
+                $ingredient['amount'] -= $min_number;
                 $provs += $prov_number;
             }
-            $deltagrain = $startgrain - $ingredient[amount];
+            $deltagrain = $startgrain - $ingredient['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltagrain "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -115,18 +112,5 @@ while( !$res->EOF )
 
     $res->MoveNext();
 }
-$time_end = getmicrotime();
-$time = $time_end - $time_start;
-$page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed
-$res = $db->Execute("INSERT INTO $dbtables[logs] "
-            ."VALUES("
-            ."'',"
-            ."'$month[count]',"
-            ."'$year[count]',"
-            ."'0000',"
-            ."'0000.00',"
-            ."'BENCHMARK',"
-            ."'$stamp',"
-            ."'$page_name completed in $time seconds.')");
-      db_op_result($res,__LINE__,__FILE__);
+
 ?>

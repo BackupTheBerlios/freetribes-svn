@@ -4,10 +4,7 @@ if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
-require_once("config.php");
-$time_start = getmicrotime();
-include("scheduler/game_time.php");
-connectdb();
+
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
 while( !$res->EOF )
@@ -21,22 +18,22 @@ while( !$res->EOF )
     {
         $act_do = $act->fields;
 
-        if( $act_do[product] == 'sling' )
+        if( $act_do['product'] == 'sling' )
         {
             $cloth = $db->Execute("SELECT * FROM $dbtables[products] "
                                  ."WHERE proper = 'Cloth' "
                                  ."AND tribeid = '$tribe[goods_tribe]'");
               db_op_result($cloth,__LINE__,__FILE__);
             $clothinfo = $cloth->fields;
-            $startcloth = $clothinfo[amount];
+            $startcloth = $clothinfo['amount'];
             $slings = 0;
-            while( $act_do[actives] > 4 && $clothinfo[amount] > 0 )
+            while( $act_do['actives'] > 4 && $clothinfo['amount'] > 0 )
             {
-                $clothinfo[amount] -= 1;
-                $act_do[actives] -= 5;
+                $clothinfo['amount'] -= 1;
+                $act_do['actives'] -= 5;
                 $slings += 10;
             }
-            $deltacloth = $startcloth - $clothinfo[amount];
+            $deltacloth = $startcloth - $clothinfo['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $slings "
                         ."WHERE proper = 'Sling' "
@@ -65,7 +62,7 @@ while( !$res->EOF )
            db_op_result($query,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'staves' )
+        if( $act_do['product'] == 'staves' )
         {
             $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
                                ."WHERE hex_id = '$tribe[hex_id]'");
@@ -75,10 +72,10 @@ while( !$res->EOF )
             if( $hexinfo[terrain] == 'df' | $hexinfo[terrain] == 'jg' | $hexinfo[terrain] == 'dh' | $hexinfo[terrain] == 'jh' )
             {
                 $staves = 0;
-                while( $act_do[actives] > 0 )
+                while( $act_do['actives'] > 0 )
                 {
                     $staves += 1;
-                    $act_do[actives] -= 1;
+                    $act_do['actives'] -= 1;
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] "
                             ."SET amount = amount + $staves "
@@ -122,7 +119,7 @@ while( !$res->EOF )
         }
 
 
-        if( $act_do[product] == 'shaft' )
+        if( $act_do['product'] == 'shaft' )
         {
             $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
                                ."WHERE hex_id = '$tribe[hex_id]'");
@@ -132,10 +129,10 @@ while( !$res->EOF )
             if( $hexinfo[terrain] == 'df' | $hexinfo[terrain] == 'jg' | $hexinfo[terrain] == 'dh' | $hexinfo[terrain] == 'jh' | $hexinfo[terrain] == 'cf' | $hexinfo[terrain] == 'ch' )
             {
                 $staves = 0;
-                while( $act_do[actives] > 0 )
+                while( $act_do['actives'] > 0 )
                 {
                     $staves += 1;
-                    $act_do[actives] -= 1;
+                    $act_do['actives'] -= 1;
                 }
                 $query = $db->Execute("UPDATE $dbtables[products] "
                             ."SET amount = amount + $staves "
@@ -179,14 +176,14 @@ while( !$res->EOF )
         }
 
 
-    if( $act_do[product] == 'bow' )
+    if( $act_do['product'] == 'bow' )
     {
         $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
                            ."WHERE hex_id = '$tribe[hex_id]'");
             db_op_result($hex,__LINE__,__FILE__);
         $hexinfo = $hex->fields;
 
-        if( $hexinfo[terrain] == 'df' | $hexinfo[terrain] == 'jg' | $hexinfo[terrain] == 'dh' | $hexinfo[terrain] == 'jh' )
+        if( $hexinfo['terrain'] == 'df' | $hexinfo['terrain'] == 'jg' | $hexinfo['terrain'] == 'dh' | $hexinfo['terrain'] == 'jh' )
         {
             $st = $db->Execute("SELECT * FROM $dbtables[products] "
                               ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -194,14 +191,14 @@ while( !$res->EOF )
               db_op_result($st,__LINE__,__FILE__);
             $string = $st->fields;
             $bows = 0;
-            $startstring = $string[amount];
-            while( $act_do[actives] > 1 && $string[amount] > 0 )
+            $startstring = $string['amount'];
+            while( $act_do['actives'] > 1 && $string['amount'] > 0 )
             {
-                $string[amount] -= 1;
-                $act_do[actives] -= 2;
+                $string['amount'] -= 1;
+                $act_do['actives'] -= 2;
                 $bows += 1;
             }
-            $deltastring = $startstring - $string[amount];
+            $deltastring = $startstring - $string['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltastring "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -240,18 +237,18 @@ while( !$res->EOF )
                                  ."AND tribeid = '$tribe[goods_tribe]'");
                   db_op_result($stave,__LINE__,__FILE__);
             $staveinfo = $stave->fields;
-            $startstring = $string[amount];
-            $startstave = $staveinfo[amount];
+            $startstring = $string['amount'];
+            $startstave = $staveinfo['amount'];
             $bows = 0;
-            while( $act_do[actives] > 0 && $string[amount] > 0 && $staveinfo[amount] > 0 )
+            while( $act_do['actives'] > 0 && $string['amount'] > 0 && $staveinfo['amount'] > 0 )
             {
-                $string[amount] -= 1;
-                $act_do[actives] -= 1;
+                $string['amount'] -= 1;
+                $act_do['actives'] -= 1;
                 $bows += 1;
-                $staveinfo[amount] -= 1;
+                $staveinfo['amount'] -= 1;
             }
-            $deltastring = $startstring - $string[amount];
-            $deltastave = $startstave - $staveinfo[amount];
+            $deltastring = $startstring - $string['amount'];
+            $deltastave = $startstave - $staveinfo['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltastring "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -290,14 +287,14 @@ while( !$res->EOF )
     }
 
 
-    if( $act_do[product] == 'longbow' )
+    if( $act_do['product'] == 'longbow' )
     {
         $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
                            ."WHERE hex_id = '$tribe[hex_id]'");
                db_op_result($hex,__LINE__,__FILE__);
         $hexinfo = $hex->fields;
 
-        if( $hexinfo[terrain] == 'df' | $hexinfo[terrain] == 'jg' | $hexinfo[terrain] == 'dh' | $hexinfo[terrain] == 'jh' )
+        if( $hexinfo['terrain'] == 'df' || $hexinfo['terrain'] == 'jg' || $hexinfo['terrain'] == 'dh' || $hexinfo['terrain'] == 'jh' )
         {
             $st = $db->Execute("SELECT * FROM $dbtables[products] "
                               ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -305,14 +302,14 @@ while( !$res->EOF )
                db_op_result($st,__LINE__,__FILE__);
             $string = $st->fields;
             $bows = 0;
-            $startstring = $string[amount];
-            while( $act_do[actives] > 2 && $string[amount] > 0 )
+            $startstring = $string['amount'];
+            while( $act_do['actives'] > 2 && $string['amount'] > 0 )
             {
-                $string[amount] -= 1;
-                $act_do[actives] -= 3;
+                $string['amount'] -= 1;
+                $act_do['actives'] -= 3;
                 $bows += 1;
             }
-            $deltastring = $startstring - $string[amount];
+            $deltastring = $startstring - $string['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltastring "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -351,18 +348,18 @@ while( !$res->EOF )
                                  ."AND tribeid = '$tribe[goods_tribe]'");
                 db_op_result($stave,__LINE__,__FILE__);
             $staveinfo = $stave->fields;
-            $startstring = $string[amount];
-            $startstave = $staveinfo[amount];
+            $startstring = $string['amount'];
+            $startstave = $staveinfo['amount'];
             $bows = 0;
-            while( $act_do[actives] > 1 && $string[amount] > 0 && $staveinfo[amount] > 0 )
+            while( $act_do['actives'] > 1 && $string['amount'] > 0 && $staveinfo['amount'] > 0 )
             {
-                $string[amount] -= 1;
-                $act_do[actives] -= 2;
+                $string['amount'] -= 1;
+                $act_do['actives'] -= 2;
                 $bows += 1;
-                $staveinfo[amount] -= 1;
+                $staveinfo['amount'] -= 1;
             }
-            $deltastring = $startstring - $string[amount];
-            $deltastave = $startstave - $staveinfo[amount];
+            $deltastring = $startstring - $string['amount'];
+            $deltastave = $startstave - $staveinfo['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltastring "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -402,7 +399,7 @@ while( !$res->EOF )
 
 
 
-if( $act_do[product] == 'crossbow' )
+if( $act_do['product'] == 'crossbow' )
 {
     $mtl = $db->Execute("SELECT * FROM $dbtables[resources] "
                       ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -417,31 +414,31 @@ if( $act_do[product] == 'crossbow' )
           db_op_result($mtl,__LINE__,__FILE__);
     }
     $metalinfo = $mtl->fields;
-    $startmetal = $metalinfo[amount];
+    $startmetal = $metalinfo['amount'];
     $col = $db->Execute("SELECT * FROM $dbtables[resources] "
                        ."WHERE tribeid = '$tribe[goods_tribe]' "
                        ."AND long_name = 'Coal'");
         db_op_result($col,__LINE__,__FILE__);
     $coal = $col->fields;
-    $startcoal = $coal[amount];
+    $startcoal = $coal['amount'];
     $st = $db->Execute("SELECT * FROM $dbtables[products] "
                       ."WHERE tribeid = '$tribe[goods_tribe]' "
                       ."AND proper = 'Strings'");
      db_op_result($st,__LINE__,__FILE__);
     $string = $st->fields;
     $bows = 0;
-    $startstring = $string[amount];
-    while( $act_do[actives] > 3 && $string[amount] > 0 && $metalinfo[amount] > 4 && $coal[amount] > 39)
+    $startstring = $string['amount'];
+    while( $act_do['actives'] > 3 && $string['amount'] > 0 && $metalinfo['amount'] > 4 && $coal['amount'] > 39)
     {
-        $string[amount] -= 1;
-        $act_do[actives] -= 2;
+        $string['amount'] -= 1;
+        $act_do['actives'] -= 2;
         $bows += 1;
-        $metalinfo[amount] -= 5;
-        $coal[amount] -= 40;
+        $metalinfo['amount'] -= 5;
+        $coal['amount'] -= 40;
     }
-    $deltalmetal = $startmetal - $metalinfo[amount];
-    $deltacoal = $startcoal - $coal[amount];
-    $deltastring = $startstring - $string[amount];
+    $deltalmetal = $startmetal - $metalinfo['amount'];
+    $deltacoal = $startcoal - $coal['amount'];
+    $deltastring = $startstring - $string['amount'];
     $query = $db->Execute("UPDATE $dbtables[resources] "
                 ."SET amount = amount - $deltacoal "
                 ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -481,7 +478,7 @@ if( $act_do[product] == 'crossbow' )
 
 
 
-if($act_do[product] == 'spetum'){
+if($act_do['product'] == 'spetum'){
 $shaft = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
      db_op_result($shaft,__LINE__,__FILE__);
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
@@ -491,20 +488,20 @@ $brnz = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Bron
 $stshft = $shaft->fields;
 $stcoal = $coal->fields;
 $stbrnz = $brnz->fields;
-$coal = $stcoal[amount];
-$brnz = $stbrnz[amount];
-$shft = $stshft[amount];
+$coal = $stcoal['amount'];
+$brnz = $stbrnz['amount'];
+$shft = $stshft['amount'];
 $spetum = 0;
-while($act_do[actives] > 0 & $stshft[amount] > 0 & $stbrnz[amount] > 1 & $stcoal[amount] > 4){
-$act_do[actives] -= 1;
-$stshft[amount] -= 1;
-$stbrnz[amount] -= 2;
-$stcoal[amount] -= 5;
+while($act_do['actives'] > 0 & $stshft['amount'] > 0 & $stbrnz['amount'] > 1 & $stcoal['amount'] > 4){
+$act_do['actives'] -= 1;
+$stshft['amount'] -= 1;
+$stbrnz['amount'] -= 2;
+$stcoal['amount'] -= 5;
 $spetum += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$brnzdelta = $brnz - $stbrnz[amount];
-$shftdelta = $shft - $stshft[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$brnzdelta = $brnz - $stbrnz['amount'];
+$shftdelta = $shft - $stshft['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $spetum WHERE long_name = 'spetum' AND tribeid = '$tribe[goods_tribe]'");
    db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $shftdelta WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
@@ -519,7 +516,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
    db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'bronzespear'){
+if($act_do['product'] == 'bronzespear'){
 $shaft = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
    db_op_result($shaft,__LINE__,__FILE__);
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
@@ -529,20 +526,20 @@ $brnz = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Bron
 $stshft = $shaft->fields;
 $stcoal = $coal->fields;
 $stbrnz = $brnz->fields;
-$coal = $stcoal[amount];
-$brnz = $stbrnz[amount];
-$shft = $stshft[amount];
+$coal = $stcoal['amount'];
+$brnz = $stbrnz['amount'];
+$shft = $stshft['amount'];
 $spear = 0;
-while($act_do[actives] > 0 & $stshft[amount] > 0 & $stbrnz[amount] > 1 & $stcoal[amount] > 4){
-$act_do[actives] -= 1;
-$stshft[amount] -= 1;
-$stbrnz[amount] -= 2;
-$stcoal[amount] -= 5;
+while($act_do['actives'] > 0 & $stshft['amount'] > 0 & $stbrnz['amount'] > 1 & $stcoal['amount'] > 4){
+$act_do['actives'] -= 1;
+$stshft['amount'] -= 1;
+$stbrnz['amount'] -= 2;
+$stcoal['amount'] -= 5;
 $spear += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$brnzdelta = $brnz - $stbrnz[amount];
-$shftdelta = $shft - $stshft[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$brnzdelta = $brnz - $stbrnz['amount'];
+$shftdelta = $shft - $stshft['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $spear WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
     db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $shftdelta WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
@@ -558,7 +555,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
 }
 
 
-if($act_do[product] == 'ironspear' | $act_do[product] == 'spears'){
+if($act_do['product'] == 'ironspear' | $act_do['product'] == 'spears'){
 $shaft = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
         db_op_result($shaft,__LINE__,__FILE__);
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
@@ -568,20 +565,20 @@ $iron = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Iron
 $stshft = $shaft->fields;
 $stcoal = $coal->fields;
 $stiron = $iron->fields;
-$coal = $stcoal[amount];
-$iron = $stiron[amount];
-$shft = $stshft[amount];
+$coal = $stcoal['amount'];
+$iron = $stiron['amount'];
+$shft = $stshft['amount'];
 $spear = 0;
-while($act_do[actives] > 0 & $stshft[amount] > 0 & $stiron[amount] > 1 & $stcoal[amount] > 9){
-$act_do[actives] -= 1;
-$stshft[amount] -= 1;
-$stiron[amount] -= 2;
-$stcoal[amount] -= 10;
+while($act_do['actives'] > 0 & $stshft['amount'] > 0 & $stiron['amount'] > 1 & $stcoal['amount'] > 9){
+$act_do['actives'] -= 1;
+$stshft['amount'] -= 1;
+$stiron['amount'] -= 2;
+$stcoal['amount'] -= 10;
 $spear += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$irondelta = $iron - $stiron[amount];
-$shftdelta = $shft - $stshft[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$irondelta = $iron - $stiron['amount'];
+$shftdelta = $shft - $stshft['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $spear WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
     db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $shftdelta WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
@@ -596,7 +593,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
      db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'steelspear'){
+if($act_do['product'] == 'steelspear'){
 $shaft = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
       db_op_result($shaft,__LINE__,__FILE__);
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
@@ -606,20 +603,20 @@ $steel = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Ste
 $stshft = $shaft->fields;
 $stcoal = $coal->fields;
 $ststeel = $steel->fields;
-$coal = $stcoal[amount];
-$steel = $ststeel[amount];
-$shft = $stshft[amount];
+$coal = $stcoal['amount'];
+$steel = $ststeel['amount'];
+$shft = $stshft['amount'];
 $spear = 0;
-while($act_do[actives] > 0 & $stshft[amount] > 0 & $ststeel[amount] > 1 & $stcoal[amount] > 9){
-$act_do[actives] -= 1;
-$stshft[amount] -= 1;
-$ststeel[amount] -= 2;
-$stcoal[amount] -= 10;
+while($act_do['actives'] > 0 & $stshft['amount'] > 0 & $ststeel['amount'] > 1 & $stcoal['amount'] > 9){
+$act_do['actives'] -= 1;
+$stshft['amount'] -= 1;
+$ststeel['amount'] -= 2;
+$stcoal['amount'] -= 10;
 $spear += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$steeldelta = $steel - $ststeel[amount];
-$shftdelta = $shft - $stshft[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$steeldelta = $steel - $ststeel['amount'];
+$shftdelta = $shft - $stshft['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $spear WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $shftdelta WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
@@ -634,7 +631,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
   db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'steel1spear'){
+if($act_do['product'] == 'steel1spear'){
 $shaft = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
      db_op_result($shaft,__LINE__,__FILE__);
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
@@ -644,20 +641,20 @@ $steel = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Ste
 $stshft = $shaft->fields;
 $stcoal = $coal->fields;
 $ststeel = $steel->fields;
-$coal = $stcoal[amount];
-$steel = $ststeel[amount];
-$shft = $stshft[amount];
+$coal = $stcoal['amount'];
+$steel = $ststeel['amount'];
+$shft = $stshft['amount'];
 $spear = 0;
-while($act_do[actives] > 0 & $stshft[amount] > 0 & $ststeel[amount] > 1 & $stcoal[amount] > 9){
-$act_do[actives] -= 1;
-$stshft[amount] -= 1;
-$ststeel[amount] -= 2;
-$stcoal[amount] -= 10;
+while($act_do['actives'] > 0 & $stshft['amount'] > 0 & $ststeel['amount'] > 1 & $stcoal['amount'] > 9){
+$act_do['actives'] -= 1;
+$stshft['amount'] -= 1;
+$ststeel['amount'] -= 2;
+$stcoal['amount'] -= 10;
 $spear += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$steeldelta = $steel - $ststeel[amount];
-$shftdelta = $shft - $stshft[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$steeldelta = $steel - $ststeel['amount'];
+$shftdelta = $shft - $stshft['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $spear WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $shftdelta WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
@@ -672,7 +669,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
  db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'steel2spear'){
+if($act_do['product'] == 'steel2spear'){
 $shaft = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
       db_op_result($shaft,__LINE__,__FILE__);
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
@@ -682,20 +679,20 @@ $steel = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Ste
 $stshft = $shaft->fields;
 $stcoal = $coal->fields;
 $ststeel = $steel->fields;
-$coal = $stcoal[amount];
-$steel = $ststeel[amount];
-$shft = $stshft[amount];
+$coal = $stcoal['amount'];
+$steel = $ststeel['amount'];
+$shft = $stshft['amount'];
 $spear = 0;
-while($act_do[actives] > 0 & $stshft[amount] > 0 & $ststeel[amount] > 1 & $stcoal[amount] > 9){
-$act_do[actives] -= 1;
-$stshft[amount] -= 1;
-$ststeel[amount] -= 2;
-$stcoal[amount] -= 10;
+while($act_do['actives'] > 0 & $stshft['amount'] > 0 & $ststeel['amount'] > 1 & $stcoal['amount'] > 9){
+$act_do['actives'] -= 1;
+$stshft['amount'] -= 1;
+$ststeel['amount'] -= 2;
+$stcoal['amount'] -= 10;
 $spear += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$steeldelta = $steel - $ststeel[amount];
-$shftdelta = $shft - $stshft[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$steeldelta = $steel - $ststeel['amount'];
+$shftdelta = $shft - $stshft['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $spear WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $shftdelta WHERE long_name = 'shaft' AND tribeid = '$tribe[goods_tribe]'");
@@ -710,24 +707,24 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
  db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'ironmace'){
+if($act_do['product'] == 'ironmace'){
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
  db_op_result($coal,__LINE__,__FILE__);
 $iron = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Iron' AND tribeid = '$tribe[goods_tribe]'");
  db_op_result($iron,__LINE__,__FILE__);
 $stcoal = $coal->fields;
 $stiron = $iron->fields;
-$coal = $stcoal[amount];
-$iron = $stiron[amount];
+$coal = $stcoal['amount'];
+$iron = $stiron['amount'];
 $mace = 0;
-while($act_do[actives] > 1 & $stcoal[amount] > 29 & $stiron[amount] > 5){
-$act_do[actives] -= 2;
-$stcoal[amount] -= 30;
-$stiron[amount] -= 6;
+while($act_do['actives'] > 1 & $stcoal['amount'] > 29 & $stiron['amount'] > 5){
+$act_do['actives'] -= 2;
+$stcoal['amount'] -= 30;
+$stiron['amount'] -= 6;
 $mace += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$irondelta = $iron - $stiron[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$irondelta = $iron - $stiron['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $mace WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
    db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[resources] SET amount = amount - $coaldelta WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
@@ -740,7 +737,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
  db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'bronzeaxe'){
+if($act_do['product'] == 'bronzeaxe'){
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
    db_op_result($coal,__LINE__,__FILE__);
 $metal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Bronze' AND tribeid = '$tribe[goods_tribe]'");
@@ -750,20 +747,20 @@ $clb = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'club' 
 $stcoal = $coal->fields;
 $stmetal = $metal->fields;
 $stclb = $clb->fields;
-$club = $stclb[amount];
-$coal = $stcoal[amount];
-$metal = $stmetal[amount];
+$club = $stclb['amount'];
+$coal = $stcoal['amount'];
+$metal = $stmetal['amount'];
 $product = 0;
-while($act_do[actives] > 1 && $stclb[amount] > 0 && $stcoal[amount] > 14 && $stmetal[amount] > 3){
-$act_do[actives] -= 2;
-$stcoal[amount] -= 15;
-$stmetal[amount] -= 4;
-$stclb[amount] -= 1;
+while($act_do['actives'] > 1 && $stclb['amount'] > 0 && $stcoal['amount'] > 14 && $stmetal['amount'] > 3){
+$act_do['actives'] -= 2;
+$stcoal['amount'] -= 15;
+$stmetal['amount'] -= 4;
+$stclb['amount'] -= 1;
 $product += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$metaldelta = $metal - $stmetal[amount];
-$clubdelta = $club - $stclb[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$metaldelta = $metal - $stmetal['amount'];
+$clubdelta = $club - $stclb['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $clubdelta WHERE long_name = 'club' AND tribeid = '$tribe[goods_tribe]'");
    db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $product WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
@@ -778,7 +775,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
   db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'ironaxe'){
+if($act_do['product'] == 'ironaxe'){
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
       db_op_result($coal,__LINE__,__FILE__);
 $metal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Iron' AND tribeid = '$tribe[goods_tribe]'");
@@ -788,20 +785,20 @@ $clb = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'club' 
 $stclb = $clb->fields;
 $stcoal = $coal->fields;
 $stmetal = $metal->fields;
-$club = $stclb[amount];
-$coal = $stcoal[amount];
-$metal = $stmetal[amount];
+$club = $stclb['amount'];
+$coal = $stcoal['amount'];
+$metal = $stmetal['amount'];
 $product = 0;
-while( $stclb[amount] > 0 && $act_do[actives] > 1 & $stcoal[amount] > 19 & $stmetal[amount] > 3){
-$act_do[actives] -= 2;
-$stcoal[amount] -= 20;
-$stmetal[amount] -= 4;
-$stclb[amount] -= 1;
+while( $stclb['amount'] > 0 && $act_do['actives'] > 1 & $stcoal['amount'] > 19 & $stmetal['amount'] > 3){
+$act_do['actives'] -= 2;
+$stcoal['amount'] -= 20;
+$stmetal['amount'] -= 4;
+$stclb['amount'] -= 1;
 $product += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$metaldelta = $metal - $stmetal[amount];
-$clubdelta = $club - $stclb[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$metaldelta = $metal - $stmetal['amount'];
+$clubdelta = $club - $stclb['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $clubdelta WHERE long_name = 'club' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $product WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
@@ -816,7 +813,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
  db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'steelaxe'){
+if($act_do['product'] == 'steelaxe'){
 $clb = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'club' AND tribeid = '$tribe[goods_tribe]'");
    db_op_result($clb,__LINE__,__FILE__);
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
@@ -826,20 +823,20 @@ $metal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Ste
 $stclb = $clb->fields;
 $stcoal = $coal->fields;
 $stmetal = $metal->fields;
-$club = $stclb[amount];
-$coal = $stcoal[amount];
-$metal = $stmetal[amount];
+$club = $stclb['amount'];
+$coal = $stcoal['amount'];
+$metal = $stmetal['amount'];
 $product = 0;
-while( $stclb[amount] > 0 && $act_do[actives] > 1 & $stcoal[amount] > 19 & $stmetal[amount] > 3){
-$act_do[actives] -= 2;
-$stcoal[amount] -= 20;
-$stmetal[amount] -= 4;
-$stclb[amount] -= 1;
+while( $stclb['amount'] > 0 && $act_do['actives'] > 1 & $stcoal['amount'] > 19 & $stmetal['amount'] > 3){
+$act_do['actives'] -= 2;
+$stcoal['amount'] -= 20;
+$stmetal['amount'] -= 4;
+$stclb['amount'] -= 1;
 $product += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$metaldelta = $metal - $stmetal[amount];
-$clubdelta = $club - $stclb[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$metaldelta = $metal - $stmetal['amount'];
+$clubdelta = $club - $stclb['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $clubdelta WHERE long_name = 'club' AND tribeid = '$tribe[goods_tribe]'");
     db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $product WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
@@ -854,7 +851,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
    db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'steel1axe'){
+if($act_do['product'] == 'steel1axe'){
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
    db_op_result($coal,__LINE__,__FILE__);
 $metal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Steel_1' AND tribeid = '$tribe[goods_tribe]'");
@@ -864,20 +861,20 @@ $clb = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'club' 
 $stclb = $clb->fields;
 $stcoal = $coal->fields;
 $stmetal = $metal->fields;
-$club = $stclb[amount];
-$coal = $stcoal[amount];
-$metal = $stmetal[amount];
+$club = $stclb['amount'];
+$coal = $stcoal['amount'];
+$metal = $stmetal['amount'];
 $product = 0;
-while( $stclb[amount] > 0 && $act_do[actives] > 1 & $stcoal[amount] > 19 & $stmetal[amount] > 3){
-$act_do[actives] -= 2;
-$stcoal[amount] -= 20;
-$stmetal[amount] -= 4;
-$stclb[amount] -= 1;
+while( $stclb['amount'] > 0 && $act_do['actives'] > 1 & $stcoal['amount'] > 19 & $stmetal['amount'] > 3){
+$act_do['actives'] -= 2;
+$stcoal['amount'] -= 20;
+$stmetal['amount'] -= 4;
+$stclb['amount'] -= 1;
 $product += 1;
 }
-$clubdelta = $club - $stclb[amount];
-$coaldelta = $coal - $stcoal[amount];
-$metaldelta = $metal - $stmetal[amount];
+$clubdelta = $club - $stclb['amount'];
+$coaldelta = $coal - $stcoal['amount'];
+$metaldelta = $metal - $stmetal['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $clubdelta WHERE long_name = 'club' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $product WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
@@ -892,7 +889,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
  db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'steel2axe'){
+if($act_do['product'] == 'steel2axe'){
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($coal,__LINE__,__FILE__);
 $metal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Steel_2' AND tribeid = '$tribe[goods_tribe]'");
@@ -902,20 +899,20 @@ $clb = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'club' 
 $stclb = $clb->fields;
 $stcoal = $coal->fields;
 $stmetal = $metal->fields;
-$club = $stclb[amount];
-$coal = $stcoal[amount];
-$metal = $stmetal[amount];
+$club = $stclb['amount'];
+$coal = $stcoal['amount'];
+$metal = $stmetal['amount'];
 $product = 0;
-while( $stclb[amount] > 0 && $act_do[actives] > 1 & $stcoal[amount] > 19 & $stmetal[amount] > 3){
-$act_do[actives] -= 2;
-$stcoal[amount] -= 20;
-$stmetal[amount] -= 4;
-$stclb[amount] -= 1;
+while( $stclb['amount'] > 0 && $act_do['actives'] > 1 & $stcoal['amount'] > 19 & $stmetal['amount'] > 3){
+$act_do['actives'] -= 2;
+$stcoal['amount'] -= 20;
+$stmetal['amount'] -= 4;
+$stclb['amount'] -= 1;
 $product += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$metaldelta = $metal - $stmetal[amount];
-$clubdelta = $club - $stclb[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$metaldelta = $metal - $stmetal['amount'];
+$clubdelta = $club - $stclb['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - $clubdelta WHERE long_name = 'club' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $product WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
@@ -930,24 +927,24 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
  db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'falchions'){
+if($act_do['product'] == 'falchions'){
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($coal,__LINE__,__FILE__);
 $metal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Bronze' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($metal,__LINE__,__FILE__);
 $stcoal = $coal->fields;
 $stmetal = $metal->fields;
-$coal = $stcoal[amount];
-$metal = $stmetal[amount];
+$coal = $stcoal['amount'];
+$metal = $stmetal['amount'];
 $product = 0;
-while($act_do[actives] > 1 & $stcoal[amount] > 14 & $stmetal[amount] > 4){
-$act_do[actives] -= 2;
-$stcoal[amount] -= 15;
-$stmetal[amount] -= 5;
+while($act_do['actives'] > 1 & $stcoal['amount'] > 14 & $stmetal['amount'] > 4){
+$act_do['actives'] -= 2;
+$stcoal['amount'] -= 15;
+$stmetal['amount'] -= 5;
 $product += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$metaldelta = $metal - $stmetal[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$metaldelta = $metal - $stmetal['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $product WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
    db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[resources] SET amount = amount - $coaldelta WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
@@ -960,24 +957,24 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
     db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'ironsword'){
+if($act_do['product'] == 'ironsword'){
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
  db_op_result($coal,__LINE__,__FILE__);
 $metal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Iron' AND tribeid = '$tribe[goods_tribe]'");
  db_op_result($metal,__LINE__,__FILE__);
 $stcoal = $coal->fields;
 $stmetal = $metal->fields;
-$coal = $stcoal[amount];
-$metal = $stmetal[amount];
+$coal = $stcoal['amount'];
+$metal = $stmetal['amount'];
 $product = 0;
-while($act_do[actives] > 2 & $stcoal[amount] > 29 & $stmetal[amount] > 4){
-$act_do[actives] -= 3;
-$stcoal[amount] -= 30;
-$stmetal[amount] -= 5;
+while($act_do['actives'] > 2 & $stcoal['amount'] > 29 & $stmetal['amount'] > 4){
+$act_do['actives'] -= 3;
+$stcoal['amount'] -= 30;
+$stmetal['amount'] -= 5;
 $product += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$metaldelta = $metal - $stmetal[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$metaldelta = $metal - $stmetal['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $product WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
  db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[resources] SET amount = amount - $coaldelta WHERE long_name = 'Coal' AND tribeid = '$tribe[goods_tribe]'");
@@ -990,24 +987,24 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
  db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'steelsword'){
+if($act_do['product'] == 'steelsword'){
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
 db_op_result($coal,__LINE__,__FILE__);
 $metal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Steel' AND tribeid = '$tribe[goods_tribe]'");
 db_op_result($metal,__LINE__,__FILE__);
 $stcoal = $coal->fields;
 $stmetal = $metal->fields;
-$coal = $stcoal[amount];
-$metal = $stmetal[amount];
+$coal = $stcoal['amount'];
+$metal = $stmetal['amount'];
 $product = 0;
-while($act_do[actives] > 2 & $stcoal[amount] > 29 & $stmetal[amount] > 4){
-$act_do[actives] -= 3;
-$stcoal[amount] -= 30;
-$stmetal[amount] -= 5;
+while($act_do['actives'] > 2 & $stcoal['amount'] > 29 & $stmetal['amount'] > 4){
+$act_do['actives'] -= 3;
+$stcoal['amount'] -= 30;
+$stmetal['amount'] -= 5;
 $product += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$metaldelta = $metal - $stmetal[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$metaldelta = $metal - $stmetal['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $product WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[resources] SET amount = amount - $coaldelta WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
@@ -1020,24 +1017,24 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
 db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'steel1sword'){
+if($act_do['product'] == 'steel1sword'){
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($coal,__LINE__,__FILE__);
 $metal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Steel_1' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($metal,__LINE__,__FILE__);
 $stcoal = $coal->fields;
 $stmetal = $metal->fields;
-$coal = $stcoal[amount];
-$metal = $stmetal[amount];
+$coal = $stcoal['amount'];
+$metal = $stmetal['amount'];
 $product = 0;
-while($act_do[actives] > 2 & $stcoal[amount] > 29 & $stmetal[amount] > 4){
-$act_do[actives] -= 3;
-$stcoal[amount] -= 30;
-$stmetal[amount] -= 5;
+while($act_do['actives'] > 2 & $stcoal['amount'] > 29 & $stmetal['amount'] > 4){
+$act_do['actives'] -= 3;
+$stcoal['amount'] -= 30;
+$stmetal['amount'] -= 5;
 $product += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$metaldelta = $metal - $stmetal[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$metaldelta = $metal - $stmetal['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $product WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[resources] SET amount = amount - $coaldelta WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
@@ -1050,24 +1047,24 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
   db_op_result($query,__LINE__,__FILE__);
 }
 
-if($act_do[product] == 'steel2sword'){
+if($act_do['product'] == 'steel2sword'){
 $coal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($coal,__LINE__,__FILE__);
 $metal = $db->Execute("SELECT * FROM $dbtables[resources] WHERE long_name = 'Steel_2' AND tribeid = '$tribe[goods_tribe]'");
  db_op_result($metal,__LINE__,__FILE__);
 $stcoal = $coal->fields;
 $stmetal = $metal->fields;
-$coal = $stcoal[amount];
-$metal = $stmetal[amount];
+$coal = $stcoal['amount'];
+$metal = $stmetal['amount'];
 $product = 0;
-while($act_do[actives] > 2 & $stcoal[amount] > 29 & $stmetal[amount] > 4){
-$act_do[actives] -= 3;
-$stcoal[amount] -= 30;
-$stmetal[amount] -= 5;
+while($act_do['actives'] > 2 & $stcoal['amount'] > 29 & $stmetal['amount'] > 4){
+$act_do['actives'] -= 3;
+$stcoal['amount'] -= 30;
+$stmetal['amount'] -= 5;
 $product += 1;
 }
-$coaldelta = $coal - $stcoal[amount];
-$metaldelta = $metal - $stmetal[amount];
+$coaldelta = $coal - $stcoal['amount'];
+$metaldelta = $metal - $stmetal['amount'];
 $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount + $product WHERE long_name = '$act_do[product]' AND tribeid = '$tribe[goods_tribe]'");
   db_op_result($query,__LINE__,__FILE__);
 $query = $db->Execute("UPDATE $dbtables[resources] SET amount = amount - $coaldelta WHERE long_name = 'Coke' AND tribeid = '$tribe[goods_tribe]'");
@@ -1080,7 +1077,7 @@ $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribe
 db_op_result($query,__LINE__,__FILE__);
 }
 
-if( $act_do[product] == 'arbalest' )
+if( $act_do['product'] == 'arbalest' )
 {
     $coal = $db->Execute("SELECT * FROM $dbtables[resources] "
                         ."WHERE long_name = 'Coal' "
@@ -1102,18 +1099,18 @@ if( $act_do[product] == 'arbalest' )
     }
     $stcoal = $coal->fields;
     $stmetal = $metal->fields;
-    $coal = $stcoal[amount];
-    $metal = $stmetal[amount];
+    $coal = $stcoal['amount'];
+    $metal = $stmetal['amount'];
     $product = 0;
-    while( $act_do[actives] > 2 && $stcoal[amount] > 19 && $stmetal[amount] > 1 )
+    while( $act_do['actives'] > 2 && $stcoal['amount'] > 19 && $stmetal['amount'] > 1 )
     {
-        $act_do[actives] -= 3;
-        $stcoal[amount] -= 20;
-        $stmetal[amount] -= 2;
+        $act_do['actives'] -= 3;
+        $stcoal['amount'] -= 20;
+        $stmetal['amount'] -= 2;
         $product += 1;
     }
-    $coaldelta = $coal - $stcoal[amount];
-    $metaldelta = $metal - $stmetal[amount];
+    $coaldelta = $coal - $stcoal['amount'];
+    $metaldelta = $metal - $stmetal['amount'];
     $query = $db->Execute("UPDATE $dbtables[products] "
                 ."SET amount = amount + $product "
                 ."WHERE long_name = '$act_do[product]' "
@@ -1147,7 +1144,7 @@ if( $act_do[product] == 'arbalest' )
        db_op_result($query,__LINE__,__FILE__);
 }
 
-if( $act_do[product] == 'repeatingarbalest' )
+if( $act_do['product'] == 'repeatingarbalest' )
 {
     $coal = $db->Execute("SELECT * FROM $dbtables[resources] "
                         ."WHERE long_name = 'Coal' "
@@ -1159,18 +1156,18 @@ if( $act_do[product] == 'repeatingarbalest' )
         db_op_result($metal,__LINE__,__FILE__);
     $stcoal = $coal->fields;
     $stmetal = $metal->fields;
-    $coal = $stcoal[amount];
-    $metal = $stmetal[amount];
+    $coal = $stcoal['amount'];
+    $metal = $stmetal['amount'];
     $product = 0;
-    while( $act_do[actives] > 3 && $stcoal[amount] > 24 && $stmetal[amount] > 1 )
+    while( $act_do['actives'] > 3 && $stcoal['amount'] > 24 && $stmetal['amount'] > 1 )
     {
-        $act_do[actives] -= 4;
-        $stcoal[amount] -= 25;
-        $stmetal[amount] -= 2;
+        $act_do['actives'] -= 4;
+        $stcoal['amount'] -= 25;
+        $stmetal['amount'] -= 2;
         $product += 1;
     }
-    $coaldelta = $coal - $stcoal[amount];
-    $metaldelta = $metal - $stmetal[amount];
+    $coaldelta = $coal - $stcoal['amount'];
+    $metaldelta = $metal - $stmetal['amount'];
     $query = $db->Execute("UPDATE $dbtables[products] "
                 ."SET amount = amount + $product "
                 ."WHERE long_name = '$act_do[product]' "
@@ -1205,13 +1202,13 @@ if( $act_do[product] == 'repeatingarbalest' )
 }
 
 
-if( $act_do[product] == 'horsebow' )
+if( $act_do['product'] == 'horsebow' )
 {
         $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
                            ."WHERE hex_id = '$tribe[hex_id]'");
         $hexinfo = $hex->fields;
 
-        if( $hexinfo[terrain] == 'df' | $hexinfo[terrain] == 'jg' | $hexinfo[terrain] == 'dh' | $hexinfo[terrain] == 'jh' )
+        if( $hexinfo['terrain'] == 'df' | $hexinfo['terrain'] == 'jg' | $hexinfo['terrain'] == 'dh' | $hexinfo['terrain'] == 'jh' )
         {
             $st = $db->Execute("SELECT * FROM $dbtables[products] "
                               ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -1219,14 +1216,14 @@ if( $act_do[product] == 'horsebow' )
              db_op_result($st,__LINE__,__FILE__);
             $string = $st->fields;
             $bows = 0;
-            $startstring = $string[amount];
-            while( $act_do[actives] > 1 && $string[amount] > 0 )
+            $startstring = $string['amount'];
+            while( $act_do['actives'] > 1 && $string['amount'] > 0 )
             {
-                $string[amount] -= 1;
-                $act_do[actives] -= 2;
+                $string['amount'] -= 1;
+                $act_do['actives'] -= 2;
                 $bows += 1;
             }
-            $deltastring = $startstring - $string[amount];
+            $deltastring = $startstring - $string['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltastring "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -1265,18 +1262,18 @@ if( $act_do[product] == 'horsebow' )
                                  ."AND tribeid = '$tribe[goods_tribe]'");
                 db_op_result($stave,__LINE__,__FILE__);
             $staveinfo = $stave->fields;
-            $startstring = $string[amount];
-            $startstave = $staveinfo[amount];
+            $startstring = $string['amount'];
+            $startstave = $staveinfo['amount'];
             $bows = 0;
-            while( $act_do[actives] > 0 && $string[amount] > 0 && $staveinfo[amount] > 0 )
+            while( $act_do['actives'] > 0 && $string['amount'] > 0 && $staveinfo['amount'] > 0 )
             {
-                $string[amount] -= 1;
-                $act_do[actives] -= 1;
+                $string['amount'] -= 1;
+                $act_do['actives'] -= 1;
                 $bows += 1;
-                $staveinfo[amount] -= 1;
+                $staveinfo['amount'] -= 1;
             }
-            $deltastring = $startstring - $string[amount];
-            $deltastave = $startstave - $staveinfo[amount];
+            $deltastring = $startstring - $string['amount'];
+            $deltastave = $startstave - $staveinfo['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount - $deltastring "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -1328,18 +1325,5 @@ $act->MoveNext();
 
 $res->MoveNext();
 }
-$time_end = getmicrotime();
-$time = $time_end - $time_start;
-$page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed
-$res = $db->Execute("INSERT INTO $dbtables[logs] "
-            ."VALUES("
-            ."'',"
-            ."'$month[count]',"
-            ."'$year[count]',"
-            ."'0000',"
-            ."'0000.00',"
-            ."'BENCHMARK',"
-            ."'$stamp',"
-            ."'$page_name completed in $time seconds.')");
-    db_op_result($res,__LINE__,__FILE__);
+
 ?>

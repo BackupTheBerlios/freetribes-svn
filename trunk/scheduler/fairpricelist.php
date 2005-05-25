@@ -1,5 +1,5 @@
 <?php
-$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+$pos = (strpos($_SERVER['PHP_SELF'], "/fairpricelist.php"));
 if ($pos !== false)
 {
     die("You cannot access this page directly!");
@@ -7,13 +7,8 @@ if ($pos !== false)
 if( $month['count'] == '6' || $month['count'] == '12' )
 {
 
-require_once("config.php");
-$time_start = getmicrotime();
-include("scheduler/game_time.php");
-connectdb();
-$sk = $db->Execute("SELECT distinct tribeid FROM $dbtables[skills] "
-                  ."WHERE abbr = 'eco' "
-                  ."AND level > 5");
+
+$sk = $db->Execute("SELECT distinct tribeid FROM $dbtables[skills] WHERE abbr = 'eco' AND level > 5");
       db_op_result($sk,__LINE__,__FILE__);
 if( !$sk->EOF )
 {
@@ -40,7 +35,7 @@ if( !$sk->EOF )
     {
         $skill = $sk->fields;
         $res = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$skill[tribeid]'");
-             db_op_result($res,__LINE__,__FILE__);
+        db_op_result($res,__LINE__,__FILE__);
         $tribe = $res->fields;
        $res = $db->Execute("INSERT INTO $dbtables[messages] "
                     ."VALUES("
@@ -56,18 +51,5 @@ if( !$sk->EOF )
     }
 }
 }
-$time_end = getmicrotime();
-$time = $time_end - $time_start;
-$page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed
-$res = $db->Execute("INSERT INTO $dbtables[logs] "
-            ."VALUES("
-            ."'',"
-            ."'$month[count]',"
-            ."'$year[count]',"
-            ."'0000',"
-            ."'0000.00',"
-            ."'BENCHMARK',"
-            ."'$stamp',"
-            ."'$page_name completed in $time seconds.')");
-      db_op_result($res,__LINE__,__FILE__);
+
 ?>

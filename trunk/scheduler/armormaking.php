@@ -5,15 +5,12 @@
 // option) any later version.
 //
 // File: armormaking.php
- $pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+ $pos = (strpos($_SERVER['PHP_SELF'], "/armormaking.php"));
 if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
-require_once("config.php");
-$time_start = getmicrotime();
-connectdb();
-include("scheduler/game_time.php");
+
 $act = $db->Execute("SELECT * FROM $dbtables[activities] "
                    ."WHERE skill_abbr = 'arm'");
   db_op_result($act,__LINE__,__FILE__);
@@ -83,17 +80,17 @@ while( !$act->EOF )
         $bronzeinfo = $brnz->fields;
         $coalinfo = $coal->fields;
         $haubemade = 0;
-        $coal = $coalinfo[amount];
-        $bronze = $bronzeinfo[amount];
-        while( $bronze > 2 && $coal > 9 && $act_do[actives] > 1 )
+        $coal = $coalinfo['amount'];
+        $bronze = $bronzeinfo['amount'];
+        while( $bronze > 2 && $coal > 9 && $act_do['actives'] > 1 )
         {
             $haubemade++;
             $bronze -= 3;
             $coal -= 10;
-            $act_do[actives] -= 2;
+            $act_do['actives'] -= 2;
         }
-        $deltabronze = $bronzeinfo[amount] - $bronze;
-        $deltacoal = $coalinfo[amount] - $coal;
+        $deltabronze = $bronzeinfo['amount'] - $bronze;
+        $deltacoal = $coalinfo['amount'] - $coal;
         $res = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount + '$haubemade' "
                     ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -141,17 +138,17 @@ while( !$act->EOF )
         $bronzeinfo = $brnz->fields;
         $coalinfo = $coal->fields;
         $scutummade = 0;
-        $coal = $coalinfo[amount];
-        $bronze = $bronzeinfo[amount];
-        while( $bronze > 4 && $coal > 14 && $act_do[actives] > 1 )
+        $coal = $coalinfo['amount'];
+        $bronze = $bronzeinfo['amount'];
+        while( $bronze > 4 && $coal > 14 && $act_do['actives'] > 1 )
         {
             $scutummade++;
             $bronze -= 5;
             $coal -= 15;
-            $act_do[actives] -= 2;
+            $act_do['actives'] -= 2;
         }
-        $deltabronze = $bronzeinfo[amount] - $bronze;
-        $deltacoal = $coalinfo[amount] - $coal;
+        $deltabronze = $bronzeinfo['amount'] - $bronze;
+        $deltacoal = $coalinfo['amount'] - $coal;
         $res = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount + '$scutummade' "
                     ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -199,17 +196,17 @@ while( !$act->EOF )
         $ironinfo = $ironore->fields;
         $coalinfo = $coal->fields;
         $shield = 0;
-        $coal = $coalinfo[amount];
-        $iron = $ironinfo[amount];
-        while( $iron > 4 && $coal > 29 && $act_do[actives] > 1 )
+        $coal = $coalinfo['amount'];
+        $iron = $ironinfo['amount'];
+        while( $iron > 4 && $coal > 29 && $act_do['actives'] > 1 )
         {
             $shield++;
             $iron -= 5;
             $coal -= 30;
-            $act_do[actives] -= 2;
+            $act_do['actives'] -= 2;
         }
-        $deltairon = $ironinfo[amount] - $iron;
-        $deltacoal = $coalinfo[amount] - $coal;
+        $deltairon = $ironinfo['amount'] - $iron;
+        $deltacoal = $coalinfo['amount'] - $coal;
         $res = $db->Execute("UPDATE $dbtables[products] "
                     ."SET amount = amount + '$shield' "
                     ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -256,17 +253,17 @@ while( !$act->EOF )
               db_op_result($coke,__LINE__,__FILE__);
             $steelinfo = $stl->fields;
             $cokeinfo = $coke->fields;
-            $startsteel = $steelinfo[amount];
-            $startcoke = $cokeinfo[amount];
+            $startsteel = $steelinfo['amount'];
+            $startcoke = $cokeinfo['amount'];
             $shield = 0;
-            $coke = $cokeinfo[amount];
-            $steel = $steelinfo[amount];
-            while( $steel > 4 && $coke > 19 && $act_do[actives] > 1 )
+            $coke = $cokeinfo['amount'];
+            $steel = $steelinfo['amount'];
+            while( $steel > 4 && $coke > 19 && $act_do['actives'] > 1 )
             {
                 $shield++;
                 $steel -= 5;
                 $coke -= 20;
-                $act_do[actives] -= 2;
+                $act_do['actives'] -= 2;
             }
             $deltacoke = $startcoke - $coke;
             $deltasteel = $startsteel - $steel;
@@ -316,17 +313,17 @@ while( !$act->EOF )
             $ironinfo = $iron->fields;
             $coalinfo = $coal->fields;
             $helm = 0;
-            $startmtl = $ironinfo[amount];
-            $startcoal = $coalinfo[amount];
-            while( $ironinfo[amount] > 2 && $coalinfo[amount] > 19 && $act_do[actives] > 1 )
+            $startmtl = $ironinfo['amount'];
+            $startcoal = $coalinfo['amount'];
+            while( $ironinfo['amount'] > 2 && $coalinfo['amount'] > 19 && $act_do['actives'] > 1 )
             {
                 $helm += 1;
-                $ironinfo[amount] -= 3;
-                $coalinfo[amount] -= 20;
-                $act_do[actives] -= 2;
+                $ironinfo['amount'] -= 3;
+                $coalinfo['amount'] -= 20;
+                $act_do['actives'] -= 2;
             }
-            $coaldelta = $startcoal - $coalinfo[amount];
-            $mtldelta = $startmtl - $ironinfo[amount];
+            $coaldelta = $startcoal - $coalinfo['amount'];
+            $mtldelta = $startmtl - $ironinfo['amount'];
             $res = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + '$helm' "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -373,17 +370,17 @@ while( !$act->EOF )
             $ironinfo = $ironore->fields;
             $coalinfo = $coal->fields;
             $product = 0;
-            $startcoal = $coalinfo[amount];
-            $startiron = $ironinfo[amount];
-            while( $ironinfo[amount] > 17 && $coalinfo[amount] > 39 && $act_do[actives] > 3 )
+            $startcoal = $coalinfo['amount'];
+            $startiron = $ironinfo['amount'];
+            while( $ironinfo['amount'] > 17 && $coalinfo['amount'] > 39 && $act_do['actives'] > 3 )
             {
                 $product++;
-                $ironinfo[amount] -= 18;
-                $coalinfo[amount] -= 40;
-                $act_do[actives] -= 4;
+                $ironinfo['amount'] -= 18;
+                $coalinfo['amount'] -= 40;
+                $act_do['actives'] -= 4;
             }
-            $coaldelta = $startcoal - $coalinfo[amount];
-            $irondelta = $startiron - $ironinfo[amount];
+            $coaldelta = $startcoal - $coalinfo['amount'];
+            $irondelta = $startiron - $ironinfo['amount'];
             $res = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + '$product' "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -430,16 +427,16 @@ while( !$act->EOF )
             $mtlinfo = $mtl->fields;
             $coalinfo = $coal->fields;
             $product = 0;
-            $coal = $coalinfo[amount];
+            $coal = $coalinfo['amount'];
             $startcoal = $coal;
-            $mtl = $mtlinfo[amount];
+            $mtl = $mtlinfo['amount'];
             $startmtl = $mtl;
-            while( $mtl > 29 && $coal > 19 && $act_do[actives] > 2 )
+            while( $mtl > 29 && $coal > 19 && $act_do['actives'] > 2 )
             {
                 $product++;
                 $mtl -= 30;
                 $coal -= 20;
-                $act_do[actives] -= 3;
+                $act_do['actives'] -= 3;
             }
             $coaldelta = $startcoal - $coal;
             $mtldelta = $startmtl - $mtl;
@@ -489,16 +486,16 @@ while( !$act->EOF )
             $mtlinfo = $mtl->fields;
             $coalinfo = $coal->fields;
             $product = 0;
-            $coal = $coalinfo[amount];
+            $coal = $coalinfo['amount'];
             $startcoal = $coal;
-            $mtl = $mtlinfo[amount];
+            $mtl = $mtlinfo['amount'];
             $startmtl = $mtl;
-            while( $mtl > 19 && $coal > 39 && $act_do[actives] > 3 )
+            while( $mtl > 19 && $coal > 39 && $act_do['actives'] > 3 )
             {
                 $product++;
                 $mtl -= 20;
                 $coal -= 40;
-                $act_do[actives] -= 4;
+                $act_do['actives'] -= 4;
             }
             $coaldelta = $startcoal - $coal;
             $mtldelta = $startmtl - $mtl;
@@ -547,16 +544,16 @@ while( !$act->EOF )
             $mtlinfo = $mtl->fields;
             $coalinfo = $coal->fields;
             $product = 0;
-            $coal = $coalinfo[amount];
+            $coal = $coalinfo['amount'];
             $startcoal = $coal;
-            $mtl = $mtlinfo[amount];
+            $mtl = $mtlinfo['amount'];
             $startmtl = $mtl;
-            while( $mtl > 19 && $coal > 39 && $act_do[actives] > 3 )
+            while( $mtl > 19 && $coal > 39 && $act_do['actives'] > 3 )
             {
                 $product++;
                 $mtl -= 20;
                 $coal -= 40;
-                $act_do[actives] -= 4;
+                $act_do['actives'] -= 4;
             }
             $coaldelta = $startcoal - $coal;
             $mtldelta = $startmtl - $mtl;
@@ -605,16 +602,16 @@ while( !$act->EOF )
             $mtlinfo = $mtl->fields;
             $coalinfo = $coal->fields;
             $product = 0;
-            $coal = $coalinfo[amount];
+            $coal = $coalinfo['amount'];
             $startcoal = $coal;
-            $mtl = $mtlinfo[amount];
+            $mtl = $mtlinfo['amount'];
             $startmtl = $mtl;
-            while( $mtl > 17 && $coal > 29 && $act_do[actives] > 2 )
+            while( $mtl > 17 && $coal > 29 && $act_do['actives'] > 2 )
             {
                 $product++;
                 $mtl -= 18;
                 $coal -= 30;
-                $act_do[actives] -= 3;
+                $act_do['actives'] -= 3;
             }
             $coaldelta = $startcoal - $coal;
             $mtldelta = $startmtl - $mtl;
@@ -665,16 +662,16 @@ while( !$act->EOF )
             $mtlinfo = $mtl->fields;
             $coalinfo = $coal->fields;
             $product = 0;
-            $coal = $coalinfo[amount];
+            $coal = $coalinfo['amount'];
             $startcoal = $coal;
-            $mtl = $mtlinfo[amount];
+            $mtl = $mtlinfo['amount'];
             $startmtl = $mtl;
-            while( $mtl > 17 && $coal > 29 && $act_do[actives] > 2 )
+            while( $mtl > 17 && $coal > 29 && $act_do['actives'] > 2 )
             {
                 $product++;
                 $mtl -= 18;
                 $coal -= 30;
-                $act_do[actives] -= 3;
+                $act_do['actives'] -= 3;
             }
             $coaldelta = $startcoal - $coal;
             $mtldelta = $startmtl - $mtl;
@@ -725,16 +722,16 @@ while( !$act->EOF )
             $mtlinfo = $mtl->fields;
             $coalinfo = $coal->fields;
             $product = 0;
-            $coal = $coalinfo[amount];
+            $coal = $coalinfo['amount'];
             $startcoal = $coal;
-            $mtl = $mtlinfo[amount];
+            $mtl = $mtlinfo['amount'];
             $startmtl = $mtl;
-            while( $mtl > 19 && $coal > 39 && $act_do[actives] > 3 )
+            while( $mtl > 19 && $coal > 39 && $act_do['actives'] > 3 )
             {
                 $product++;
                 $mtl -= 20;
                 $coal -= 40;
-                $act_do[actives] -= 4;
+                $act_do['actives'] -= 4;
             }
             $coaldelta = $startcoal - $coal;
             $mtldelta = $startmtl - $mtl;
@@ -778,18 +775,5 @@ while( !$act->EOF )
 
     $act->MoveNext();
 }
-$time_end = getmicrotime();
-$time = $time_end - $time_start;
-$page_name =   str_replace($game_root."scheduler/",'',__FILE__);//ereg("([^/]*).php", $_SERVER['PHP_SELF'], $page_name); // get the name of the file being viewed
-$res = $db->Execute("INSERT INTO $dbtables[logs] "
-            ."VALUES("
-            ."'',"
-            ."'$month[count]',"
-            ."'$year[count]',"
-            ."'0000',"
-            ."'0000.00',"
-            ."'BENCHMARK',"
-            ."'$stamp',"
-            ."'$page_name completed in $time seconds.')");
-            db_op_result($res,__LINE__,__FILE__);
+
 ?>

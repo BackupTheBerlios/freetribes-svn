@@ -1,12 +1,10 @@
 <?php
-$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+$pos = (strpos($_SERVER['PHP_SELF'], "/defaultactivities.php"));
 if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
-require_once("config.php");
-$time_start = getmicrotime();
-connectdb();
+
 //get rid of last turn activities
  $res = $db->Execute("TRUNCATE $dbtables[last_turn]");
 db_op_result($res,__LINE__,__FILE__);
@@ -91,18 +89,6 @@ db_op_result($act,__LINE__,__FILE__);
 
 $res->MoveNext();
 }
-$time_end = getmicrotime();
-$time = $time_end - $time_start;
-$page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed
-$res = $db->Execute("INSERT INTO $dbtables[logs] "
-            ."VALUES("
-            ."'',"
-            ."'$month[count]',"
-            ."'$year[count]',"
-            ."'0000',"
-            ."'0000.00',"
-            ."'BENCHMARK',"
-            ."'$stamp',"
-            ."'$page_name completed in $time seconds.')");
-      db_op_result($res,__LINE__,__FILE__);
+
+
 ?>

@@ -6,16 +6,15 @@ if ($pos !== false)
     die("You cannot access this page directly!");
 }
 
-include_once('config.php');
-
-$res = $db->Execute("OPTIMIZE TABLE products_used, farming, farm_activities, mapping, outbox, alliances, activities, armor, chiefs, game_date, hexes, ip_bans, livestock, logs, messages, product_table, products, resources, skills, seeking, scouts, poptrans, skill_table, structures, tribes, weather, fair, fair_tribe, clans");
-db_op_result($res,__LINE__,__FILE__);
+///HMMM!!!
+//      NEW EVENT! : <br>
+//hourlysched.php executed in 23.6696419716 seconds at 2005-05-24 20:00:01. Interval is 12 minutes last run at 2005-05-24 19:48:02 runtime scheduled for 2005-05-24 19:59:02 <br><br>
+//
+//<br> Scheduler completed in 23.6785838604 seconds at 2005-05-24 20:00:25<br>
+//WHY??!!
 
 include("scheduler/reportprod.php");
 include("scheduler/weight.php");
-
-//convert scheduler to run off db only when required, set this file to be non php_self
-//game time update moved to scheduler(daily))
 
 if($month['count'] == '3' || $month['count'] == '4' || $month['count'] == '5')
 {
@@ -345,21 +344,6 @@ elseif( $season['count'] == '4' )
         db_op_result($res,__LINE__,__FILE__);
     }
 }
-
-$time_end = getmicrotime();
-$time = $time_end - $time_start;
-$page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed
-$res = $db->Execute("INSERT INTO $dbtables[logs] "
-            ."VALUES("
-            ."'',"
-            ."'$month[count]',"
-            ."'$year[count]',"
-            ."'0000',"
-            ."'0000.00',"
-            ."'HOURLYTICK',"
-            ."'$stamp',"
-            ."'$page_name completed in $time seconds.')");
-db_op_result($res,__LINE__,__FILE__);
 
 $res = $db->Execute("DELETE FROM $dbtables[logs] WHERE time < date_sub(NOW(),INTERVAL 1 day)");
 db_op_result($res,__LINE__,__FILE__);

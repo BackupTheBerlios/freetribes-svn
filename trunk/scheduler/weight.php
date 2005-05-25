@@ -1,14 +1,11 @@
 <?php
 error_reporting  (E_ALL);
-$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+$pos = (strpos($_SERVER['PHP_SELF'], "/weight.php"));
 if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
-require_once("config.php"); //we dont need THESE do we? this stuff is already included in the calling file.. but oh well
-$time_start = getmicrotime();
-include("game_time.php");
-connectdb();
+
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
   db_op_result($res,__LINE__,__FILE__);
 while( !$res->EOF )
@@ -16,9 +13,7 @@ while( !$res->EOF )
     $tribe = $res->fields;
 
     ///////////////First, figure out the carry capacity//////////////////////////////////
-    $liv = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                       ."WHERE tribeid = '$tribe[tribeid]' "
-                       ."AND amount > 0");
+    $liv = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[tribeid]' AND amount > 0");
         db_op_result($liv,__LINE__,__FILE__);
     $horse = 0;
     $elephant = 0;
@@ -46,21 +41,13 @@ while( !$res->EOF )
     }
     $bak = array();
 
-    $sad = $db->Execute("SELECT * FROM $dbtables[products] "
-                       ."WHERE long_name = 'saddlebags' "
-                       ."AND tribeid = '$tribe[tribeid]'");
+    $sad = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'saddlebags' AND tribeid = '$tribe[tribeid]'");
       db_op_result($sad,__LINE__,__FILE__);
-    $wag = $db->Execute("SELECT * FROM $dbtables[products] "
-                       ."WHERE long_name = 'wagon' "
-                       ."AND tribeid = '$tribe[tribeid]'");
+    $wag = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'wagon' AND tribeid = '$tribe[tribeid]'");
      db_op_result($wag,__LINE__,__FILE__);
-    $bak = $db->Execute("SELECT * FROM $dbtables[products] "
-                       ."WHERE long_name = 'backpack' "
-                       ."AND tribeid = '$tribe[tribeid]'");
+    $bak = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'backpack' AND tribeid = '$tribe[tribeid]'");
     db_op_result($bak,__LINE__,__FILE__);
-    $pal = $db->Execute("SELECT * FROM $dbtables[products] "
-                       ."WHERE long_name = 'palanquin' "
-                       ."AND tribeid = '$tribe[tribeid]'");
+    $pal = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'palanquin' AND tribeid = '$tribe[tribeid]'");
         db_op_result($pal,__LINE__,__FILE__);
     $palanquin = $pal->fields;
     ////////////Figure out how many bearers needed for the palanquins////////
@@ -129,45 +116,34 @@ while( !$res->EOF )
 
     if( $tribe['tribeid'] == $tribe['goods_tribe'] )
     {
-        $query = $db->Execute("UPDATE $dbtables[tribes] "
-                    ."SET maxweight = '$maxweight' "
-                    ."WHERE tribeid = '$tribe[goods_tribe]'");
+        $query = $db->Execute("UPDATE $dbtables[tribes] SET maxweight = '$maxweight' WHERE tribeid = '$tribe[goods_tribe]'");
             db_op_result($query,__LINE__,__FILE__);
     }
     else
     {
-        $query = $db->Execute("UPDATE $dbtables[tribes] "
-                    ."SET maxweight = maxweight + $maxweight "
-                    ."WHERE tribeid = '$tribe[goods_tribe]'");
-        db_op_result($query,__LINE__,__FILE__);
-        $query = $db->Execute("UPDATE $dbtables[tribes] "
-                    ."SET maxweight = 0 "
-                    ."WHERE tribeid = '$tribe[tribeid]'");
+        //$query = $db->Execute("UPDATE $dbtables[tribes] SET maxweight = maxweight + $maxweight WHERE tribeid = '$tribe[tribeid]'");
+        //db_op_result($query,__LINE__,__FILE__);
+        $query = $db->Execute("UPDATE $dbtables[tribes] SET maxweight = maxweight + $maxweight WHERE tribeid = '$tribe[tribeid]'");
           db_op_result($query,__LINE__,__FILE__);
     }
 
 //////////////////////////////////////////Next, figure out how much they're carrying///////////////////////////
 
 
-    $prod = $db->Execute("SELECT * FROM $dbtables[products] "
-                        ."WHERE tribeid = '$tribe[tribeid]' "
-                        ."AND amount > 0");
+    $prod = $db->Execute("SELECT * FROM $dbtables[products] WHERE tribeid = '$tribe[tribeid]' AND amount > 0");
          db_op_result($prod,__LINE__,__FILE__);
     $totalweight = 0;
     while( !$prod->EOF )
     {
         $prodinfo = $prod->fields;
-        $weight = $db->Execute("SELECT * FROM $dbtables[product_table] "
-                              ."WHERE long_name = '$prodinfo[long_name]'");
+        $weight = $db->Execute("SELECT * FROM $dbtables[product_table] WHERE long_name = '$prodinfo[long_name]'");
           db_op_result($weight,__LINE__,__FILE__);
         $prodweight = $weight->fields;
         $totalweight += $prodweight['weight'] * $prodinfo['amount'];
         $prod->MoveNext();
     }
 
-    $resource = $db->Execute("SELECT * FROM $dbtables[resources] "
-                            ."WHERE tribeid = '$tribe[tribeid]' "
-                            ."AND amount > 0");
+    $resource = $db->Execute("SELECT * FROM $dbtables[resources] WHERE tribeid = '$tribe[tribeid]' AND amount > 0");
        db_op_result($resource,__LINE__,__FILE__);
     while( !$resource->EOF )
     {
@@ -176,24 +152,9 @@ while( !$res->EOF )
         $resource->MoveNext();
     }
 
-    $query = $db->Execute("UPDATE $dbtables[tribes] "
-                ."SET curweight = $totalweight "
-                ."WHERE tribeid = '$tribe[tribeid]'");
+    $query = $db->Execute("UPDATE $dbtables[tribes] SET curweight = $totalweight WHERE tribeid = '$tribe[tribeid]'");
          db_op_result($query,__LINE__,__FILE__);
     $res->MoveNext();
 }
-$time_end = getmicrotime();
-$time = $time_end - $time_start;
-$page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed
-$res = $db->Execute("INSERT INTO $dbtables[logs] "
-            ."VALUES("
-            ."'',"
-            ."'$month[count]',"
-            ."'$year[count]',"
-            ."'0000',"
-            ."'0000.00',"
-            ."'BENCHMARK',"
-            ."'$stamp',"
-            ."'$page_name completed in $time seconds.')");
-    db_op_result($res,__LINE__,__FILE__);
+
 ?>

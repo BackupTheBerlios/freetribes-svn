@@ -5,16 +5,13 @@
 // option) any later version.
 //
 // File: apiarism.php
-$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+$pos = (strpos($_SERVER['PHP_SELF'], "/apiarism.php"));
 if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
-require_once("config.php");
-$time_start = getmicrotime();
-include("scheduler/game_time.php");
-connectdb();
-$res = $db->Execute("SELECT * FROM $dbtables[tribes]");
+
+$res = $db->Execute("SELECT goods_tribe,hex_id,tribeid,clanid FROM $dbtables[tribes]");
 db_op_result($res,__LINE__,__FILE__);
 while( !$res->EOF )
 {
@@ -22,27 +19,19 @@ while( !$res->EOF )
 
 
 ////////////////////////////Fill up the apiaries////////////////
-    $act = $db->Execute("SELECT * FROM $dbtables[structures] "
-                       ."WHERE long_name = 'apiary' "
-                       ."AND tribeid = '$tribe[goods_tribe]' "
-                       ."AND complete = 'Y' "
-                       ."AND number < 20 "
-                       ."ORDER BY struct_id DESC");
+    $act = $db->Execute("SELECT * FROM $dbtables[structures] WHERE long_name = 'apiary' AND tribeid = '$tribe[goods_tribe]' AND complete = 'Y' AND number < 20 ORDER BY struct_id DESC");
     db_op_result($act,__LINE__,__FILE__);
-    $hiv = $db->Execute("SELECT * FROM $dbtables[products] "
-                       ."WHERE long_name = 'hives' "
-                       ."AND tribeid = '$tribe[goods_tribe]' "
-                       ."AND amount > 0");
+    $hiv = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'hives' AND tribeid = '$tribe[goods_tribe]' AND amount > 0");
     db_op_result($hiv,__LINE__,__FILE__);
     if( !$hiv->EOF && !$act->EOF )
     {
         $act_do = $act->fields;
         $hives = $hiv->fields;
         $installed = 0;
-        while( $act_do[number] < 20 && $hives[amount] > 0 )
+        while( $act_do['number'] < 20 && $hives['amount'] > 0 )
         {
-            $act_do[number] += 1;
-            $hives[amount] -= 1;
+            $act_do['number'] += 1;
+            $hives['amount'] -= 1;
             $installed += 1;
         }
         $query = $db->Execute("UPDATE $dbtables[structures] "
@@ -84,7 +73,7 @@ while( !$res->EOF )
         while( !$api->EOF )
         {
             $apiary = $api->fields;
-            $beekeepers += round($apiary[number] / 5 );
+            $beekeepers += round($apiary['number'] / 5 );
             $query = $db->Execute("UPDATE $dbtables[structures] "
                         ."SET used = 'Y' "
                         ."WHERE struct_id = '$apiary[struct_id]'");
@@ -96,8 +85,8 @@ while( !$res->EOF )
         while( $beekeepers > 0 )
         {
             $beekeepers -= 1;
-            $wax += rand(0, $skill[level]);
-            $honey += rand(0, $skill[level]);
+            $wax += rand(0, $skill['level']);
+            $honey += rand(0, $skill['level']);
         }
         $query = $db->Execute("DELETE FROM $dbtables[activities] "
                     ."WHERE tribeid = '$tribe[tribeid]' "
@@ -128,20 +117,6 @@ while( !$res->EOF )
     }
     $res->MoveNext();
 }
-$time_end = getmicrotime();
-$time = $time_end - $time_start;
-//eg("([^/]*).php", $_SERVER['PHP_SELF'], $page_name); // get the name of the file being viewed
-$page_name =   str_replace($game_root."scheduler/",'',__FILE__);
-$res = $db->Execute("INSERT INTO $dbtables[logs] "
-            ."VALUES("
-            ."'',"
-            ."'$month[count]',"
-            ."'$year[count]',"
-            ."'0000',"
-            ."'0000.00',"
-            ."'BENCHMARK',"
-            ."'$stamp',"
-            ."'$page_name completed in $time seconds.')");
-db_op_result($res,__LINE__,__FILE__);
+
 
 ?>

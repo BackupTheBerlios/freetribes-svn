@@ -1,13 +1,10 @@
 <?php
-$pos = (strpos($_SERVER['PHP_SELF'], "/mysqlt-common.php"));
+$pos = (strpos($_SERVER['PHP_SELF'], "/distilling.php"));
 if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
-require_once("config.php");
-$time_start = getmicrotime();
-include("scheduler/game_time.php");
-connectdb();
+
 $reslt = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($reslt,__LINE__,__FILE__);
 while( !$reslt->EOF )
@@ -29,7 +26,7 @@ while( !$reslt->EOF )
                              ."AND number > 0");
             db_op_result($still,__LINE__,__FILE__);
 
-        if( $act_do[product] == 'ale' && !$still->EOF )
+        if( $act_do['product'] == 'ale' && !$still->EOF )
         {
             $distillery = $still->fields;
             $gr = $db->Execute("SELECT * FROM $dbtables[products] "
@@ -37,27 +34,27 @@ while( !$reslt->EOF )
                               ."AND long_name = 'grain'");
               db_op_result($gr,__LINE__,__FILE__);
             $grain = $gr->fields;
-            $startgrain = $grain[amount];
+            $startgrain = $grain['amount'];
             $bar = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'barrels'");
                 db_op_result($bar,__LINE__,__FILE__);
             $barrel = $bar->fields;
-            $startbar = $barrel[amount];
-            if( $act_do[actives] > ( $distillery[number] * 10 ) )
+            $startbar = $barrel['amount'];
+            if( $act_do['actives'] > ( $distillery['number'] * 10 ) )
             {
-                $act_do[actives] = ( $distillery[number] * 10 );
+                $act_do['actives'] = ( $distillery['number'] * 10 );
             }
             $grog = 0;
-            while( $act_do[actives] > 4 && $grain[amount] > 99 && $barrel[amount] > 0 )
+            while( $act_do['actives'] > 4 && $grain['amount'] > 99 && $barrel['amount'] > 0 )
             {
-                $act_do[actives] -= 5;
-                $grain[amount] -= 100;
-                $barrel[amount] -= 1;
+                $act_do['actives'] -= 5;
+                $grain['amount'] -= 100;
+                $barrel['amount'] -= 1;
                 $grog += 100;
             }
-            $deltagrain = $startgrain - $grain[amount];
-            $deltabarrel = $startbar - $barrel[amount];
+            $deltagrain = $startgrain - $grain['amount'];
+            $deltabarrel = $startbar - $barrel['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $grog "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -96,7 +93,7 @@ while( !$reslt->EOF )
         }
 
 
-        if( $act_do[product] == 'mead' && !$still->EOF )
+        if( $act_do['product'] == 'mead' && !$still->EOF )
         {
             $distillery = $still->fields;
             $hon = $db->Execute("SELECT * FROM $dbtables[products] "
@@ -104,27 +101,27 @@ while( !$reslt->EOF )
                               ."AND long_name = 'honey'");
                db_op_result($hon,__LINE__,__FILE__);
             $honey = $ho->fields;
-            $starthoney = $honey[amount];
+            $starthoney = $honey['amount'];
             $bar = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'barrels'");
                db_op_result($bar,__LINE__,__FILE__);
             $barrel = $bar->fields;
-            $startbar = $barrel[amount];
-            if( $act_do[actives] > ( $distillery[number] * 10 ) )
+            $startbar = $barrel['amount'];
+            if( $act_do['actives'] > ( $distillery['number'] * 10 ) )
             {
-                $act_do[actives] = ( $distillery[number] * 10 );
+                $act_do['actives'] = ( $distillery['number'] * 10 );
             }
             $grog = 0;
-            while( $act_do[actives] > 4 && $honey[amount] > 19 && $barrel[amount] > 0 )
+            while( $act_do['actives'] > 4 && $honey['amount'] > 19 && $barrel['amount'] > 0 )
             {
-                $act_do[actives] -= 5;
-                $honey[amount] -= 20;
-                $barrel[amount] -= 1;
+                $act_do['actives'] -= 5;
+                $honey['amount'] -= 20;
+                $barrel['amount'] -= 1;
                 $grog += 100;
             }
-            $deltahoney = $starthoney - $honey[amount];
-            $deltabarrel = $startbar - $barrel[amount];
+            $deltahoney = $starthoney - $honey['amount'];
+            $deltabarrel = $startbar - $barrel['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $grog "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -163,7 +160,7 @@ while( !$reslt->EOF )
         }
 
 
-        if( $act_do[product] == 'wine' && !$still->EOF )
+        if( $act_do['product'] == 'wine' && !$still->EOF )
         {
             $distillery = $still->fields;
             $gr = $db->Execute("SELECT * FROM $dbtables[products] "
@@ -171,27 +168,27 @@ while( !$reslt->EOF )
                               ."AND long_name = 'grapes'");
               db_op_result($gr,__LINE__,__FILE__);
             $grapes = $gr->fields;
-            $startgrapes = $grapes[amount];
+            $startgrapes = $grapes['amount'];
             $bar = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'barrels'");
                db_op_result($bar,__LINE__,__FILE__);
             $barrel = $bar->fields;
-            $startbar = $barrel[amount];
-            if( $act_do[actives] > ( $distillery[number] * 10 ) )
+            $startbar = $barrel['amount'];
+            if( $act_do['actives'] > ( $distillery['number'] * 10 ) )
             {
-                $act_do[actives] = ( $distillery[number] * 10 );
+                $act_do['actives'] = ( $distillery['number'] * 10 );
             }
             $grog = 0;
-            while( $act_do[actives] > 4 && $grapes[amount] > 99 && $barrel[amount] > 0 )
+            while( $act_do['actives'] > 4 && $grapes['amount'] > 99 && $barrel['amount'] > 0 )
             {
-                $act_do[actives] -= 5;
-                $grapes[amount] -= 100;
-                $barrel[amount] -= 1;
+                $act_do['actives'] -= 5;
+                $grapes['amount'] -= 100;
+                $barrel['amount'] -= 1;
                 $grog += 100;
             }
-            $deltagrapes = $startgrapes - $grapes[amount];
-            $deltabarrel = $startbar - $barrel[amount];
+            $deltagrapes = $startgrapes - $grapes['amount'];
+            $deltabarrel = $startbar - $barrel['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $grog "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -229,7 +226,7 @@ while( !$reslt->EOF )
                   db_op_result($query,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'rum' && !$still->EOF )
+        if( $act_do['product'] == 'rum' && !$still->EOF )
         {
             $distillery = $still->fields;
             $su = $db->Execute("SELECT * FROM $dbtables[products] "
@@ -237,27 +234,27 @@ while( !$reslt->EOF )
                               ."AND long_name = 'sugar'");
               db_op_result($su,__LINE__,__FILE__);
             $sugar = $su->fields;
-            $startsugar = $sugar[amount];
+            $startsugar = $sugar['amount'];
             $bar = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'barrels'");
               db_op_result($bar,__LINE__,__FILE__);
             $barrel = $bar->fields;
-            $startbar = $barrel[amount];
-            if( $act_do[actives] > ( $distillery[number] * 10 ) )
+            $startbar = $barrel['amount'];
+            if( $act_do['actives'] > ( $distillery['number'] * 10 ) )
             {
-                $act_do[actives] = ( $distillery[number] * 10 );
+                $act_do['actives'] = ( $distillery['number'] * 10 );
             }
             $grog = 0;
-            while( $act_do[actives] > 4 && $sugar[amount] > 99 && $barrel[amount] > 0 )
+            while( $act_do['actives'] > 4 && $sugar['amount'] > 99 && $barrel['amount'] > 0 )
             {
-                $act_do[actives] -= 5;
-                $sugar[amount] -= 100;
-                $barrel[amount] -= 1;
+                $act_do['actives'] -= 5;
+                $sugar['amount'] -= 100;
+                $barrel['amount'] -= 1;
                 $grog += 100;
             }
-            $deltasugar = $startsugar - $sugar[amount];
-            $deltabarrel = $startbar - $barrel[amount];
+            $deltasugar = $startsugar - $sugar['amount'];
+            $deltabarrel = $startbar - $barrel['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $grog "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -296,7 +293,7 @@ while( !$reslt->EOF )
         }
 
 
-        if( $act_do[product] == 'brandy' && !$still->EOF )
+        if( $act_do['product'] == 'brandy' && !$still->EOF )
         {
             $distillery = $still->fields;
             $su = $db->Execute("SELECT * FROM $dbtables[products] "
@@ -304,35 +301,35 @@ while( !$reslt->EOF )
                               ."AND long_name = 'sugar'");
             db_op_result($su,__LINE__,__FILE__);
             $sugar = $su->fields;
-            $startsugar = $sugar[amount];
+            $startsugar = $sugar['amount'];
             $gr = $db->Execute("SELECT * FROM $dbtables[products] "
                               ."WHERE tribeid = '$tribe[goods_tribe]' "
                               ."AND long_name = 'grapes'");
              db_op_result($gr,__LINE__,__FILE__);
             $grapes = $gr->fields;
-            $startgrapes = $grapes[amount];
+            $startgrapes = $grapes['amount'];
             $bar = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$tribe[goods_tribe]' "
                                ."AND long_name = 'barrels'");
              db_op_result($bar,__LINE__,__FILE__);
             $barrel = $bar->fields;
-            $startbar = $barrel[amount];
-            if( $act_do[actives] > ( $distillery[number] * 10 ) )
+            $startbar = $barrel['amount'];
+            if( $act_do['actives'] > ( $distillery['number'] * 10 ) )
             {
-                $act_do[actives] = ( $distillery[number] * 10 );
+                $act_do['actives'] = ( $distillery['number'] * 10 );
             }
             $grog = 0;
-            while( $act_do[actives] > 4 && $sugar[amount] > 49 && $grapes[amount] > 49 && $barrel[amount] > 0 )
+            while( $act_do['actives'] > 4 && $sugar['amount'] > 49 && $grapes['amount'] > 49 && $barrel['amount'] > 0 )
             {
-                $act_do[actives] -= 5;
-                $sugar[amount] -= 50;
-                $grapes[amount] -= 50;
-                $barrel[amount] -= 1;
+                $act_do['actives'] -= 5;
+                $sugar['amount'] -= 50;
+                $grapes['amount'] -= 50;
+                $barrel['amount'] -= 1;
                 $grog += 100;
             }
-            $deltasugar = $startsugar - $sugar[amount];
-            $deltabarrel = $startbar - $barrel[amount];
-            $deltagrapes = $startgrapes - $grapes[amount];
+            $deltasugar = $startsugar - $sugar['amount'];
+            $deltabarrel = $startbar - $barrel['amount'];
+            $deltagrapes = $startgrapes - $grapes['amount'];
             $query = $db->Execute("UPDATE $dbtables[products] "
                         ."SET amount = amount + $grog "
                         ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -388,18 +385,6 @@ while( !$reslt->EOF )
 
     $reslt->MoveNext();
 }
-$time_end = getmicrotime();
-$time = $time_end - $time_start;
-$page_name =   str_replace($game_root."scheduler/",'',__FILE__);// get the name of the file being viewed
-$res = $db->Execute("INSERT INTO $dbtables[logs] "
-            ."VALUES("
-            ."'',"
-            ."'$month[count]',"
-            ."'$year[count]',"
-            ."'0000',"
-            ."'0000.00',"
-            ."'BENCHMARK',"
-            ."'$stamp',"
-            ."'$page_name completed in $time seconds.')");
-      db_op_result($res,__LINE__,__FILE__);
+
+
 ?>

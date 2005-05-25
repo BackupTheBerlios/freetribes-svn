@@ -4,10 +4,7 @@ if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
-require_once("config.php");
-$time_start = getmicrotime();
-include("scheduler/game_time.php");
-connectdb();
+
 $res = $db->Execute("SELECT * FROM $dbtables[tribes] "
                    ."WHERE activepop < 1 "
                    ."AND slavepop < 1 "
@@ -49,7 +46,7 @@ while( !$res->EOF )
     $query = $db->Execute("DELETE FROM $dbtables[tribes] "
                 ."WHERE tribeid = '$tribe[tribeid]'");
           db_op_result($query,__LINE__,__FILE__);
-    if( $tribe[tribeid] == $tribe[clanid] )
+    if( $tribe['tribeid'] == $tribe['clanid'] )
     {
         $query = $db->Execute("DELETE FROM $dbtables[chiefs] "
                     ."WHERE clanid = '$tribe[clanid]'");
@@ -141,26 +138,6 @@ if($newmonth == 1)
     $gameupdate = $db->Execute("UPDATE $dbtables[game_date] SET count=$newyear where type='year'");
     db_op_result($gameupdate,__LINE__,__FILE__);
 }
-
-$endtime = time();
-$diff_seconds = $endtime - $sched_starttime;
-$diff_minutes = floor($diff_seconds/60);
-$diff_seconds -= $diff_minutes * 60;
-
-$result = $db->Execute("INSERT INTO $dbtables[logs] "
-            ."VALUES("
-            ."'',"
-            ."'$month[count]',"
-            ."'$year[count]',"
-            ."'0000',"
-            ."'0000',"
-            ."'SYSTEMSTAT',"
-            ."'$stamp',"
-            ."'Update completed in $diff_minutes minutes, "
-            ."$diff_seconds seconds, the weather count "
-            ."reached $weatherinfo[count]')");
-
-db_op_result($result,__LINE__,__FILE__);
 
 
 ?>

@@ -1,13 +1,20 @@
 <?php
 error_reporting  (E_ALL);
-
-
 include_once('config.php');
-
  $time_start = getmicrotime();
- $sched_starttime = getmicrotime();
-include("scheduler/game_time.php");
+// include("scheduler/game_time.php");
 connectdb();
+  $gy = $db->Execute("SELECT * FROM $dbtables[game_date] WHERE type = 'year'");
+  db_op_result($gy,__LINE__,__FILE__);
+  $year = $gy->fields;
+  $gm = $db->Execute("SELECT * FROM $dbtables[game_date] WHERE type = 'month'");
+  db_op_result($gm,__LINE__,__FILE__);
+  $month = $gm->fields;
+  $gd = $db->Execute("SELECT * FROM $dbtables[game_date] WHERE type = 'day'");
+  db_op_result($gd,__LINE__,__FILE__);
+  $day = $gd->fields;
+$stamp = date("Y-m-d H:i:s");
+ $turn_over = 23;
   /*
   CREATE TABLE `tstr_scheduler` (
 `id` TINYINT( 3 ) UNSIGNED NOT NULL AUTO_INCREMENT ,
@@ -32,9 +39,12 @@ while(!$sched_run->EOF)
     $now = date("Y-m-d H:i:s");
     if($now > $runtime )
     {
+        $set_time = getmicrotime();
         include_once('./scheduler/'.$script);
+        $finis = getmicrotime();
+        $eta = $finis - $set_time;
         echo "NEW EVENT! : <br>\n";
-        echo "$script executed at $now. Interval is $interval minutes last run at $last_run runtime scheduled for $runtime <br><br>\n\n";
+        echo "$script executed in $eta seconds at $now. Interval is $interval minutes last run at $last_run runtime scheduled for $runtime <br><br>\n\n";
         $upd = $db->Execute("update $dbtables[scheduler] SET last_run = now() where script='$script'");
     }
     //echo $script;
@@ -43,7 +53,7 @@ while(!$sched_run->EOF)
 
 $time_end = getmicrotime();
 $time = $time_end - $time_start;
-echo "<br>Scheduler completed in $time seconds at ".date("Y-m-d H:i:s")."\n Game Time is (d m y) $day[count] $month[count] $year[count]<br>";
+echo "<br> Scheduler completed in $time seconds at ".date("Y-m-d H:i:s")."<br>";
 
 //$test = $db->Execute("SELECT * frmo tstr_loopus WHERE id=3");
 //db_op_result($test,__LINE__,__FILE__);
