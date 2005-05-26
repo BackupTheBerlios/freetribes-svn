@@ -153,7 +153,7 @@ $unique = uniqid(microtime(),1);
 echo "<INPUT TYPE=HIDDEN NAME=unique VALUE='$unique'>"
     ."<INPUT TYPE=HIDDEN NAME=ALREADY VALUE=1>";
 
-echo "<TABLE $BGCOLOR=\"$color_header\" BORDER=0 CELLSPACING=0 CELLPADDING=4 WIDTH=\"100%\">";
+echo "<TABLE BGCOLOR=\"$color_header\" BORDER=0 CELLSPACING=0 CELLPADDING=4 WIDTH=\"100%\">";
 echo "<TR BGCOLOR=\"$color_header\" WIDTH=\"100%\">"
     ."<TD COLSPAN=4>"
     ."<FONT CLASS=page_subtitle>Population Available ($from_tribe)</FONT>"
@@ -197,7 +197,7 @@ echo "<TR BGCOLOR=$color_table ALIGN=CENTER>"
 
 $clan = $db->Execute("SELECT * FROM $dbtables[tribes] "
                     ."WHERE tribeid <> '$from_tribe' "
-                    ."AND hex_id = '$from_hex' "
+                    ."AND hex_id = '$tribeinfo[hex_id]' "
                     ."ORDER BY tribeid ASC");
 $n=0;
 while( !$clan->EOF )

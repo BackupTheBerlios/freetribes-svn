@@ -11,6 +11,31 @@ if (ISSET($_POST['dump']))
     $dump="Yes";
 }
 //O-Tay.. so far so good it seems to be werkin' well :)
+/*
+Notice: Undefined variable: give_liv in /var/www/logic/public_html/tribes/trans_liv.php on line 185
+
+Notice: Undefined variable: month in /var/www/logic/public_html/tribes/trans_liv.php on line 196
+
+Notice: Undefined variable: year in /var/www/logic/public_html/tribes/trans_liv.php on line 197
+
+Notice: Undefined variable: stamp in /var/www/logic/public_html/tribes/trans_liv.php on line 201
+
+Notice: Undefined variable: give_liv in /var/www/logic/public_html/tribes/trans_liv.php on line 185
+
+Notice: Undefined variable: month in /var/www/logic/public_html/tribes/trans_liv.php on line 196
+
+Notice: Undefined variable: year in /var/www/logic/public_html/tribes/trans_liv.php on line 197
+
+Notice: Undefined variable: stamp in /var/www/logic/public_html/tribes/trans_liv.php on line 201
+
+Notice: Undefined variable: give_liv in /var/www/logic/public_html/tribes/trans_liv.php on line 185
+
+Notice: Undefined variable: month in /var/www/logic/public_html/tribes/trans_liv.php on line 196
+
+Notice: Undefined variable: year in /var/www/logic/public_html/tribes/trans_liv.php on line 197
+
+Notice: Undefined variable: stamp in /var/www/logic/public_html/tribes/trans_liv.php on line 201*/
+
 $clanid = $_SESSION['clanid'];
 $tribeid = $_SESSION['current_unit'];
 $from_tribe = $_POST['from_tribe'];

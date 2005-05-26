@@ -388,6 +388,7 @@ while( !$res->EOF )
 
             if( $act_do['product'] == 'refinery' )
             {
+
                 if( !$mhp->EOF )
                 {
                     $log = $db->Execute("SELECT * FROM $dbtables[products] "
@@ -472,7 +473,7 @@ while( !$res->EOF )
                         }
 
                     }
-                }
+
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
                              ."WHERE tribeid = '$tribe[tribeid]' "
                              ."AND product = 'refinery'");
@@ -493,6 +494,7 @@ while( !$res->EOF )
                              ."'$stamp',"
                              ."'Engineering: Refinery Construction using $logs_installed logs.')");
                   db_op_result($query,__LINE__,__FILE__);
+                  }
             }
 
             if( $act_do['product'] == 'smelters' )

@@ -1,3 +1,36 @@
+2005-05-26 7 PM
+3 new functions added
+get_game_time(empty_array);
+create an empty array, pass it to teh function, it returns a multi dimensional array containing
+month,year,day,weather,gameseason arrays - replaces the constant inclusion of game_time.php
+which was causing a slow down in teh scheduler. it hasnt been completely implemented but it is working, and it will
+recieve further optimization in the future.
+it is also created because the game information table is slated for remopval,
+and game date will be maintained in configuration data
+
+playerlog(tribeid,clanid,type,month,year,data,dbtables_array)
+
+returns a true on completion - type can be a defined constant or a literal value such as 'HUNTING'
+month and year values are game date values gotten from get_game_date
+
+get_weight(tribeid)
+Returns an integer value of the total weight of the tribe, which will be used against carry capacity
+this function already existed, I just fixed it to work
+
+Added a great deal of debug code, added adodb's logsql tool to the admin panel
+(which will be turned *OFF* and/or removed in teh released code)
+fixed many many bugs reported in teh game code.
+
+TODO's :
+bug reporting: set up a centralized database and client/server scripts so
+that the main server can query any registered remote server and grab the bug details
+via http so all bug reports can be centralized and sorted
+
+player logging function needs to replace all db queries
+
+also while we are at it when fixing or optimizting a query, convert it to adodb bind variables
+
+
 2005-04-28 11 PM
 more scheduler fixes-
 table $dbtables[map_table] doesnt exist/isnt created by installer- I am not sure of the create table structure, so I copied movement_log, since it enters teh same identical data

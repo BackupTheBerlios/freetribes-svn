@@ -21,7 +21,7 @@ $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
  db_op_result($res,__LINE__,__FILE__);
 while( !$res->EOF )
 {
-    $tribe = array();
+         $tribe = array();
     $tribe = $res->fields;
     $war = $db->Execute("SELECT * FROM $dbtables[garrisons] "
                        ."WHERE tribeid = '$tribe[tribeid]'");
@@ -172,7 +172,7 @@ while( !$res->EOF )
                         ."AND long_name = 'provs'");
        db_op_result($food,__LINE__,__FILE__);
     $foodinfo = $food->fields;
-
+    $starving = false;
     if( $foodinfo['amount'] >= $food_eaten )
     {
         $result = $db->Execute("UPDATE $dbtables[products] "
@@ -301,7 +301,7 @@ while( !$res->EOF )
         $loginfoactives = 0;
         $loginfoinactives = 0;
         $loginfoslavepop = 0;
-        $starving = false;
+
         if( $foodinfo['amount'] < 1 && $foodneeded > 0 && $goat < 1 && $cattle < 1 && $horse < 1 && $elephant < 1 && $pig < 1 && $sheep < 1 )
         {
             $loginfoactives = abs(round( $tribe['activepop'] * .05 ));
@@ -318,6 +318,7 @@ while( !$res->EOF )
 
             $logtext2 = "Starvation: $loginfoactives Actives, $loginfoinactives Inactives, "
                    ."$loginfoslavepop Slaves either starved or ran away.";
+
         }
         $totalpop = $tribe['activepop'] + $tribe['inactivepop'] + $totalwar + $tribe['slavepop'];
         $maxam = $tribe['activepop'] + $tribe['slavepop'] - $slavers;

@@ -93,17 +93,7 @@ while(!$res->EOF)
              {
                  $logtext = "Scouting: $tribe_id's scouting party $party headed $direction detected ";
                  $logtext .= "$count[tribeid] ";
-                 $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                    ."VALUES("
-                                    ."'',"
-                                    ."'$month[count]',"
-                                    ."'$year[count]',"
-                                    ."'$clan_id',"
-                                    ."'$tribe_id',"
-                                    ."'SCOUT',"
-                                    ."'$stamp',"
-                                    ."'$logtext')");
-                  db_op_result($query,__LINE__,__FILE__);
+                 playerlog($tribeid,,$clan_id,'SCOUTING',$month['count'],$year['count'],$logtext,$dbtables);
               }//end scouts found other player
               //OK scout attrition - do we lose any? lets calculate
               $scoutfind = abs(ceil(mt_rand( 1,500 )));//whole positive integer
@@ -114,26 +104,15 @@ while(!$res->EOF)
                   {
                       $sql = $db->Prepare("DELETE FROM $dbtables[scouts] WHERE scoutid = ?");
                       $logmessage = "Scouting Party LOST! All scouts from $direction Party ID $party have been lost or deserted you!";
+                      playerlog($tribeid,,$clan_id,'SCOUTING',$month['count'],$year['count'],$logmessage,$dbtables);
                   }
-                  else
+                  elseif($numbermissed > 0)
                   {
                       $sql = $db->Prepare("UPDATE $dbtables[scouts] SET actives = actives - $numbermissed WHERE scoutid = ?");
                       $logmessage = "It appears that $numbermissed scouts did not return from $direction Party ID $party.";
+                      playerlog($tribeid,,$clan_id,'SCOUTING',$month['count'],$year['count'],$logmessage,$dbtables);
                   }
-                  if($numbermissed > 0)
-                  {
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                    ."VALUES("
-                                    ."'',"
-                                    ."'$month[count]',"
-                                    ."'$year[count]',"
-                                    ."'$clan_id',"
-                                    ."'$tribe_id',"
-                                    ."'SCOUT',"
-                                    ."'$stamp',"
-                                    ."'Scouting: It appears that $numbermissed scouts did not return.')");
-                        db_op_result($query,__LINE__,__FILE__);
-                  }//end dealing with missing scouts
+
                }
                elseif($scoutfind < $skill_level)//we find something
                {
@@ -149,17 +128,8 @@ while(!$res->EOF)
                         $findwhat = $find->fields;
                         $what = abs(ceil(mt_rand( 0, $findwhat['count'])));
                         $many = abs(ceil(mt_rand( 1, $skill_level )));
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                    ."VALUES("
-                                    ."'',"
-                                    ."'$month[count]',"
-                                    ."'$year[count]',"
-                                    ."'$clan_id',"
-                                    ."'$tribe_id',"
-                                    ."'SCOUT',"
-                                    ."'$stamp',"
-                                    ."'North Scouting: We have found $many $findwhat[proper].')");
-                        db_op_result($query,__LINE__,__FILE__);
+                        $logmessage = "$direction Scouting: We have found $many $findwhat[proper].";
+                        playerlog($tribeid,,$clan_id,'SCOUTING',$month['count'],$year['count'],$logmessage,$dbtables);
                         $query = $db->Execute("UPDATE $dbtables[products] "
                                     ."SET amount = amount + $many "
                                     ."WHERE long_name = '$findwhat[long_name]' "
@@ -176,18 +146,9 @@ while(!$res->EOF)
                                              ."LIMIT $what, 1");
                         db_op_result($found,__LINE__,__FILE__);
                         $findwhat = $found->fields;
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                    ."VALUES("
-                                    ."'',"
-                                    ."'$month[count]',"
-                                    ."'$year[count]',"
-                                    ."'$clan_id',"
-                                    ."'$tribe_id',"
-                                    ."'SCOUT',"
-                                    ."'$stamp',"
-                                    ."'North Scouting: We have found $many $findwhat[type].')");
-                       db_op_result($query,__LINE__,__FILE__);
-                       $query = $db->Execute("UPDATE $dbtables[livestock] "
+                        $logmessage = "$direction Scouting: We have found $many $findwhat[proper].";
+                        playerlog($tribeid,,$clan_id,'SCOUTING',$month['count'],$year['count'],$logmessage,$dbtables);
+                        $query = $db->Execute("UPDATE $dbtables[livestock] "
                                     ."SET amount = amount + $many "
                                     ."WHERE type = '$findwhat[type]' "
                                     ."AND tribeid = '$goods_tribe'");

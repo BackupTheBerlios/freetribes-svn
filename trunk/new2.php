@@ -25,7 +25,7 @@ $username = $_POST['username'];
 $startore = $_POST['startore'];
 $email = $_POST['email'];
 $email2 = $_POST['email2'];
-
+$startitem1 = $_POST['startitem1'];
 
 if( empty($username) || empty($character) || empty($email) || empty($email2) )
 {

@@ -94,7 +94,6 @@ $from_hex = $from_hex->fields;
 $from_hex = $from_hex['hex_id'];
 $hex_tribes = $db->Execute("SELECT tribeid FROM $dbtables[tribes] WHERE clanid = '$clanid' AND hex_id='$from_hex' ORDER BY tribeid");
 db_op_result($hex_tribes,__LINE__,__FILE__);
-echo "<OPTION VALUE=Clan>--- Clan ---</option>\n";
 while(!$hex_tribes->EOF)
 {
     $tribe = $hex_tribes->fields;

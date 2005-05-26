@@ -26,19 +26,36 @@ while( !$last->EOF )
     db_op_result($res,__LINE__,__FILE__);
     $last->MoveNext();
 }
-  $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
-  db_op_result($res,__LINE__,__FILE__);
-  while(!$res->EOF)
-   {
+//OK here, we need to see if a tribe has a hunt or herd activity set if they do not,
+//set a default with whatever actives they have remaining
+//this ensures herding and population are maintained as much as possible.
+
+$res = $db->Execute("SELECT * FROM $dbtables[tribes]");
+db_op_result($res,__LINE__,__FILE__);
+while(!$res->EOF)
+{
     $tribe = $res->fields;
 
-$act = $db->Execute("SELECT * FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]'");
- db_op_result($act,__LINE__,__FILE__);
-if($act->EOF)
-{
+    $total_herders = 0;
+    $herdflag=0;
+    $huntflag=0;
+    $hrd = $db->Execute("SELECT count(*) as count from $dbtables[activities] WHERE tribeid='$tribe[tribeid]' and skill_abbr = 'herd'");
+    db_op_result($hrd,__LINE__,__FILE__);
+    $hrdg = $hrd->fields;
+    if($hrdg['count'] < 1)
+    {
+         $herdflag = 1;
+    }
+    $hnt = $db->Execute("select count(*) as count from $dbtables[activities] where tribeid='$tribe[tribeid]' AND skill_abbr='hunt' AND product='provs'");
+    db_op_result($hnt,__LINE__,__FILE__);
+    $hntg = $hnt->fields;
+    if($hntg['count'] < 1)
+    {
+         $huntflag = 1;
+    }
 
 
-if($tribe['tribeid'] == $tribe['goods_tribe'])
+if($herdflag)
 {
     $liv1 = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$tribe[tribeid]' AND type = 'Cattle'");
     db_op_result($liv1,__LINE__,__FILE__);
@@ -68,25 +85,29 @@ if($tribe['tribeid'] == $tribe['goods_tribe'])
     $denominator2 = 5 + $skillinfo['level'];
     $denominator3 = 20 + $skillinfo['level'];
 $total_herders = ceil(($mounts1['amount']/$denominator) + ($mounts2['amount']/$denominator) + ($mounts3['amount']/$denominator2) + ($mounts4['amount']/$denominator3) + ($mounts5['amount']/$denominator) + ($mounts6['amount']/$denominator3) + ($mounts7['amount']/$denominator3));
+
+
+
+if($total_herders > $tribe['curam'])
+{
+    $total_herders = $tribe['curam'];
 }
 
-$default_activity = $tribe['activepop'] - $total_herders;
-if($default_activity < 0){
-$default_activity = 0;
-}
-if($total_herders > $tribe['curam']){
-$total_herders = $tribe['curam'];
-}
-$query = $db->Execute("INSERT INTO $dbtables[activities]
-VALUES('','$tribe[tribeid]','hunt','provs','$default_activity')");
- db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("INSERT INTO $dbtables[activities]
-VALUES('','$tribe[tribeid]','herd','livestock','$total_herders')");
+$query = $db->Execute("INSERT INTO $dbtables[activities] VALUES('','$tribe[tribeid]','herd','livestock','$total_herders')");
 db_op_result($query,__LINE__,__FILE__);
-$act = $db->Execute("SELECT * FROM $dbtables[activities] WHERE tribeid = '$tribe[tribeid]'");
-db_op_result($act,__LINE__,__FILE__);
 }
 
+if($huntflag)
+{
+  $default_activity = $tribe['curam'] - $total_herders;
+if($default_activity < 0)
+{
+    $default_activity = 0;
+}
+
+$query = $db->Execute("INSERT INTO $dbtables[activities] VALUES('','$tribe[tribeid]','hunt','provs','$default_activity')");
+ db_op_result($query,__LINE__,__FILE__);
+}
 $res->MoveNext();
 }
 

@@ -1,0 +1,20 @@
+livestock table needs totally re-done
+
+should be : tribeid  int(6) unsigned  autoincrement
+Cattle   int(8) unsigned
+Horses      int(8) unsigned
+Elephants   int(8) unsigned
+Goats       int(8) unsigned
+Sheep       int(8) unsigned
+Pigs        int(8) unsigned
+Dogs        int(8) unsigned
+
+//this would considerably help things in the code, requirements : re-do tribes table
+have a players table with player info, options, (clan name, etc) then have a tribes table
+for individual tribes and subtribes, allow players to name tribes and associate tribe id with player id
+simple
+
+because this will completely change the structure of teh databases , let's do the rest
+and make this version 1.2
+
+

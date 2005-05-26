@@ -4,6 +4,8 @@ if ($pos !== false)
 {
     die("You cannot access this page directly!");
 }
+//What we should do here is select from activities where activity = quarry and then select the appropriate
+//tribe info for it.
 
 $res = $db->Execute("SELECT * FROM $dbtables[tribes]");
 db_op_result($res,__LINE__,__FILE__);
@@ -20,8 +22,7 @@ while( !$res->EOF )
 
         if( $act_do['skill_abbr'] == 'qry' )
         {
-            $hex = $db->Execute("SELECT * FROM $dbtables[hexes] "
-                               ."WHERE hex_id = '$tribe[hex_id]'");
+            $hex = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$tribe[hex_id]'");
              db_op_result($hex,__LINE__,__FILE__);
             $hexinfo = $hex->fields;
             if( $hexinfo['terrain'] == 'gh' | $hexinfo['terrain'] == 'dh' | $hexinfo['terrain'] == 'ch' | $hexinfo['terrain'] == 'jh' | $hexinfo['terrain'] == 'lcm' | $hexinfo['terrain'] == 'ljm' )
@@ -52,18 +53,10 @@ while( !$res->EOF )
                                        ."AND long_name = 'mattock'");
                   db_op_result($mattock,__LINE__,__FILE__);
 
-                if( !$shov->EOF )
-                {
-                    $shovinfo = $shov->fields;
-                }
-                if( !$pick->EOF )
-                {
-                    $pickinfo = $pick->fields;
-                }
-                if( !$mattock->EOF )
-                {
-                    $mattockinfo = $mattock->fields;
-                }
+                $shovinfo = $shov->fields;
+                $pickinfo = $pick->fields;
+                $mattockinfo = $mattock->fields;
+
                 if( $shovinfo['amount'] > $act_do['actives'] )
                 {
                     $shovinfo['amount'] = $act_do['actives'];

@@ -64,6 +64,7 @@ $dbtables['weapons'] = "${db_prefix}weapons";
 $dbtables['weather'] = "${db_prefix}weather";
 $dbtables['news'] = "{$db_prefix}game_news";
 $dbtables['scheduler'] = "{$db_prefix}scheduler";
+$dbtables['player_logs'] = "{$db_prefix}player_logs";
 $privilege = array (
 // Helper privileges
                     "hlp_Search"       =>  0,
@@ -124,18 +125,22 @@ function connectdb()
 
   if(!$result)
     die ("Unable to connect to the database");
+    $db->LogSQL();
 }
 
 
 
-function playerlog($sid, $log_type, $data = "")
+function playerlog($tribeid,$clanid,$log_type,$month,$year,$data = '',$dbtables)
 {
-  global $db, $dbtables;
+  global $db;
   /* write log_entry to the player's log - identified by player's ship_id - sid. */
-  if ($sid != "" && !empty($log_type))
+  if ($tribeid != "" && !empty($log_type))
   {
-    $db->Execute("INSERT INTO $dbtables[logs] VALUES('', $sid, $log_type, NOW(), '$data')");
+    $logsql = $db->Prepare("INSERT INTO $dbtables[player_logs] (month,year,tribeid,clanid,type,time,data) VALUES (?,?,?,?,?,NOW(),?)");
+    $res = $db->Execute($logsql,array($month,$year,$tribeid,$clanid,$log_type,$data));
+    db_op_result($res,__LINE__,__FILE__);
   }
+   return true;
 }
 
 
@@ -181,31 +186,62 @@ function db_op_result($query,$served_line,$served_page)
         $cumulative = 1; // For areas with multiple actions needing status - 0 is all good so far, 1 is at least one bad.
     }
 }
+function get_game_time($info)
+{
+    global $db , $dbtables;
 
+    $gy = $db->Execute("SELECT count FROM $dbtables[game_date] WHERE type = 'year'");
+    db_op_result($gy,__LINE__,__FILE__);
+    $year = $gy->fields;
+
+    $gtseason = $db->Execute("SELECT * FROM $dbtables[game_date] WHERE type = 'season'");
+    db_op_result($gtseason,__LINE__,__FILE__);
+    $gameseason = $gtseason->fields;
+
+    $gm = $db->execute("SELECT count FROM $dbtables[game_date] WHERE type = 'month'");
+     db_op_result($gm,__LINE__,__FILE__);
+    $month = $gm->fields;
+
+    $gd = $db->Execute("SELECT count FROM $dbtables[game_date] WHERE type = 'day'");
+    db_op_result($gd,__LINE__,__FILE__);
+    $day = $gd->fields;
+
+    $wtr = $db->Execute("SELECT * FROM $dbtables[weather] WHERE current_type = 'Y'");
+    db_op_result($wtr,__LINE__,__FILE__);
+    $weather = $wtr->fields;
+
+    $info = array("year"=>$year,"month"=>$month,"day"=>$day,"gameseason"=>$gameseason,"weather"=>$weather);
+    return $info;
+}
 function get_weight($tribeid)
 {
     global $db, $dbtables;
     $prod = $db->Execute("SELECT * FROM $dbtables[products] WHERE tribeid = '$tribeid' AND amount > 0 AND long_name != 'wagon'");
+    db_op_result($prod,__LINE__,__FILE__);
     $totalweight = 0;
     while( !$prod->EOF )
     {
         $prodinfo = $prod->fields;
         $weight = $db->Execute("SELECT * FROM $dbtables[product_table] WHERE long_name = '$prodinfo[long_name]'");
+        db_op_result($weight,__LINE__,__FILE__);
         $prodweight = $weight->fields;
-        $totalweight += $prodweight[weight] * $prodinfo[amount];
+        $totalweight += $prodweight['weight'] * $prodinfo['amount'];
         $prod->MoveNext();
     }
 
     $resource = $db->Execute("SELECT * FROM $dbtables[resources] WHERE tribeid = '$tribeid' AND amount > 0");
+    db_op_result($resource,__LINE__,__FILE__);
     while( !$resource->EOF)
     {
         $resinfo = $resource->fields;
-        $totalweight += $resinfo[amount];
+        $totalweight += $resinfo['amount'];
         $resource->MoveNext();
     }
 
-    $db->Execute("UPDATE $dbtables[tribes] SET curweight = $totalweight WHERE tribeid = '$tribeid'");
+    $gy = $db->Execute("UPDATE $dbtables[tribes] SET curweight = $totalweight WHERE tribeid = '$tribeid'");
+    db_op_result($gy,__LINE__,__FILE__);
 
+   return $totalweight;
 }
 
 

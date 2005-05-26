@@ -345,7 +345,7 @@ elseif( $season['count'] == '4' )
     }
 }
 
-$res = $db->Execute("DELETE FROM $dbtables[logs] WHERE time < date_sub(NOW(),INTERVAL 1 day)");
+$res = $db->Execute("DELETE FROM $dbtables[logs] WHERE time < date_sub(NOW(),INTERVAL 7 day)");
 db_op_result($res,__LINE__,__FILE__);
 //echo "DONE!";
 ?>

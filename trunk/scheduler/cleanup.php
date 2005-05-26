@@ -97,14 +97,14 @@ $res = $db->Execute("INSERT INTO $dbtables[logs] "
             ."'$stamp',"
             ."'$page_name completed in $time seconds.')");
       db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("DELETE FROM $dbtables[poptrans]");
+$res = $db->Execute("TRUNCATE TABLE $dbtables[poptrans]");
 db_op_result($res,__LINE__,__FILE__);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 $res = $db->Execute("DELETE FROM $dbtables[activities] WHERE skill_abbr = 'Relax'");
 db_op_result($res,__LINE__,__FILE__);
 $res = $db->Execute("UPDATE $dbtables[chiefs] SET active = active + 1");
 db_op_result($res,__LINE__,__FILE__);
-$res = $db->Execute("DELETE FROM $dbtables[map_view]");
+$res = $db->Execute("TRUNCATE TABLE $dbtables[map_view]");
 db_op_result($res,__LINE__,__FILE__);
 $weather = $db->Execute("SELECT * FROM $dbtables[game_date] where type = 'weather'");
 db_op_result($weather,__LINE__,__FILE__);
@@ -139,5 +139,6 @@ if($newmonth == 1)
     db_op_result($gameupdate,__LINE__,__FILE__);
 }
 
-
+$res = $db->Execute("TRUNCATE TABLE $dbtables[activities]");
+db_op_result($res,__LINE__,__FILE__);
 ?>
