@@ -365,14 +365,14 @@ else
                 `active` int(11) NOT NULL default '0',
                 `current_unit` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
                 `minimap` set('0','1','2') NOT NULL default '1',
-                `adid`)min` tinyint(1) NOT NULL default '0',
+                `admin` tinyint(1) NOT NULL default '0',
                 `score` bigint(20) NOT NULL default '0',
                 `hour` int(15) default NULL,
                 `theme` varchar(50) NOT NULL default 'Original',
                 `tooltip` enum('0','1') NOT NULL default '0',
                 PRIMARY KEY  (`clanid`)
                 ) TYPE=MyISAM");
-    $hashed_pass = md5($_REQUEST[password]);
+    $hashed_pass = md5($_REQUEST['password']);
     $db->Execute("INSERT INTO $dbtables[chiefs] "
                 ."VALUES("
                 ."'',"
@@ -1268,11 +1268,11 @@ else
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (177,'silver','Silver','N','N','ref',0,'silver.ore','N',1.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (178,'lead','Lead','N','N','ref',0,'lead.ore','N',1.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (179,'gold','Gold','N','N','ref',0,'gold.ore','N',1.00)");
-    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (181,'stonewalls10','10\' Stone Walls','N','N','eng',11,'stones','N',0.00)");
+    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (181,'stonewalls10','10ft Stone Walls','N','N','eng',11,'stones','N',0.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (180,'steel','Steel','N','N','ref',12,'iron.ore','N',1.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (182,'palisade','Wooden Palisade','N','N','eng',11,'','N',0.00)");
-    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (183,'stonewalls15','15\' Stone Walls','N','N','eng',11,'stones','N',0.00)");
-    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (184,'stonewalls20','20\' Stone Walls','N','N','eng',11,'stones','N',0.00)");
+    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (183,'stonewalls15','15ft Stone Walls','N','N','eng',11,'stones','N',0.00)");
+    $db->Execute("INSERT INTO $dbtables[product_table] VALUES (184,'stonewalls20','20ft Stone Walls','N','N','eng',11,'stones','N',0.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (185,'gate','Gate','N','N','eng',11,'','N',0.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (186,'gate_barred','Barred Gate','N','N','eng',11,'','N',0.00)");
     $db->Execute("INSERT INTO $dbtables[product_table] VALUES (187,'moat','Moat','N','N','eng',3,'','N',0.00)");
@@ -1436,7 +1436,7 @@ else
         .") TYPE=MyISAM;");
 db_op_result($result,__LINE__,__FILE__);
 echo "Inserting Data....";
-$result = $db->Execute("INSERT INTO tstr_scheduler VALUES ('', 6, 'D', 1440, 'defaultactivities.php', '0000-00-00 00:00:00'),"
+$result = $db->Execute("INSERT INTO $dbtables[scheduler] VALUES ('', 6, 'D', 1440, 'defaultactivities.php', '0000-00-00 00:00:00'),"
 ."('', 7, 'D', 1440, 'fairfigures.php', '0000-00-00 00:00:00'),   "
 ."('', 8, 'D', 1440, 'fairfigures2.php', '0000-00-00 00:00:00'),  "
 ."('', 9, 'D', 1440, 'fairpricelist.php', '0000-00-00 00:00:00'), "
@@ -1532,7 +1532,7 @@ flush();
      $stamp = date("Y-m-d H:i:s");
     $query = $db->Execute("INSERT INTO $dbtables[news] (created,expire,headline,front_page,news) VALUES ("
                             ."now(),"
-                            ."date_add(cur_date(),interval 1 year),"
+                            ."date_add(now(),interval 1 year),"
                             ."'Game Reset!',"
                             ."'1',"
                             ."'$title $version has been Reset on $stamp. Join up, and Conquer!'"
@@ -2421,7 +2421,7 @@ flush();
                 `game` int(11) NOT NULL default '0',
                 `prospect` smallint(2) NOT NULL default '0',
                 `seed` int(10) unsigned zerofill NOT NULL default '1111111111',
-                UNIQUE KEY `hex_id` (`hex_id`)
+                PRIMARY KEY `hex_id` (`hex_id`)
                     ) TYPE=MyISAM ");
         echo " Done!<BR>";
         flush();
@@ -2437,7 +2437,7 @@ flush();
     while( $safehex < 1 )
     {
         $safeinfo = $safe->fields;
-        if( $safeinfo[safe] == 'N' )
+        if( $safeinfo['safe'] == 'N' )
         {
             $random_hex = rand( 1, 4096 );
             $safe = $db->Execute("SELECT * FROM $dbtables[hexes] "
