@@ -19,11 +19,11 @@ if($account_creation_closed)
 //$character = preg_replace ("/[^\w\d\s]/","",$_POST['character']);
 //$clanname = preg_replace ("/[^\w\d\s]/","",$_POST['clanname']);
 //$username = preg_replace ("/[^\w\d\s]/","",$_POST['username']);
-$character = $_POST['character'];
-$clanname = $_POST['clanname'];
-$username = $_POST['username'];
+$character = str_replace(" ",'',$_POST['character']);
+$clanname = str_replace(" ",'',$_POST['clanname']);
+$username = str_replace(" ",'',$_POST['username']);
 $startore = $_POST['startore'];
-$email = $_POST['email'];
+$email = str_replace(" ",'',$_POST['email']);
 $email2 = $_POST['email2'];
 $startitem1 = $_POST['startitem1'];
 
@@ -102,27 +102,10 @@ if( $flag == 0 )
 {
   /* insert code to add player to database */
     $makepass = '';
-    $syllables = 'er,in,tia,wol,fe,pre,vet,jo,nes,al,len,son,';
-    $syllables .= 'cha,ir,ler,bo,ok,tio,nar,sim,ple,bla,ten,toe,';
-    $syllables .= 'cho,co,lat,spe,ak,er,po,co,lor,pen,cil,li,ght,';
-    $syllables .= 'wh,at,the,he,ck,is,mam,bo,no,fi,ve,any,way,pol,';
-    $syllables .= 'iti,cs,ra,dio,sou,rce,sea,rch,pa,per,com,bo,sp,';
-    $syllables .= 'eak,st,fi,rst,gr,oup,boy,ea,gle,tr,ail,bi,ble,';
-    $syllables .= 'brb,pri,dee,kay,en,be,se,lud,spr,bloy,oit,nid';
-    $syllable_array=explode(",", $syllables);
-    srand( ( double ) microtime() * 1000000 );
-    for( $count = 1 ; $count <= 4 ; $count++ )
-    {
-        if( rand()%10 == 1 )
-        {
-            $makepass .= sprintf( "%0.0f", ( rand()%50 ) +1 );
-    }
-    else
-        {
-            $makepass .= sprintf( "%s", $syllable_array[rand()%62] );
-    }
-
-    }
+   $seed = mt_rand(0,time());
+   $food = substr(md5($username.$character.$email),0,15);
+   $makeup = md5($seed.$food);
+   $makepass = substr($makeup,mt_rand(0,20),12);
     $hashed_pass = md5($makepass);
     $curr_hex = rand(1,4096);
     $safehex = 0;

@@ -1,4 +1,4 @@
-<?
+<?php
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2 of the License, or (at your
@@ -17,13 +17,13 @@ page_header("Tribe Activities");
 
 connectdb();
 
-    $job = explode( '.', $_REQUEST[job] );
+    $job = explode( '.', $_REQUEST['job'] );
     $module = $_POST['skilltype'];
 /*
-	echo "<PRE>";
-	print_r($_POST);
-	print_r($_REQUEST);
-	echo "</PRE>";
+    echo "<PRE>";
+    print_r($_POST);
+    print_r($_REQUEST);
+    echo "</PRE>";
 */
     $deva = $db->Execute("SELECT * FROM $dbtables[tribes] "
                         ."WHERE tribeid = '$_SESSION[current_unit]'");
@@ -37,25 +37,25 @@ connectdb();
 
 
 echo "<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>"
-	."<TR>"
-	."<TD>&nbsp;</TD>";
+    ."<TR>"
+    ."<TD>&nbsp;</TD>";
 if ( $month[count] > 2 && $month[count] < 12 )
 {
-	echo "<FORM ACTION=seeking.php METHOD=POST>"
-		."<TD>"
-		."<INPUT TYPE=SUBMIT VALUE=\"Seeking\">"
-		."&nbsp;</TD>"
-		."</FORM>";
+    echo "<FORM ACTION=seeking.php METHOD=POST>"
+        ."<TD>"
+        ."<INPUT TYPE=SUBMIT VALUE=\"Seeking\">"
+        ."&nbsp;</TD>"
+        ."</FORM>";
 }
 echo "</FORM>"
-	."</TR>"
-	."</TABLE>"
-	."<BR>";
+    ."</TR>"
+    ."</TABLE>"
+    ."<BR>";
 
 
 
 
-    if( ISSET( $_REQUEST[repeat] ) )
+    if( ISSET( $_REQUEST['repeat'] ) )
     {
         ////////////FIRST, get how many actives we have to duplicate///////////
         $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] "
@@ -65,57 +65,44 @@ echo "</FORM>"
         ////////////Now, let's figure out what they did last turn/////////
         $act = $db->Execute("SELECT * FROM $dbtables[last_turn] "
                            ."WHERE tribeid = '$_SESSION[current_unit]'");
-        while( !$act->EOF  && $actives[curam] > 0 )
+        while( !$act->EOF  && $actives['curam'] > 0 )
         {
             $act_do = $act->fields;
-            if( ( $act_do[actives] + $actives[curam] ) > 0 )
+            if( ( $act_do['actives'] + $actives['curam'] ) > 0 )
             {
-                if( $act_do[skill_abbr] == 'herd' )
+                if( $act_do['skill_abbr'] == 'herd' )
                 {
-                    $liv1 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                        ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                        ."AND type = 'Cattle'");
-                    $liv2 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                        ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                        ."AND type = 'Horses'");
-                    $liv3 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                        ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                        ."AND type = 'Elephants'");
-                    $liv4 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                        ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                        ."AND type = 'Goats'");
-                    $liv5 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                        ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                        ."AND type = 'Dogs'");
-                    $liv6 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                        ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                        ."AND type = 'Pigs'");
-                    $liv7 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                        ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                        ."AND type = 'Sheep'");
-                    $mounts1 = $liv1->fields;
-                    $mounts2 = $liv2->fields;
-                    $mounts3 = $liv3->fields;
-                    $mounts4 = $liv4->fields;
-                    $mounts5 = $liv5->fields;
-                    $mounts6 = $liv6->fields;
-                    $mounts7 = $liv7->fields;
-                    $skill = $db->Execute("SELECT * FROM $dbtables[skills] "
-                                         ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                         ."AND abbr = 'herd'");
-                    $skillinfo = $skill->fields;
-                    $denominator = 10 + $skillinfo[level];
-                    $denominator2 = 5 + $skillinfo[level];
-                    $denominator3 = 20 + $skillinfo[level];
+                $sql = $db->Prepare("SELECT type,amount from $dbtables[livestock] WHERE tribeid=?");
+                $animals = $db->Execute($sql,array($_SESSION['current_unit']));
+                db_op_result($animals,__LINE__,__FILE__);
+                while(!$animals->EOF)
+                {
+                    $info = $animals->fields;
+                    $name = $info['type'];
+                    $amt = $info['amount'];
+                    $$name = $amt;
+                    //above is a variable variable, resulting in something like $Catttle = 3724;
+                    //NOTE- animal names appear to be capitalized letters, this likely will be important
+                    $animals->MoveNext();
+                }
+                $skills = $db->Prepare("SELECT level FROM $dbtables[skills] WHERE tribeid = ? AND abbr = 'herd'");
+                $skill = $db->Execute($skills,array($_SESSION['current_unit']));
+                db_op_result($skill,__LINE__,__FILE__);
+                $skillinfo = $skill->fields;
+                    //now we calculate herders required in total  and see if we have enough actives assigned
+                    $cat_hors_dog_herd = 10 + $skillinfo['level'];
+                    $eleph_herd = 5 + $skillinfo['level'];
+                    $goat_pig_shp_herd = 20 + $skillinfo['level'];
                     $required_herders = 0;
-                    $required_herders = ceil( $mounts1[amount] / $denominator );
-                    $required_herders += ceil( $mounts2[amount] / $denominator );
-                    $required_herders += ceil( $mounts3[amount] / $denominator2 );
-                    $required_herders += ceil( $mounts4[amount] / $denominator3 );
-                    $required_herders += ceil( $mounts5[amount] / $denominator );
-                    $required_herders += ceil( $mounts6[amount] / $denominator3 );
-                    $required_herders += ceil( $mounts7[amount] / $denominator3 );
-                    $act_do[actives] = $required_herders;
+                    $cattle = abs(round($Cattle/$cat_hors_dog_herd));
+                    $horse = abs(round($Horses/$cat_hors_dog_herd));
+                    $dogs = abs(round($Dogs/$cat_hors_dog_herd));
+                    $elephants = abs(round($Elephants/$eleph_herd));
+                    $goat = abs(round($Goats/$goat_pig_shp_herd));
+                    $sheep = abs(round($Sheep/$goat_pig_shp_herd));
+                    $pigs = abs(round($Pigs/$goat_pig_shp_herd));
+                    $required_herders = abs($cattle+$horse+$dogs+$elephants+$goat+$sheep+$pigs);
+                    $act_do['actives'] = $required_herders;
                 }
                 $db->Execute("INSERT INTO $dbtables[activities] "
                             ."VALUES("
@@ -132,7 +119,7 @@ echo "</FORM>"
             $act->MoveNext();
         }
     }
-    if( !ISSET( $module ) && ISSET( $_REQUEST[cancel] ) )
+    if( !ISSET( $module ) && ISSET( $_REQUEST['cancel'] ) )
     {
         $db->Execute("DELETE FROM $dbtables[activities] "
                     ."WHERE tribeid = '$_SESSION[current_unit]' "
@@ -200,7 +187,7 @@ echo "</FORM>"
             $r = 0;
             echo "<TR CLASS=color_row$rc><TD COLSPAN=4 ALIGN=CENTER>None</TD></TR>";
             $rc = $r % 2;
-			$r++;
+            $r++;
 
             echo "<TR CLASS=color_row$rc><TD COLSPAN=4 ALIGN=CENTER>";
             echo "<FORM ACTION=activities.php METHOD=POST>";
@@ -211,7 +198,7 @@ echo "</FORM>"
         {
             $act_do_info = $act_do->fields;
             $rc = $r % 2;
-			$r++;
+            $r++;
 
             echo "<TR CLASS=color_row$rc><TD>";
             echo "$act_do_info[skill_abbr]</TD>";
@@ -251,8 +238,8 @@ echo "</FORM>"
             while( !$fm->EOF )
             {
                 $farm = $fm->fields;
-				$rc = $r % 2;
-				$r++;
+                $rc = $r % 2;
+                $r++;
                 echo "<TR CLASS=color_row$rc ALIGN=CENTER>";
                 echo "<TD>$farm[hex_id]</TD>";
                 echo "<TD>$farm[crop]</TD>";
@@ -265,11 +252,11 @@ echo "</FORM>"
 
         echo '<P>';
 
-		mstsck_list($_SESSION['current_unit']);
+        mstsck_list($_SESSION['current_unit']);
 
         echo "</TD>";
-		
-		echo "<TD VALIGN=TOP><TABLE BORDER=0 VALIGN=TOP><TR>";
+
+        echo "<TD VALIGN=TOP><TABLE BORDER=0 VALIGN=TOP><TR>";
         echo "<TD CLASS=color_header COLSPAN=2>Resources And Products Available</TD></TR>";
         $stuff = $db->Execute("SELECT * FROM $dbtables[products] "
                              ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
@@ -280,8 +267,8 @@ echo "</FORM>"
         while( !$stuff->EOF )
         {
             $stuffinfo = $stuff->fields;
-			$rc =$r % 2;
-			$r++;
+            $rc =$r % 2;
+            $r++;
             echo "<TR CLASS=color_row$rc>";
             echo "<TD>$stuffinfo[proper]</TD>";
             echo "<TD>$stuffinfo[amount]</TD></TR>";
@@ -296,8 +283,8 @@ echo "</FORM>"
         while( !$stuff->EOF )
         {
             $stuffinfo = $stuff->fields;
-			$rc =$r % 2;
-			$r++;
+            $rc =$r % 2;
+            $r++;
             echo "<TR CLASS=color_row$rc>";
             echo "<TD>$stuffinfo[long_name]</TD>";
             echo "<TD>$stuffinfo[amount]</TD></TR>";
@@ -313,7 +300,7 @@ echo "</FORM>"
         {
             $stuffinfo = $stuff->fields;
             $rc = $r % 2;
-			$r++;
+            $r++;
             echo "<TR CLASS=color_row$rc>";
             echo "<TD>$stuffinfo[type]</TD>";
             echo "<TD>$stuffinfo[amount]</TD></TR>";
@@ -327,7 +314,7 @@ echo "</FORM>"
             echo "</TABLE></TD></TR></TABLE>";
 
     }
-    elseif( ISSET( $module ) && !ISSET( $_REQUEST[actives] ) )
+    elseif( ISSET( $module ) && !ISSET( $_REQUEST['actives'] ) )
     {
         echo "<TABLE BORDER=0 WIDTH=\"100%\">";
         echo "<TR CLASS=color_header ALIGN=CENTER><TD COLSPAN=3>";
@@ -349,7 +336,7 @@ echo "</FORM>"
             $res = $db->Execute("SELECT * FROM $dbtables[product_table] "
                                ."WHERE skill_abbr = '$abbr' "
                                ."AND skill_level <= '$skillinfo[level]'"
-							   ."ORDER BY proper");
+                               ."ORDER BY proper");
             while( !$res->EOF )
             {
                 $resinfo = $res->fields;
@@ -362,66 +349,55 @@ echo "</FORM>"
             }
         }
         echo "</SELECT></TD></TR>";
-        if( $resinfo[skill_abbr] == 'seek' )
+        if( $resinfo['skill_abbr'] == 'seek' )
         {
-			echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=seeking.php\">";
-			page_footer();
+            echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=seeking.php\">";
+            page_footer();
         }
-        if( $resinfo[skill_abbr] == 'farm' )
+        if( $resinfo['skill_abbr'] == 'farm' )
         {
-			echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=farmingacts.php\">";
-			page_footer();
+            echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=farmingacts.php\">";
+            page_footer();
         }
 
         $active = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                              ."WHERE tribeid = '$_SESSION[current_unit]'"); 
+                              ."WHERE tribeid = '$_SESSION[current_unit]'");
         $activeinfo = $active->fields;
-        if( $resinfo[skill_abbr] == 'herd' )
+        if( $resinfo['skill_abbr'] == 'herd' )
         {
-            $liv1 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                ."AND type = 'Cattle'");
-            $liv2 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                ."AND type = 'Horses'");
-            $liv3 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                ."AND type = 'Elephants'");
-            $liv4 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                ."AND type = 'Goats'");
-            $liv5 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                ."AND type = 'Dogs'");
-            $liv6 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                ."AND type = 'Pigs'");
-            $liv7 = $db->Execute("SELECT * FROM $dbtables[livestock] "
-                                ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                ."AND type = 'Sheep'");
-            $mounts1 = $liv1->fields;
-            $mounts2 = $liv2->fields;
-            $mounts3 = $liv3->fields;
-            $mounts4 = $liv4->fields;
-            $mounts5 = $liv5->fields;
-            $mounts6 = $liv6->fields;
-            $mounts7 = $liv7->fields;
-            $skill = $db->Execute("SELECT * FROM $dbtables[skills] "
-                                 ."WHERE tribeid = '$_SESSION[current_unit]' "
-                                 ."AND abbr = 'herd'");
-            $skillinfo = $skill->fields;
-            $denominator = 10 + $skillinfo[level];
-            $denominator2 = 5 + $skillinfo[level];
-            $denominator3 = 20 + $skillinfo[level];
-            $required_herders = ceil( $mounts1[amount] / $denominator );
-            $required_herders += ceil( $mounts2[amount] / $denominator );
-            $required_herders += ceil( $mounts3[amount] / $denominator2 );
-            $required_herders += ceil( $mounts4[amount] / $denominator3 );
-            $required_herders += ceil( $mounts5[amount] / $denominator );
-            $required_herders += ceil( $mounts6[amount] / $denominator3 );
-            $required_herders += ceil( $mounts7[amount] / $denominator3 );
+                $sql = $db->Prepare("SELECT type,amount from $dbtables[livestock] WHERE tribeid=?");
+                $animals = $db->Execute($sql,array($_SESSION['current_unit']));
+                db_op_result($animals,__LINE__,__FILE__);
+                while(!$animals->EOF)
+                {
+                    $info = $animals->fields;
+                    $name = $info['type'];
+                    $amt = $info['amount'];
+                    $$name = $amt;
+                    //above is a variable variable, resulting in something like $Catttle = 3724;
+                    //NOTE- animal names appear to be capitalized letters, this likely will be important
+                    $animals->MoveNext();
+                }
+                $skills = $db->Prepare("SELECT level FROM $dbtables[skills] WHERE tribeid = ? AND abbr = 'herd'");
+                $skill = $db->Execute($skills,array($_SESSION['current_unit']));
+                db_op_result($skill,__LINE__,__FILE__);
+                $skillinfo = $skill->fields;
+            //now we calculate herders required in total  and see if we have enough actives assigned
+            $cat_hors_dog_herd = 10 + $skillinfo['level'];
+            $eleph_herd = 5 + $skillinfo['level'];
+            $goat_pig_shp_herd = 20 + $skillinfo['level'];
+            $required_herders = 0;
+            $cattle = abs(round($Cattle/$cat_hors_dog_herd));
+            $horse = abs(round($Horses/$cat_hors_dog_herd));
+            $dogs = abs(round($Dogs/$cat_hors_dog_herd));
+            $elephants = abs(round($Elephants/$eleph_herd));
+            $goat = abs(round($Goats/$goat_pig_shp_herd));
+            $sheep = abs(round($Sheep/$goat_pig_shp_herd));
+            $pigs = abs(round($Pigs/$goat_pig_shp_herd));
+            $required_herders = abs($cattle+$horse+$dogs+$elephants+$goat+$sheep+$pigs);
+
             echo "<TR bgcolor=$color_line2>";
-            echo "<TD>Allocate</TD>";
+            echo "<TD>Allocate </TD>";
             echo "<TD><INPUT CLASS=edit_area NAME=actives TYPE=TEXT SIZE=5 MAXLENGTH=7 VALUE=''></TD>";
             echo "</TR>";
             echo "<TR CLASS=color_row0><TD>Actives remaining:</TD>";
@@ -429,7 +405,7 @@ echo "</FORM>"
             echo "<TR bgcolor=$color_line2><TD>Herders Required:</TD>";
             echo "<TD ALIGN=CENTER>$required_herders</TD></TR>";
         }
-        else 
+        else
         {
             echo "<TR bgcolor=$color_line2><TD>Allocate</TD>";
             echo "<TD><INPUT CLASS=edit_area NAME=actives TYPE=TEXT SIZE=5 MAXLENGTH=7 VALUE=''></TD>";
@@ -442,19 +418,19 @@ echo "</FORM>"
         $capinfo = $cap->fields;
         $skill = $db->Execute("SELECT * FROM $dbtables[skills] "
                              ."WHERE tribeid = '$_SESSION[current_unit]' "
-                             ."AND abbr = '$_REQUEST[skilltype]'");
+                             ."AND abbr = '$_POST[skilltype]'");
         $skillinfo = $skill->fields;
-        if( $capinfo[level_cap] == 'Y' && $skillinfo[level] < 10 )
+        if( $capinfo['level_cap'] == 'Y' && $skillinfo['level'] < 10 )
         {
-            $maxallowed = $skillinfo[level] * 10;
-            if( $maxallowed > $tribeinfo[curam] )
+            $maxallowed = $skillinfo['level'] * 10;
+            if( $maxallowed > $tribeinfo['curam'] )
             {
-                $maxallowed = $tribeinfo[curam];
+                $maxallowed = $tribeinfo['curam'];
             }
         }
         else
         {
-            $maxallowed = $tribeinfo[curam];
+            $maxallowed = $tribeinfo['curam'];
         }
         echo "<TR CLASS=color_row0><TD>Max Assignable:</TD>";
         echo "<TD ALIGN=CENTER>$maxallowed</TD></TR>";
@@ -475,11 +451,11 @@ echo "</FORM>"
         {
             $stuffinfo = $stuff->fields;
             $rc = $r % 2;
-			$r++;
+            $r++;
             echo "<TR CLASS=color_row$rc><TD>$stuffinfo[proper]</TD>";
             echo "<TD>$stuffinfo[amount]</TD></TR>";
             $totalstuff++;
-	    $stuff->MoveNext();
+        $stuff->MoveNext();
         }
         $stuff = array();
         $stuff = $db->Execute("SELECT * FROM $dbtables[resources] "
@@ -499,8 +475,8 @@ echo "</FORM>"
             }
             echo "<TR CLASS=color_row$rc><TD>$stuffinfo[long_name]</TD>";
             echo "<TD>$stuffinfo[amount]</TD></TR>";
-	    $totalstuff++;
-	    $stuff->MoveNext();
+        $totalstuff++;
+        $stuff->MoveNext();
         }
         if( $totalstuff < 1 )
         {
@@ -558,9 +534,9 @@ echo "</FORM>"
             {
                 $job = false;
             }
-			echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=activities.php?job=$job\">";
+            echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=activities.php?job=$job\">";
         }
-        else 
+        else
         {
             echo "You do not have that many actives unallocated.<BR>";
             echo "Click <a href=activities.php>here</a> to try again.<BR>";
@@ -570,4 +546,4 @@ echo "</FORM>"
 
 
 page_footer();
-?> 
+?>

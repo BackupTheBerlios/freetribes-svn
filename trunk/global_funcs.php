@@ -63,6 +63,7 @@ $dbtables['tribes'] = "${db_prefix}tribes";
 $dbtables['weapons'] = "${db_prefix}weapons";
 $dbtables['weather'] = "${db_prefix}weather";
 $dbtables['news'] = "{$db_prefix}game_news";
+$dbtables['game_news'] = "{$db_prefix}game_news";
 $dbtables['scheduler'] = "{$db_prefix}scheduler";
 $dbtables['player_logs'] = "{$db_prefix}player_logs";
 $privilege = array (

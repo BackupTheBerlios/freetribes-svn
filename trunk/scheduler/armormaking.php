@@ -125,7 +125,7 @@ while( !$act->EOF )
          db_op_result($res,__LINE__,__FILE__);
     }
 
-    if( $act_do[product] == 'scutum' )
+    if( $act_do['product'] == 'scutum' )
     {
         $brnz = $db->Execute("SELECT * FROM $dbtables[resources] "
                             ."WHERE long_name = 'Bronze' "
@@ -183,7 +183,7 @@ while( !$act->EOF )
         db_op_result($res,__LINE__,__FILE__);
     }
 
-    if( $act_do[product] == 'ironshield' )
+    if( $act_do['product'] == 'ironshield' )
     {
         $ironore = $db->Execute("SELECT * FROM $dbtables[resources] "
                                ."WHERE long_name = 'Iron' "
@@ -241,7 +241,7 @@ while( !$act->EOF )
         db_op_result($res,__LINE__,__FILE__);
     }
 
-    if( $act_do[product] == 'steelshield' )
+    if( $act_do['product'] == 'steelshield' )
     {
             $stl = $db->Execute("SELECT * FROM $dbtables[resources] "
                                ."WHERE long_name = 'Steel' "
@@ -300,7 +300,7 @@ while( !$act->EOF )
              db_op_result($res,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'ironhelm' )
+        if( $act_do['product'] == 'ironhelm' )
         {
             $iron = $db->Execute("SELECT * FROM $dbtables[resources] "
                                 ."WHERE long_name = 'Iron' "
@@ -357,7 +357,7 @@ while( !$act->EOF )
               db_op_result($res,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'ironchain' )
+        if( $act_do['product'] == 'ironchain' )
         {
             $ironore = $db->Execute("SELECT * FROM $dbtables[resources] "
                                    ."WHERE long_name = 'Iron' "
@@ -414,7 +414,7 @@ while( !$act->EOF )
             db_op_result($res,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'cuirass' )
+        if( $act_do['product'] == 'cuirass' )
         {
             $mtl = $db->Execute("SELECT * FROM $dbtables[resources] "
                                ."WHERE long_name = 'Bronze' "
@@ -473,7 +473,7 @@ while( !$act->EOF )
              db_op_result($res,__LINE__,__FILE__);
         }
 
-        if( $act_do[product] == 'ironbreastplate' )
+        if( $act_do['product'] == 'ironbreastplate' )
         {
             $mtl = $db->Execute("SELECT * FROM $dbtables[resources] "
                                ."WHERE long_name = 'Iron' "
@@ -531,7 +531,7 @@ while( !$act->EOF )
                         ."'Armormaking: $product Iron breastplates made using $coaldelta coal and $mtldelta iron.')");
            db_op_result($res,__LINE__,__FILE__);
         }
-        if( $act_do[product] == 'ironplatebarding' )
+        if( $act_do['product'] == 'ironplatebarding' )
         {
             $mtl = $db->Execute("SELECT * FROM $dbtables[resources] "
                                ."WHERE long_name = 'Iron' "
@@ -589,7 +589,7 @@ while( !$act->EOF )
                         ."'Armormaking: $product Iron platemail barding made using $coaldelta coal and $mtldelta iron.')");
              db_op_result($res,__LINE__,__FILE__);
         }
-        if( $act_do[product] == 'ironchainbarding' )
+        if( $act_do['product'] == 'ironchainbarding' )
         {
             $mtl = $db->Execute("SELECT * FROM $dbtables[resources] "
                                ."WHERE long_name = 'Iron' "
@@ -649,7 +649,7 @@ while( !$act->EOF )
     }
 
 
-        if( $act_do[product] == 'steelchainbarding' )
+        if( $act_do['product'] == 'steelchainbarding' )
         {
             $mtl = $db->Execute("SELECT * FROM $dbtables[resources] "
                                ."WHERE long_name = 'Steel' "
@@ -709,7 +709,7 @@ while( !$act->EOF )
     }
 
 
-        if( $act_do[product] == 'steelplatebarding' )
+        if( $act_do['product'] == 'steelplatebarding' )
         {
             $mtl = $db->Execute("SELECT * FROM $dbtables[resources] "
                                ."WHERE long_name = 'Steel' "

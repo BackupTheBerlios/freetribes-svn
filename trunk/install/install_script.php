@@ -49,27 +49,29 @@ else
     echo "<P>";
     //to use db_op_result here, we need log table created first ..
     $db->Execute("DROP TABLE IF EXISTS $dbtables[logs]");
-    $db->Execute("CREATE TABLE $dbtables[logs] ("
-                ."`logid` int(10) unsigned NOT NULL auto_increment,"
-                ."`month` smallint(2) NOT NULL default '0',"
-                ."`year` smallint(4) NOT NULL default '0',"
-                ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`type` varchar(15) NOT NULL default '0',"
-                ."`time` datetime NOT NULL default '0000-00-00 00:00:00',"
-                ."`data` text,"
-                ."PRIMARY KEY  (`logid`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[logs] (
+                    `logid` int(10) unsigned NOT NULL auto_increment,
+                    `month` smallint(2) NOT NULL default '0',
+                    `year` smallint(4) NOT NULL default '0',
+                    `clanid` int(4) unsigned zerofill NOT NULL default '0000',
+                    `tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                    `type` varchar(15) NOT NULL default '0',
+                    `time` datetime NOT NULL default '0000-00-00 00:00:00',
+                    `data` text,
+                    PRIMARY KEY  (`logid`),
+                    KEY `tribeid` (`tribeid`,`month`,`year`,`type`),
+                    KEY `time` (`time`)
+                ) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "<CENTER>Creating weather table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[weather]");
-    $db->Execute("CREATE TABLE $dbtables[weather] ("
-                ."`weather_id` smallint(2) NOT NULL auto_increment,"
-                ."`long_name` varchar(15) NOT NULL default '',"
-                ."`current_type` set('Y','N') NOT NULL default 'N',"
-                ."PRIMARY KEY `weather_id` (`weather_id`)) TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[weather] (
+                `weather_id` smallint(2) NOT NULL auto_increment,
+                `long_name` varchar(15) NOT NULL default '',
+                `current_type` set('Y','N') NOT NULL default 'N',
+                PRIMARY KEY  (`weather_id`)) TYPE=MyISAM");
     $db->Execute("INSERT INTO $dbtables[weather] "
                 ."VALUES (1,'Fine','Y')");
     $db->Execute("INSERT INTO $dbtables[weather] "
@@ -82,6 +84,38 @@ else
                 ."VALUES (8,'Heavy Snow','N')");
     $db->Execute("INSERT INTO $dbtables[weather] "
                 ." VALUES (4,'Wind','N')");
+    echo " Done!<BR>";
+    flush();
+    echo "<CENTER>Creating news table....";
+    flush();
+    $db->Execute("DROP TABLE IF EXISTS $dbtables[game_news]");
+    $db->Execute("CREATE TABLE $dbtables[game_news] (
+            `id` bigint(20) unsigned NOT NULL auto_increment,
+            `created` date NOT NULL default '0000-00-00',
+            `expire` date NOT NULL default '0000-00-00',
+            `headline` varchar(80) NOT NULL default '',
+            `news` text NOT NULL,
+            PRIMARY KEY  (`id`),
+            KEY `created` (`created`,`expire`)
+            ) TYPE=MyISAM");
+
+    echo " Done!<BR>";
+    flush();
+    echo "<CENTER>Creating news table....";
+    flush();
+    $db->Execute("DROP TABLE IF EXISTS $dbtables[player_logs]");
+    $db->Execute("CREATE TABLE $dbtables[player_logs] (
+                `logid` int(10) unsigned NOT NULL auto_increment,
+                `month` smallint(2) NOT NULL default '0',
+                `year` smallint(4) NOT NULL default '0',
+                `clanid` int(4) unsigned zerofill NOT NULL default '0000',
+                `tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                `type` varchar(15) NOT NULL default '0',
+                `time` datetime NOT NULL default '0000-00-00 00:00:00',
+                `data` text,
+                PRIMARY KEY  (`logid`)
+            ) TYPE=MyISAM");
+
     echo " Done!<BR>";
     flush();
     echo "Creating gd_terrain table....";
@@ -146,18 +180,18 @@ else
     echo "Creating weapons table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[weapons]");
-    $db->Execute("CREATE TABLE $dbtables[weapons] ("
-                ."`proper` varchar(20) NOT NULL default '',"
-                ."`dbname` varchar(20) NOT NULL default '',"
-                ."`inf_inf` decimal(4,2) NOT NULL default '0.00',"
-                ."`inf_cav` decimal(4,2) NOT NULL default '0.00',"
-                ."`inf_arc` decimal(4,2) NOT NULL default '0.00',"
-                ."`cav_inf` decimal(4,2) NOT NULL default '0.00',"
-                ."`cav_cav` decimal(4,2) NOT NULL default '0.00',"
-                ."`cav_arc` decimal(4,2) NOT NULL default '0.00',"
-                ."`hunting` decimal(3,2) NOT NULL default '0.00',"
-                ."KEY `dbname` (`dbname`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[weapons] (
+                `proper` varchar(20) NOT NULL default '',
+                `dbname` varchar(20) NOT NULL default '',
+                `inf_inf` decimal(4,2) NOT NULL default '0.00',
+                `inf_cav` decimal(4,2) NOT NULL default '0.00',
+                `inf_arc` decimal(4,2) NOT NULL default '0.00',
+                `cav_inf` decimal(4,2) NOT NULL default '0.00',
+                `cav_cav` decimal(4,2) NOT NULL default '0.00',
+                `cav_arc` decimal(4,2) NOT NULL default '0.00',
+                `hunting` decimal(3,2) NOT NULL default '0.00',
+                KEY `dbname` (`dbname`)
+                ) TYPE=MyISAM");
     $db->Execute("INSERT INTO $dbtables[weapons] VALUES ('Club','club',1.68,1.29,1.80,1.53,0.67,1.69,0.03)");
     $db->Execute("INSERT INTO $dbtables[weapons] VALUES ('Bone Spear','bonespear',2.81,2.81,3.00,3.21,2.72,3.50,0.05)");
     $db->Execute("INSERT INTO $dbtables[weapons] VALUES ('Stone Spear','stonespear',2.96,2.96,3.26,3.36,2.87,3.66,0.05)");
@@ -196,23 +230,23 @@ else
     echo "Creating armor table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[armor]");
-    $db->Execute("CREATE TABLE $dbtables[armor] ("
-                ."`arm_id` int(11) NOT NULL auto_increment,"
-                ."`proper` varchar(20) NOT NULL default '',"
-                ."`long_name` varchar(20) NOT NULL default '',"
-                ."`type` varchar(15) NOT NULL default '',"
-                ."`arrow` smallint(2) NOT NULL default '0',"
-                ."`bronze` smallint(2) NOT NULL default '0',"
-                ."`iron` smallint(2) NOT NULL default '0',"
-                ."`pellet` smallint(2) NOT NULL default '0',"
-                ."`quarrel` smallint(2) NOT NULL default '0',"
-                ."`shaft` smallint(2) NOT NULL default '0',"
-                ."`steel` smallint(2) NOT NULL default '0',"
-                ."`steel_1` smallint(2) NOT NULL default '0',"
-                ."`steel_2` smallint(2) NOT NULL default '0',"
-                ."`stone` smallint(2) NOT NULL default '0',"
-                ."PRIMARY KEY `arm_id` (`arm_id`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[armor] (
+            `arm_id` int(11) NOT NULL auto_increment,
+            `proper` varchar(20) NOT NULL default '',
+            `long_name` varchar(20) NOT NULL default '',
+            `type` varchar(15) NOT NULL default '',
+            `arrow` smallint(2) NOT NULL default '0',
+            `bronze` smallint(2) NOT NULL default '0',
+            `iron` smallint(2) NOT NULL default '0',
+            `pellet` smallint(2) NOT NULL default '0',
+            `quarrel` smallint(2) NOT NULL default '0',
+            `shaft` smallint(2) NOT NULL default '0',
+            `steel` smallint(2) NOT NULL default '0',
+            `steel_1` smallint(2) NOT NULL default '0',
+            `steel_2` smallint(2) NOT NULL default '0',
+            `stone` smallint(2) NOT NULL default '0',
+            PRIMARY KEY  (`arm_id`)
+                ) TYPE=MyISAM");
 
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (1,'Iron Breastplate','ironbreastplate','overtorso',5,20,10,15,5,10,8,6,4,25)");
     $db->Execute("INSERT INTO $dbtables[armor] VALUES (2,'Iron Chain','ironchain','torso',2,17,15,5,2,5,12,10,7,20)");
@@ -273,71 +307,71 @@ else
     echo "Creating activities table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[activities]");
-    $db->Execute("CREATE TABLE $dbtables[activities] ("
-                ."`id` int(11) NOT NULL auto_increment,"
-                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`skill_abbr` varchar(5) NOT NULL default '',"
-                ."`product` varchar(15) NOT NULL default '',"
-                ."`actives` int(25) NOT NULL default '0',"
-                ."PRIMARY KEY `id` (`id`)"
-                .") TYPE=MyISAM ");
+    $db->Execute("CREATE TABLE $dbtables[activities] (
+            `id` int(11) NOT NULL auto_increment,
+            `tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+            `skill_abbr` varchar(5) NOT NULL default '',
+            `product` varchar(15) NOT NULL default '',
+            `actives` int(25) NOT NULL default '0',
+            PRIMARY KEY  (`id`)
+            ) TYPE=MyISAM ");
     echo " Done!<BR>";
     flush();
     echo "Creating alliances table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[alliances]");
-    $db->Execute("CREATE TABLE $dbtables[alliances] ("
-                ."`alliance_id` int(11) NOT NULL auto_increment,"
-                ."`offerer_id` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`receipt_id` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`accept` set('Y','N') NOT NULL default 'N',"
-                ."PRIMARY KEY `alliance_id` (`alliance_id`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[alliances] (
+                `alliance_id` int(11) NOT NULL auto_increment,
+                `offerer_id` int(4) unsigned zerofill NOT NULL default '0000',
+                `receipt_id` int(4) unsigned zerofill NOT NULL default '0000',
+                `accept` set('Y','N') NOT NULL default 'N',
+                PRIMARY KEY  (`alliance_id`)
+                ) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Creating bug_tracker table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[bug_tracker]");
-    $db->Execute("CREATE TABLE $dbtables[bug_tracker] ("
-                ."`entryid` int(11) NOT NULL auto_increment,"
-                ."`ticketid` int(11) NOT NULL default '0',"
-                ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`username` varchar(30) NOT NULL default '',"
-                ."`skillname` varchar(15) NOT NULL default '',"
-                ."`product` varchar(20) NOT NULL default '',"
-                ."`summary` varchar(50) NOT NULL default '',"
-                ."`detail` text NOT NULL,"
-                ."`status` enum('NEW','OPEN','STALLED','RESOLVED') NOT NULL default 'NEW',"
-                ."`owner` varchar(30) NOT NULL default '',"
-                ."`month` smallint(2) NOT NULL default '0',"
-                ."`year` smallint(5) NOT NULL default '0',"
-                ."PRIMARY KEY `entryid` (`entryid`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[bug_tracker] (
+                `entryid` int(11) NOT NULL auto_increment,
+                `ticketid` int(11) NOT NULL default '0',
+                `clanid` int(4) unsigned zerofill NOT NULL default '0000',
+                `tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                `username` varchar(30) NOT NULL default '',
+                `skillname` varchar(15) NOT NULL default '',
+                `product` varchar(20) NOT NULL default '',
+                `summary` varchar(50) NOT NULL default '',
+                `detail` text NOT NULL,
+                `status` enum('NEW','OPEN','STALLED','RESOLVED') NOT NULL default 'NEW',
+                `owner` varchar(30) NOT NULL default '',
+                `month` smallint(2) NOT NULL default '0',
+                `year` smallint(5) NOT NULL default '0',
+                PRIMARY KEY  (`entryid`)
+                ) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Creating chiefs table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[chiefs]");
-    $db->Execute("CREATE TABLE $dbtables[chiefs] ("
-                ."`clanid` int(4) unsigned zerofill NOT NULL auto_increment,"
-                ."`username` varchar(30) NOT NULL default '',"
-                ."`password` varchar(60) NOT NULL default '',"
-                ."`chiefname` varchar(30) NOT NULL default '',"
-                ."`email` text NOT NULL,"
-                ."`lastseen_month` smallint(2) default NULL,"
-                ."`lastseen_year` smallint(4) NOT NULL default '0',"
-                ."`ipaddr` varchar(15) NOT NULL default '',"
-                ."`active` int(11) NOT NULL default '0',"
-                ."`current_unit` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`minimap` set('0','1','2') NOT NULL default '1',"
-                ."`admin` tinyint(1) NOT NULL default '0',"
-                ."`score` bigint(20) NOT NULL default '0',"
-                ."`hour` int(15) default NULL,"
-                ."`theme` varchar(50) NOT NULL default 'Original',"
-                ."`tooltip` ENUM( '0', '1' ) NOT NULL default '1',"
-                ."PRIMARY KEY `clanid` (`clanid`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[chiefs] (
+                `clanid` int(4) unsigned zerofill NOT NULL auto_increment,
+                `username` varchar(30) NOT NULL default '',
+                `password` varchar(60) NOT NULL default '',
+                `chiefname` varchar(30) NOT NULL default '',
+                `email` text NOT NULL,
+                `lastseen_month` smallint(2) default NULL,
+                `lastseen_year` smallint(4) NOT NULL default '0',
+                `ipaddr` varchar(15) NOT NULL default '',
+                `active` int(11) NOT NULL default '0',
+                `current_unit` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                `minimap` set('0','1','2') NOT NULL default '1',
+                `adid`)min` tinyint(1) NOT NULL default '0',
+                `score` bigint(20) NOT NULL default '0',
+                `hour` int(15) default NULL,
+                `theme` varchar(50) NOT NULL default 'Original',
+                `tooltip` enum('0','1') NOT NULL default '0',
+                PRIMARY KEY  (`clanid`)
+                ) TYPE=MyISAM");
     $hashed_pass = md5($_REQUEST[password]);
     $db->Execute("INSERT INTO $dbtables[chiefs] "
                 ."VALUES("
@@ -356,19 +390,19 @@ else
                 ."'',"
                 ."'',"
                 ."'Original',"
-                ."'1')");
+                ."'0')");
     echo " Done!<BR>";
     flush();
     echo "Creating clans table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[clans]");
-    $db->Execute("CREATE TABLE $dbtables[clans] ("
-                ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`clanname` varchar(25) NOT NULL default 'Wanderers',"
-                ."`religion` varchar(25) NOT NULL default 'None',"
-                ."`active` tinyint(1) NOT NULL default '1',"
-                ."PRIMARY KEY `clanid` (`clanid`)"
-                .") TYPE=MyISAM ");
+    $db->Execute("CREATE TABLE $dbtables[clans] (
+                `clanid` int(4) unsigned zerofill NOT NULL default '0001',
+                `clanname` varchar(25) NOT NULL default 'Wanderers',
+                `religion` varchar(25) NOT NULL default 'None',
+                `active` tinyint(1) NOT NULL default '1',
+                PRIMARY KEY  (`clanid`)
+                ) TYPE=MyISAM ");
     $db->Execute("INSERT INTO $dbtables[clans] "
                 ."VALUES("
                 ."'0001',"
@@ -380,31 +414,30 @@ else
     echo "Creating tribes table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[tribes]");
-    $db->Execute("CREATE TABLE $dbtables[tribes] ("
-                ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`tribename` varchar(30) NOT NULL default '',"
-                ."`DeVA` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`totalpop` int(25) NOT NULL default '0',"
-                ."`warpop` int(25) NOT NULL default '0',"
-                ."`activepop` int(25) NOT NULL default '0',"
-                ."`inactivepop` int(25) NOT NULL default '0',"
-                ."`slavepop` int(25) NOT NULL default '0',"
-                ."`specialpop` int(25) NOT NULL default '0',"
-                ."`maxam` int(25) NOT NULL default '0',"
-                ."`curam` int(25) NOT NULL default '0',"
-                ."`morale` decimal(4,3) NOT NULL default '1.000',"
-                ."`maxweight` decimal(25,2) NOT NULL default '0.00',"
-                ."`curweight` int(25) NOT NULL default '0',"
-                ."`hex_id` int(11) NOT NULL default '0',"
-                ."`pri_skill_att` varchar(4) NOT NULL default '',"
-                ."`sec_skill_att` varchar(4) NOT NULL default '',"
-                ."`research_att` varchar(25) NOT NULL default '',"
-                ."`move_pts` int(11) NOT NULL default '0',"
-                ."`goods_tribe` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."PRIMARY KEY `clanid` (`clanid`),"
-                ."UNIQUE KEY `tribeid` (`tribeid`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[tribes] (
+                `clanid` int(4) unsigned zerofill NOT NULL default '0000',
+                `tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                `tribename` varchar(30) NOT NULL default '',
+                `DeVA` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                `totalpop` int(25) unsigned NOT NULL default '0',
+                `warpop` int(25) unsigned NOT NULL default '0',
+                `activepop` int(25) unsigned NOT NULL default '0',
+                `inactivepop` int(25) unsigned NOT NULL default '0',
+                `slavepop` int(25) unsigned NOT NULL default '0',
+                `specialpop` int(25) unsigned NOT NULL default '0',
+                `maxam` int(25) unsigned NOT NULL default '0',
+                `curam` int(25) unsigned NOT NULL default '0',
+                `morale` decimal(4,3) NOT NULL default '1.000',
+                `maxweight` decimal(25,2) NOT NULL default '0.00',
+                `curweight` int(25) unsigned NOT NULL default '0',
+                `hex_id` int(11) unsigned NOT NULL default '0',
+                `pri_skill_att` varchar(4) NOT NULL default '',
+                `sec_skill_att` varchar(4) NOT NULL default '',
+                `research_att` varchar(25) NOT NULL default '',
+                `move_pts` int(11) unsigned NOT NULL default '0',
+                `goods_tribe` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                PRIMARY KEY  (`tribeid`)
+                ) TYPE=MyISAM");
     $random_hex = rand(1, 4096);
     $db->Execute("INSERT INTO $dbtables[tribes] "
                 ."VALUES("
@@ -434,29 +467,29 @@ else
     echo "Creating combat_terrain_effect table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[combat_terrain_effect]");
-    $db->Execute("CREATE TABLE $dbtables[combat_terrain_effect] ("
-                ."`type` varchar(11) NOT NULL default '',"
-                ."`ah` decimal(3,2) NOT NULL default '0.00',"
-                ."`ar` decimal(3,2) NOT NULL default '0.00',"
-                ."`ch` decimal(3,2) NOT NULL default '0.00',"
-                ."`de` decimal(3,2) NOT NULL default '0.00',"
-                ."`df` decimal(3,2) NOT NULL default '0.00',"
-                ."`gh` decimal(3,2) NOT NULL default '0.00',"
-                ."`hsm` decimal(3,2) NOT NULL default '0.00',"
-                ."`hvm` decimal(3,2) NOT NULL default '0.00',"
-                ."`jh` decimal(3,2) NOT NULL default '0.00',"
-                ."`ju` decimal(3,2) NOT NULL default '0.00',"
-                ."`lam` decimal(3,2) NOT NULL default '0.00',"
-                ."`lcm` decimal(3,2) NOT NULL default '0.00',"
-                ."`ljm` decimal(3,2) NOT NULL default '0.00',"
-                ."`lsm` decimal(3,2) NOT NULL default '0.00',"
-                ."`pr` decimal(3,2) NOT NULL default '0.00',"
-                ."`sh` decimal(3,2) NOT NULL default '0.00',"
-                ."`sw` decimal(3,2) NOT NULL default '0.00',"
-                ."`tu` decimal(3,2) NOT NULL default '0.00',"
-                ."`dh` decimal(3,2) NOT NULL default '0.00',"
-                ."`jg` decimal(3,2) NOT NULL default '0.00',"
-                ."PRIMARY KEY type (type)) TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[combat_terrain_effect] (
+                `type` varchar(11) NOT NULL default '',
+                `ah` decimal(3,2) NOT NULL default '0.00',
+                `ar` decimal(3,2) NOT NULL default '0.00',
+                `ch` decimal(3,2) NOT NULL default '0.00',
+                `de` decimal(3,2) NOT NULL default '0.00',
+                `df` decimal(3,2) NOT NULL default '0.00',
+                `gh` decimal(3,2) NOT NULL default '0.00',
+                `hsm` decimal(3,2) NOT NULL default '0.00',
+                `hvm` decimal(3,2) NOT NULL default '0.00',
+                `jh` decimal(3,2) NOT NULL default '0.00',
+                `ju` decimal(3,2) NOT NULL default '0.00',
+                `lam` decimal(3,2) NOT NULL default '0.00',
+                `lcm` decimal(3,2) NOT NULL default '0.00',
+                `ljm` decimal(3,2) NOT NULL default '0.00',
+                `lsm` decimal(3,2) NOT NULL default '0.00',
+                `pr` decimal(3,2) NOT NULL default '0.00',
+                `sh` decimal(3,2) NOT NULL default '0.00',
+                `sw` decimal(3,2) NOT NULL default '0.00',
+                `tu` decimal(3,2) NOT NULL default '0.00',
+                `dh` decimal(3,2) NOT NULL default '0.00',
+                `jg` decimal(3,2) NOT NULL default '0.00',
+                PRIMARY KEY type (type)) TYPE=MyISAM");
     $db->Execute("INSERT INTO $dbtables[combat_terrain_effect] "
                 ."VALUES("
                 ."'archery',0.80,1.00,0.32,1.00,0.40,0.32,0.80,0.50,0.50,0.24,1.00,0.60,0.24,0.18,0.60,1.00,0.80,0.50,1.00,0.40)");
@@ -471,24 +504,24 @@ else
     echo "Creating combat_terrain_mods table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[combat_terrain_mods]");
-    $db->Execute("CREATE TABLE $dbtables[combat_terrain_mods] ("
-                ."`pr` decimal(2,1) NOT NULL default '0.0',"
-                ."`tu` decimal(2,1) NOT NULL default '0.0',"
-                ."`df` decimal(2,1) NOT NULL default '0.0',"
-                ."`cf` decimal(2,1) NOT NULL default '0.0',"
-                ."`jg` decimal(2,1) NOT NULL default '0.0',"
-                ."`gh` decimal(2,1) NOT NULL default '0.0',"
-                ."`dh` decimal(2,1) NOT NULL default '0.0',"
-                ."`ch` decimal(2,1) NOT NULL default '0.0',"
-                ."`jh` decimal(2,1) NOT NULL default '0.0',"
-                ."`lcm` decimal(2,1) NOT NULL default '0.0',"
-                ."`ljm` decimal(2,1) NOT NULL default '0.0',"
-                ."`hsm` decimal(2,1) NOT NULL default '0.0',"
-                ."`sw` decimal(2,1) NOT NULL default '0.0',"
-                ."`10wall` decimal(2,1) NOT NULL default '0.0',"
-                ."`15wall` decimal(2,1) NOT NULL default '0.0',"
-                ."`20wall` decimal(2,1) NOT NULL default '0.0'"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[combat_terrain_mods] (
+                `pr` decimal(2,1) NOT NULL default '0.0',
+                `tu` decimal(2,1) NOT NULL default '0.0',
+                `df` decimal(2,1) NOT NULL default '0.0',
+                `cf` decimal(2,1) NOT NULL default '0.0',
+                `jg` decimal(2,1) NOT NULL default '0.0',
+                `gh` decimal(2,1) NOT NULL default '0.0',
+                `dh` decimal(2,1) NOT NULL default '0.0',
+                `ch` decimal(2,1) NOT NULL default '0.0',
+                `jh` decimal(2,1) NOT NULL default '0.0',
+                `lcm` decimal(2,1) NOT NULL default '0.0',
+                `ljm` decimal(2,1) NOT NULL default '0.0',
+                `hsm` decimal(2,1) NOT NULL default '0.0',
+                `sw` decimal(2,1) NOT NULL default '0.0',
+                `10wall` decimal(2,1) NOT NULL default '0.0',
+                `15wall` decimal(2,1) NOT NULL default '0.0',
+                `20wall` decimal(2,1) NOT NULL default '0.0'
+               ) TYPE=MyISAM");
     $db->Execute("INSERT INTO $dbtables[combat_terrain_mods] "
                 ."VALUES("
                 ."1.0,1.0,1.0,1.0,1.0,0.8,0.8,0.8,0.8,0.6,0.6,0.5,0.5,0.5,0.4,0.3)");
@@ -847,32 +880,32 @@ else
     echo "Creating skill_table table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[skill_table]");
-    $db->Execute("CREATE TABLE $dbtables[skill_table] ("
-                ."`skill_id` int(11) NOT NULL auto_increment,"
-                ."`abbr` varchar(5) NOT NULL default '',"
-                ."`long_name` varchar(15) NOT NULL default '',"
-                ."`group` set('a','b','c') NOT NULL default '',"
-                ."`auto` set('Y','N') NOT NULL default 'N',"
-                ."`min_level` int(2) NOT NULL default '1',"
-                ."`level_cap` set('Y','N') NOT NULL default 'N',"
-                ."`morale` set('Y','N') NOT NULL default 'N',"
-                ."`display` varchar(15) NOT NULL default '',"
-                ."`arch_animism` enum('Y','N') NOT NULL default 'N',"
-                ."`arch_totemism` enum('Y','N') NOT NULL default 'N',"
-                ."`arch_pantheism` enum('Y','N') NOT NULL default 'N',"
-                ."`arch_polytheism` enum('Y','N') NOT NULL default 'N',"
-                ."`arch_henotheism` enum('Y','N') NOT NULL default 'N',"
-                ."`arch_dualism` enum('Y','N') NOT NULL default 'N',"
-                ."`arch_monotheism` enum('Y','N') NOT NULL default 'N',"
-                ."`arch_panentheism` enum('Y','N') NOT NULL default 'N',"
-                ."`exc_inclusive` enum('Y','N') NOT NULL default 'N',"
-                ."`exc_exclusive` enum('Y','N') NOT NULL default 'N',"
-                ."`exc_plural` enum('Y','N') NOT NULL default 'N',"
-                ."`prost_none` enum('Y','N') NOT NULL default 'N',"
-                ."`prost_mild` enum('Y','N') NOT NULL default 'N',"
-                ."`prost_strong` enum('Y','N') NOT NULL default 'N',"
-                ."PRIMARY KEY `skill_id` (`skill_id`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[skill_table] (
+                `skill_id` int(11) NOT NULL auto_increment,
+                `abbr` varchar(5) NOT NULL default '',
+                `long_name` varchar(15) NOT NULL default '',
+                `group` set('a','b','c') NOT NULL default '',
+                `auto` set('Y','N') NOT NULL default 'N',
+                `min_level` int(2) NOT NULL default '1',
+                `level_cap` set('Y','N') NOT NULL default 'N',
+                `morale` set('Y','N') NOT NULL default 'N',
+                `display` varchar(15) NOT NULL default '',
+                `arch_animism` enum('Y','N') NOT NULL default 'N',
+                `arch_totemism` enum('Y','N') NOT NULL default 'N',
+                `arch_pantheism` enum('Y','N') NOT NULL default 'N',
+                `arch_polytheism` enum('Y','N') NOT NULL default 'N',
+                `arch_henotheism` enum('Y','N') NOT NULL default 'N',
+                `arch_dualism` enum('Y','N') NOT NULL default 'N',
+                `arch_monotheism` enum('Y','N') NOT NULL default 'N',
+                `arch_panentheism` enum('Y','N') NOT NULL default 'N',
+                `exc_inclusive` enum('Y','N') NOT NULL default 'N',
+                `exc_exclusive` enum('Y','N') NOT NULL default 'N',
+                `exc_plural` enum('Y','N') NOT NULL default 'N',
+                `prost_none` enum('Y','N') NOT NULL default 'N',
+                `prost_mild` enum('Y','N') NOT NULL default 'N',
+                `prost_strong` enum('Y','N') NOT NULL default 'N',
+                PRIMARY KEY  (`skill_id`)
+                ) TYPE=MyISAM");
 
     $db->Execute("INSERT INTO $dbtables[skill_table] "
                 ."VALUES (1,'arm','Armor','a','N',1,'N','N','Armor','N','N','N','Y','Y','Y','Y','Y','Y','N','Y','N','N','N')");
@@ -1043,16 +1076,17 @@ else
     echo "Checking skills table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[skills]");
-    $db->Execute("CREATE TABLE $dbtables[skills] ("
-                ."`entry_id` int(11) NOT NULL auto_increment,"
-                ."`abbr` varchar(5) NOT NULL default '',"
-                ."`long_name` varchar(15) NOT NULL default '',"
-                ."`group` char(1) NOT NULL default '',"
-                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`level` smallint(2) NOT NULL default '0',"
-                ."`turn_done` set('Y','N') NOT NULL default 'N',"
-                ."PRIMARY KEY `skill_id` (`entry_id`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[skills] (
+                `entry_id` int(11) NOT NULL auto_increment,
+                `abbr` varchar(5) NOT NULL default '',
+                `long_name` varchar(15) NOT NULL default '',
+                `group` char(1) NOT NULL default '',
+                `tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                `level` smallint(2) NOT NULL default '0',
+                `turn_done` set('Y','N') NOT NULL default 'N',
+                PRIMARY KEY  (`entry_id`),
+                KEY `abbr` (`abbr`,`tribeid`)
+                ) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Checking product_table table....";
@@ -1465,19 +1499,19 @@ flush();
     echo "Creating seeking table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[seeking]");
-    $query = $db->Execute("CREATE TABLE $dbtables[seeking] ("
-                ."`id` int(11) NOT NULL auto_increment,"
-                ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`actives` int(3) NOT NULL default '0',"
-                ."`horses` int(3) NOT NULL default '0',"
-                ."`wagons` int(2) NOT NULL default '0',"
-                ."`burden_beasts` int(2) NOT NULL default '0',"
-                ."`backpacks` int(3) NOT NULL default '0',"
-                ."`saddlebags` int(3) NOT NULL default '0',"
-                ."`target` varchar(12) NOT NULL default '',"
-                ."PRIMARY KEY `id` (`id`)"
-                .") TYPE=MyISAM");
+    $query = $db->Execute("CREATE TABLE $dbtables[seeking] (
+                `id` int(11) NOT NULL auto_increment,
+                `clanid` int(4) unsigned zerofill NOT NULL default '0000',
+                `tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                `actives` int(3) NOT NULL default '0',
+                `horses` int(3) NOT NULL default '0',
+                `wagons` int(2) NOT NULL default '0',
+                `burden_beasts` int(2) NOT NULL default '0',
+                `backpacks` int(3) NOT NULL default '0',
+                `saddlebags` int(3) NOT NULL default '0',
+                `target` varchar(12) NOT NULL default '',
+                PRIMARY KEY  (`id`)
+                ) TYPE=MyISAM");
       db_op_result($query,__LINE__,__FILE__);
     echo " Done!<BR>";
       flush();
@@ -1510,21 +1544,21 @@ flush();
     echo "Creating structures table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[structures]");
-    $db->Execute("CREATE TABLE $dbtables[structures] ("
-                ."`struct_id` int(11) NOT NULL auto_increment,"
-                ."`long_name` varchar(15) NOT NULL default '',"
-                ."`proper` varchar(15) NOT NULL default '',"
-                ."`hex_id` int(5) NOT NULL default '0',"
-                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`complete` set('Y','N') NOT NULL default 'N',"
-                ."`struct_pts` int(3) NOT NULL default '0',"
-                ."`max_struct_pts` int(3) NOT NULL default '0',"
-                ."`subunit` varchar(15) NOT NULL default '',"
-                ."`number` int(11) NOT NULL default '0',"
-                ."`used` enum('Y','N') NOT NULL default 'N',"
-                ." PRIMARY KEY `struct_id` (`struct_id`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[structures] (
+                `struct_id` int(11) NOT NULL auto_increment,
+                `long_name` varchar(15) NOT NULL default '',
+                `proper` varchar(15) NOT NULL default '',
+                `hex_id` int(5) NOT NULL default '0',
+                `tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                `clanid` int(4) unsigned zerofill NOT NULL default '0000',
+                `complete` set('Y','N') NOT NULL default 'N',
+                `struct_pts` int(3) NOT NULL default '0',
+                `max_struct_pts` int(3) NOT NULL default '0',
+                `subunit` varchar(15) NOT NULL default '',
+                `number` int(11) NOT NULL default '0',
+                `used` enum('Y','N') NOT NULL default 'N',
+                PRIMARY KEY  (`struct_id`)
+                ) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Creating subtribe_id table....";
@@ -1539,27 +1573,27 @@ flush();
     echo "Creating scouts table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[scouts]");
-    $db->Execute("CREATE TABLE $dbtables[scouts] ("
-                ."`scoutid` int(11) NOT NULL auto_increment,"
-                ."`tribeid` decimal(6,2) NOT NULL default '0.00',"
-                ."`actives` int(11) NOT NULL default '0',"
-                ."`direction` char(2) NOT NULL default '',"
-                ."`mounted` set('Y','N') NOT NULL default '',"
-                ."`orders` set('P','L') NOT NULL default '',"
-                ."PRIMARY KEY  (`scoutid`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[scouts] (
+                `scoutid` int(11) NOT NULL auto_increment,
+                `tribeid` decimal(6,2) NOT NULL default '0.00',
+                `actives` int(11) NOT NULL default '0',
+                `direction` char(2) NOT NULL default '',
+                `mounted` set('Y','N') NOT NULL default '',
+                `orders` set('P','L') NOT NULL default '',
+                PRIMARY KEY  (`scoutid`)
+                ) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Creating resources table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[resources]");
-    $db->execute("CREATE TABLE $dbtables[resources] ("
-                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`long_name` varchar(15) NOT NULL default '',"
-                ."`amount` int(11) NOT NULL default '0',"
-                ."`dbname` varchar(15) NOT NULL default '',"
-                ."KEY `unitid` (`tribeid`)"
-                .") TYPE=MyISAM");
+    $db->execute("CREATE TABLE $dbtables[resources] (
+                `tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                `long_name` varchar(15) NOT NULL default '',
+                `amount` int(11) NOT NULL default '0',
+                `dbname` varchar(15) NOT NULL default '',
+                KEY `unitid` (`tribeid`)
+                ) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Creating last_turn table....";
@@ -1590,17 +1624,18 @@ flush();
     echo "Creating products table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[products]");
-    $db->Execute("CREATE TABLE $dbtables[products] ("
-                ."`tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',"
-                ."`proper` varchar(20) NOT NULL default '',"
-                ."`long_name` varchar(20) NOT NULL default '',"
-                ."`amount` int(11) NOT NULL default '0',"
-                ."`weapon` set('Y','N') NOT NULL default 'N',"
-                ."`armor` set('Y','N') NOT NULL default 'N',"
-                ."id bigint(20) unsigned auto_increment,"
-                ."PRIMARY KEY id (id),"
-                ."KEY `unitid` (`tribeid`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[products] (
+                `tribeid` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
+                `proper` varchar(20) NOT NULL default '',
+                `long_name` varchar(20) NOT NULL default '',
+                `amount` int(11) unsigned NOT NULL default '0',
+                `weapon` set('Y','N') NOT NULL default 'N',
+                `armor` set('Y','N') NOT NULL default 'N',
+                `id` bigint(20) unsigned NOT NULL auto_increment,
+                PRIMARY KEY  (`id`),
+                KEY `unitid` (`tribeid`),
+                KEY `long_name` (`long_name`,`tribeid`)
+                ) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Creating products_used table....";
@@ -1698,76 +1733,76 @@ flush();
     echo "Creating outbox table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[outbox]");
-    $db->Execute("CREATE TABLE $dbtables[outbox] ("
-                ."`ID` int(11) NOT NULL auto_increment,"
-                ."`sender_id` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`recp_id` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`subject` varchar(250) NOT NULL default '',"
-                ."`sent` varchar(19) default NULL,"
-                ."`message` longtext NOT NULL,"
-                ."`notified` enum('Y','N') NOT NULL default 'N',"
-                ."PRIMARY KEY  (`ID`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[outbox] (
+                `ID` int(11) NOT NULL auto_increment,
+                `sender_id` int(4) unsigned zerofill NOT NULL default '0000',
+                `recp_id` int(4) unsigned zerofill NOT NULL default '0000',
+                `subject` varchar(250) NOT NULL default '',
+                `sent` varchar(19) default NULL,
+                `message` longtext NOT NULL,
+                `notified` enum('Y','N') NOT NULL default 'N',
+                PRIMARY KEY  (`ID`)
+                ) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     echo "Creating religions table....";
     flush();
     $db->Execute("DROP TABLE IF EXISTS $dbtables[religions]");
-    $db->Execute("CREATE TABLE $dbtables[religions] ("
-                ."`relid` int(11) NOT NULL auto_increment,"
-                ."`family` mediumint(5) NOT NULL default '0',"
-                ."`generation` mediumint(4) NOT NULL default '0',"
-                ."`clanid` int(4) unsigned zerofill NOT NULL default '0000',"
-                ."`cannibal` set('Y','N') NOT NULL default 'N',"
-                ."`rel_abbr` varchar(35) NOT NULL default '',"
-                ."`rel_display` varchar(35) NOT NULL default '',"
-                ."`holidays` smallint(1) NOT NULL default '0',"
-                ."`holiday1` smallint(2) NOT NULL default '0',"
-                ."`holiday2` smallint(2) NOT NULL default '0',"
-                ."`holiday3` smallint(3) NOT NULL default '0',"
-                ."`rel_arch` varchar(15) NOT NULL default '',"
-                ."`arch_skill1` varchar(4) NOT NULL default '',"
-                ."`arch_skill1_type` set('1','2') NOT NULL default '',"
-                ."`arch_skill1_amount` decimal(3,2) NOT NULL default '0.00',"
-                ."`arch_skill2` varchar(4) NOT NULL default '',"
-                ."`arch_skill2_type` set('1','2') NOT NULL default '',"
-                ."`arch_skill2_amount` decimal(3,2) NOT NULL default '0.00',"
-                ."`arch_pen1` varchar(4) NOT NULL default '',"
-                ."`arch_pen1_type` set('1','2') NOT NULL default '',"
-                ."`arch_pen1_amount` decimal(4,3) NOT NULL default '0.000',"
-                ."`arch_pen2` varchar(4) NOT NULL default '',"
-                ."`arch_pen2_type` set('1','2') NOT NULL default '1',"
-                ."`arch_pen2_amount` decimal(4,3) NOT NULL default '0.000',"
-                ."`healers` set('Y','N') NOT NULL default '',"
-                ."`healer_name` varchar(25) NOT NULL default '',"
-                ."`infantry` set('Y','N') NOT NULL default '',"
-                ."`infantry_name` varchar(25) NOT NULL default '',"
-                ."`calvalry` set('Y','N') NOT NULL default '',"
-                ."`calvalry_name` varchar(25) NOT NULL default '',"
-                ."`rel_exclude` enum('Inclusivism','Pluralism','Exclusivism') NOT NULL default 'Inclusivism',"
-                ."`exclude_skill` varchar(4) NOT NULL default '',"
-                ."`exclude_skill_type` set('1','2') NOT NULL default '',"
-                ."`exclude_skill_amount` decimal(3,2) NOT NULL default '0.00',"
-                ."`rel_prostlytize` enum('None','Mild','Strong') NOT NULL default 'None',"
-                ."`pros_skill` varchar(4) NOT NULL default '',"
-                ."`pros_skill_type` set('1','2') NOT NULL default '',"
-                ."`pros_skill_amount` decimal(3,2) NOT NULL default '0.00',"
-                ."`description` text NOT NULL,"
-                ."`inf_weapon1` varchar(25) NOT NULL default '',"
-                ."`inf_head_armor` varchar(25) NOT NULL default '',"
-                ."`inf_torso_armor` varchar(25) NOT NULL default '',"
-                ."`inf_otorso_armor` varchar(25) NOT NULL default '',"
-                ."`inf_legs_armor` varchar(25) NOT NULL default '',"
-                ."`inf_shield` varchar(25) NOT NULL default '',"
-                ."`cav_weapon1` varchar(25) NOT NULL default '',"
-                ."`cav_head_armor` varchar(25) NOT NULL default '',"
-                ."`cav_torso_armor` varchar(25) NOT NULL default '',"
-                ."`cav_otorso_armor` varchar(25) NOT NULL default '',"
-                ."`cav_legs_armor` varchar(25) NOT NULL default '',"
-                ."`cav_shield` varchar(25) NOT NULL default '',"
-                ."`cav_horse_armor` varchar(25) NOT NULL default '',"
-                ."PRIMARY KEY `relid` (`relid`)"
-                .") TYPE=MyISAM");
+    $db->Execute("CREATE TABLE $dbtables[religions] (
+                `relid` int(11) NOT NULL auto_increment,
+                `family` mediumint(5) NOT NULL default '0',
+                `generation` mediumint(4) NOT NULL default '0',
+                `clanid` int(4) unsigned zerofill NOT NULL default '0000',
+                `cannibal` set('Y','N') NOT NULL default 'N',
+                `rel_abbr` varchar(35) NOT NULL default '',
+                `rel_display` varchar(35) NOT NULL default '',
+                `holidays` smallint(1) NOT NULL default '0',
+                `holiday1` smallint(2) NOT NULL default '0',
+                `holiday2` smallint(2) NOT NULL default '0',
+                `holiday3` smallint(3) NOT NULL default '0',
+                `rel_arch` varchar(15) NOT NULL default '',
+                `arch_skill1` varchar(4) NOT NULL default '',
+                `arch_skill1_type` set('1','2') NOT NULL default '',
+                `arch_skill1_amount` decimal(3,2) NOT NULL default '0.00',
+                `arch_skill2` varchar(4) NOT NULL default '',
+                `arch_skill2_type` set('1','2') NOT NULL default '',
+                `arch_skill2_amount` decimal(3,2) NOT NULL default '0.00',
+                `arch_pen1` varchar(4) NOT NULL default '',
+                `arch_pen1_type` set('1','2') NOT NULL default '',
+                `arch_pen1_amount` decimal(4,3) NOT NULL default '0.000',
+                `arch_pen2` varchar(4) NOT NULL default '',
+                `arch_pen2_type` set('1','2') NOT NULL default '1',
+                `arch_pen2_amount` decimal(4,3) NOT NULL default '0.000',
+                `healers` set('Y','N') NOT NULL default '',
+                `healer_name` varchar(25) NOT NULL default '',
+                `infantry` set('Y','N') NOT NULL default '',
+                `infantry_name` varchar(25) NOT NULL default '',
+                `calvalry` set('Y','N') NOT NULL default '',
+                `calvalry_name` varchar(25) NOT NULL default '',
+                `rel_exclude` enum('Inclusivism','Pluralism','Exclusivism') NOT NULL default 'Inclusivism',
+                `exclude_skill` varchar(4) NOT NULL default '',
+                `exclude_skill_type` set('1','2') NOT NULL default '',
+                `exclude_skill_amount` decimal(3,2) NOT NULL default '0.00',
+                `rel_prostlytize` enum('None','Mild','Strong') NOT NULL default 'None',
+                `pros_skill` varchar(4) NOT NULL default '',
+                `pros_skill_type` set('1','2') NOT NULL default '',
+                `pros_skill_amount` decimal(3,2) NOT NULL default '0.00',
+                `description` text NOT NULL,
+                `inf_weapon1` varchar(25) NOT NULL default '',
+                `inf_head_armor` varchar(25) NOT NULL default '',
+                `inf_torso_armor` varchar(25) NOT NULL default '',
+                `inf_otorso_armor` varchar(25) NOT NULL default '',
+                `inf_legs_armor` varchar(25) NOT NULL default '',
+                `inf_shield` varchar(25) NOT NULL default '',
+                `cav_weapon1` varchar(25) NOT NULL default '',
+                `cav_head_armor` varchar(25) NOT NULL default '',
+                `cav_torso_armor` varchar(25) NOT NULL default '',
+                `cav_otorso_armor` varchar(25) NOT NULL default '',
+                `cav_legs_armor` varchar(25) NOT NULL default '',
+                `cav_shield` varchar(25) NOT NULL default '',
+                `cav_horse_armor` varchar(25) NOT NULL default '',
+                PRIMARY KEY  (`relid`)
+                ) TYPE=MyISAM");
     echo " Done!<BR>";
     flush();
     //Scheduled for deletion - we'll add next reset date to config values
@@ -2367,27 +2402,27 @@ flush();
         echo "Creating hexes table....";
         flush();
         $db->Execute("DROP TABLE IF EXISTS $dbtables[hexes]");
-        $db->Execute("CREATE TABLE $dbtables[hexes] ("
-                    ."`hex_id` int(11) NOT NULL,"
-                    ."`terrain` text NOT NULL,"
-                    ."`n` int(11) NOT NULL default '0',"
-                    ."`e` int(11) NOT NULL default '0',"
-                    ."`s` int(11) NOT NULL default '0',"
-                    ."`w` int(11) NOT NULL default '0',"
-                    ."`ne` int(11) NOT NULL default '0',"
-                    ."`se` int(11) NOT NULL default '0',"
-                    ."`sw` int(11) NOT NULL default '0',"
-                    ."`nw` int(11) NOT NULL default '0',"
-                    ."`resource` enum('Y','N') NOT NULL default 'N',"
-                    ."`res_type` text NOT NULL,"
-                    ."`res_amount` int(11) NOT NULL default '-1',"
-                    ."`move` int(11) NOT NULL default '0',"
-                    ."`safe` set('Y','N') NOT NULL default 'Y',"
-                    ."`game` int(11) NOT NULL default '0',"
-                    ."`prospect` smallint(2) NOT NULL default '0',"
-                    ."`seed` int(10) unsigned zerofill NOT NULL default '1111111111',"
-                    ."PRIMARY KEY `hex_id` (`hex_id`)"
-                    .") TYPE=MyISAM ");
+        $db->Execute("CREATE TABLE $dbtables[hexes] (
+                `hex_id` int(11) NOT NULL default '0',
+                `terrain` text NOT NULL,
+                `n` int(11) NOT NULL default '0',
+                `e` int(11) NOT NULL default '0',
+                `s` int(11) NOT NULL default '0',
+                `w` int(11) NOT NULL default '0',
+                `ne` int(11) NOT NULL default '0',
+                `se` int(11) NOT NULL default '0',
+                `sw` int(11) NOT NULL default '0',
+                `nw` int(11) NOT NULL default '0',
+                `resource` enum('Y','N') NOT NULL default 'N',
+                `res_type` text NOT NULL,
+                `res_amount` int(11) NOT NULL default '-1',
+                `move` int(11) NOT NULL default '0',
+                `safe` set('Y','N') NOT NULL default 'Y',
+                `game` int(11) NOT NULL default '0',
+                `prospect` smallint(2) NOT NULL default '0',
+                `seed` int(10) unsigned zerofill NOT NULL default '1111111111',
+                UNIQUE KEY `hex_id` (`hex_id`)
+                    ) TYPE=MyISAM ");
         echo " Done!<BR>";
         flush();
         echo "Generating map....";
@@ -2451,7 +2486,7 @@ flush();
                     ."'$productinfo[long_name]',"
                     ."'0',"
                     ."'$productinfo[weapon]',"
-                    ."'$productinfo[armor]')");
+                    ."'$productinfo[armor]','')");
         $products->MoveNext();
     }
     $traps = 1000;

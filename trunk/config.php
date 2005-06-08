@@ -1,4 +1,4 @@
-<?
+<?php
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2 of the License, or (at your
@@ -17,28 +17,13 @@ error_reporting  (E_ERROR | E_WARNING | E_PARSE | !E_NOTICE);
 ini_set("register_globals", "Off");
 
 
-// Set the following to true if you want to use custom files
-//    for generating the login page and the page headers and footers
-// Be careful not to change the PHP code in the header and footer
-//    or your game may fail to run correctly
-
-$use_local = false;
-
 // Path on the filesystem where the Tribe Strive files will reside
 // You MUST set this variable correctly to reflect your local game path
 
 $game_root = "/var/www/tribes/";
 $gameroot = $game_root;
+include($game_root."config_local.php");
 
-
-if ($use_local && file_exists($game_root."local/config_local.php") )
-{
-   include($game_root."local/config_local.php");
-}
-else
-{
-   include($game_root."config_local.php");
-}
 
 include_once($game_root."global_funcs.php");
 
@@ -57,15 +42,15 @@ $theme_default = "Original";
 $local_number_dec_point = ".";
 $local_number_thousands_sep = ",";
 $language = "english";
-$title = "TribeStrive";
-$version = "v 0.9.3-Alpha";
+$title = "FreeTribes";
+$version = "v 0.9.4-Alpha";
 
 /* game variables */
 $ip = getenv("REMOTE_ADDR");
 
 // The last numeral in the version string is the gui code base level.
 // It is liable to be independent of the first four numerals that J sets as the main release level.
-   $game_version            = "v.00.09.3.002";
+   $game_version            = "v.00.09.4";
    $maxlen_password         = 16;
    $server_closed           = false;       // true = block logins but not new account creation
    $account_creation_closed = false;       // true = block new account creation

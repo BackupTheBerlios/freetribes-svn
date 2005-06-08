@@ -29,7 +29,8 @@ while(!$mainloop->EOF)
          $animals->MoveNext();
     }
     //OK now lets get this tribe's actual skill level
-    $skill = $db->Prepare("SELECT level FROM $dbtables[skills] WHERE tribeid = ? AND abbr = 'herd'");
+    $skills = $db->Prepare("SELECT level FROM $dbtables[skills] WHERE tribeid = ? AND abbr = 'herd'");
+    $skill = $db->Execute($skills,array($data['tribeid']));
     db_op_result($skill,__LINE__,__FILE__);
     $skillinfo = $skill->fields;
     //now we calculate herders required in total  and see if we have enough actives assigned
@@ -95,7 +96,7 @@ while(!$mainloop->EOF)
         $log_breed .= "$sheep_bred additional sheep, ";
 
         $pigs_bred = abs(ceil(round(($Pigs/3)*$bonus)));
-        $log_breed .= "and $pigs_bred additional pigs with $surplus extra herders.";
+        $log_breed .= "and $pigs_bred additional pigs with $surplus extra herders. needed $required_herders had $herders ";
         playerlog($data['tribeid'],$data['clanid'],'BREEDING',$month['count'],$year['count'],$log_breed,$dbtables);
     }
     elseif($required_herders > $herders)
@@ -122,7 +123,7 @@ while(!$mainloop->EOF)
          $log_lost .= "$data[tribeid] Lost $sheep_lost sheep, ";
 
          $pigs_lost = abs(round($Pigs*$runaway));
-         $log_lost .= "$data[tribeid] Lost $pigs_lost pigs. You did not assign enough herders. ";
+         $log_lost .= "$data[tribeid] Lost $pigs_lost pigs. You did not assign enough herders. needed $required_herders had $herders ";
          playerlog($data['tribeid'],$data['clanid'],'HERDLOSS',$month['count'],$year['count'],$log_lost,$dbtables);
     }
     //OK now we have gains and losses and let's see if we have to update...

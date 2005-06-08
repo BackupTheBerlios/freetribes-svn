@@ -113,7 +113,7 @@ if( $_POST['maptrans'] == 1 )
     $curam = $cur->fields;
     if( $curam['curam'] >= $transcost )
     {
-        $mapto = $db->Execute("SELECT hex_id, `$_SESSION[clanid]`  FROM $dbtables[mapping] WHERE `clanid_$_SESSION[clanid]` > '0'");
+        $mapto = $db->Execute("SELECT hex_id, clanid_{$_SESSION[clanid]}  FROM $dbtables[mapping] WHERE clanid_{$_SESSION[clanid]} > '0'");
          db_op_result($mapto,__LINE__,__FILE__);
         $bef = $db->Execute("SELECT COUNT(hex_id) AS before FROM $dbtables[mapping] WHERE `clanid_$_POST[recmsg]` > '0'");
         db_op_result($bef,__LINE__,__FILE__);

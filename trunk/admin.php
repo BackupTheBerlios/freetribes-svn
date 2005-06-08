@@ -1,4 +1,4 @@
-<?
+<?php
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2 of the License, or (at your
@@ -50,6 +50,7 @@ $md5password = md5($_POST['password']);
     {
         echo "<OPTION VALUE=report>Admin Logs</OPTION>"
             ."<OPTION VALUE=debuglog>Debug Logs</OPTION>"
+            ."<OPTION VALUE=adjust_sched>Adjust Scheduler</option>"
             ."<option value=sql_log>View SQL logs</option>"
             ."<OPTION VALUE=passreset>Password Reset</OPTION>"
             ."<OPTION VALUE=adminmove>Move Tribes</OPTION>"
@@ -141,6 +142,10 @@ $md5password = md5($_POST['password']);
     if($_POST['menu'] == "debuglog")
     {
         echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=admin_debug_log.php\">";
+    }
+    if($_POST['menu'] == "adjust_sched")
+    {
+        echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=admin_sched_adjust.php\">";
     }
     if($_POST['menu'] == "sql_log")
     {

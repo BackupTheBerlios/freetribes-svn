@@ -576,21 +576,20 @@ while( !$res->EOF )
                                      ."WHERE tribeid = '$tribe[tribeid]' "
                                      ."AND product = 'smelters'");
                           db_op_result($query,__LINE__,__FILE__);
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                     ."VALUES("
-                                     ."'',"
-                                     ."'$month[count]',"
-                                     ."'$year[count]',"
-                                     ."'$tribe[clanid]',"
-                                     ."'$tribe[tribeid]',"
-                                     ."'UPDATE',"
-                                     ."'$stamp',"
-                                     ."'Engineering: $smelters Smelters "
-                                     ."constructed using $deltacoal coal "
-                                     ."and $deltametal $metalinfo[long_name].')");
-                             db_op_result($query,__LINE__,__FILE__);
+                       $log_info = "Smelter construction completed Built $smelters smelters using $deltacoal coal and $deltametal $metalinfo[long_name].";
+
+                    }
+                    else
+                    {
+                        $log_info = "Smelter construction failed- You have a refinery but no meetinghouse!";
                     }
                 }
+                else
+                {
+                       $log_info = "Smelter construction failed- scheduler found no Refinery!";
+                }
+          playerlog($tribe['tribeid'],$tribe['clanid'],'Smelter',$month['count'],$year['count'],$log_info,$dbtables);
+
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
                              ."WHERE tribeid = '$tribe[tribeid]' "
                              ."AND product = 'smelters'");

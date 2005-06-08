@@ -20,79 +20,35 @@ if ($pos !== false)
 // Tundra = 10,000
 // Desert = 1,000
 
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = 1000 "
-            ."WHERE game < 10");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = 1000 WHERE game < 10");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.035 "
-            ."WHERE game < 30000 "
-            ."AND terrain = 'pr'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.035 WHERE game < 30000 AND terrain = 'pr'");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.04 "
-            ."WHERE game < 35000 "
-            ."AND terrain = 'gh'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.04 WHERE game < 35000 AND terrain = 'gh'");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.045 "
-            ."WHERE game < 40000 "
-            ."AND terrain = 'df'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.045 WHERE game < 40000 AND terrain = 'df'");
 db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.0455 "
-            ."WHERE game < 45000 "
-            ."AND terrain = 'dh'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.0455 WHERE game < 45000 AND terrain = 'dh'");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.039 "
-            ."WHERE game < 35000 "
-            ."AND terrain = 'cf'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.039 WHERE game < 35000 AND terrain = 'cf'");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.035 "
-            ."WHERE game < 40000 "
-            ."AND terrain = 'ch'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.035 WHERE game < 40000 AND terrain = 'ch'");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.019 "
-            ."WHERE game < 25000 "
-            ."AND terrain = 'lcm'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.019 WHERE game < 25000 AND terrain = 'lcm'");
   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.06 "
-            ."WHERE game < 55000 "
-            ."AND terrain = 'jg'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.06 WHERE game < 55000 AND terrain = 'jg'");
   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.065 "
-            ."WHERE game < 60000 "
-            ."AND terrain = 'jh'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.065 WHERE game < 60000 AND terrain = 'jh'");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.05 "
-            ."WHERE game < 50000 "
-            ."AND terrain = 'ljm'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.05 WHERE game < 50000 AND terrain = 'ljm'");
 db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.015 "
-            ."WHERE game < 15000 "
-            ."AND terrain = 'sw'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.015 WHERE game < 15000 AND terrain = 'sw'");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.01 "
-            ."WHERE game < 2000 "
-            ."AND terrain = 'hsm'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.01 WHERE game < 2000 AND terrain = 'hsm'");
   db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.005 "
-            ."WHERE game < 10000 "
-            ."AND terrain = 'tu'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.005 WHERE game < 10000 AND terrain = 'tu'");
  db_op_result($query,__LINE__,__FILE__);
-$query = $db->Execute("UPDATE $dbtables[hexes] "
-            ."SET game = game * 1.005 "
-            ."WHERE game < 1000 "
-            ."AND terrain = 'de'");
+$query = $db->Execute("UPDATE $dbtables[hexes] SET game = game * 1.005 WHERE game < 1000 AND terrain = 'de'");
   db_op_result($query,__LINE__,__FILE__);
 
 

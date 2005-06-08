@@ -1,4 +1,4 @@
-<?
+<?php
 require_once("../config.php");
 $time_start = getmicrotime();
 include("game_time.php");
@@ -16,23 +16,23 @@ while( !$res->EOF )
                        ."WHERE hex_id = '$tribe[hex_id]'");
     $hexinfo = $hex->fields;
 
-    if( $hexinfo[terrain] == 'pr' )
+    if( $hexinfo['terrain'] == 'pr' )
     {
         $bonus_acres = 1;
     }
-    elseif( $hexinfo[terrain] == 'gh' )
+    elseif( $hexinfo['terrain'] == 'gh' )
     {
         $bonus_acres = .5;
     }
-    elseif( $hexinfo[terrain] == 'df' | $hexinfo[terrain] == 'cf' | $hexinfo[terrain] == 'jg' )
+    elseif( $hexinfo['terrain'] == 'df' | $hexinfo['terrain'] == 'cf' | $hexinfo['terrain'] == 'jg' )
     {
         $bonus_acres = 0;
     }
-    elseif( $hexinfo[terrain] == 'dh' | $hexinfo[terrain] == 'ch' | $hexinfo[terrain] == 'jh' )
+    elseif( $hexinfo['terrain'] == 'dh' | $hexinfo['terrain'] == 'ch' | $hexinfo['terrain'] == 'jh' )
     {
         $bonus_acres = -.5;
     }
-    elseif( $hexinfo[terrain] == 'sw' | $hexinfo[terrain] == 'ljm' | $hexinfo[terrain] == 'lcm' )
+    elseif( $hexinfo['terrain'] == 'sw' | $hexinfo['terrain'] == 'ljm' | $hexinfo['terrain'] == 'lcm' )
     {
         $bonus_acres = -.75;
     }
@@ -57,10 +57,10 @@ while( !$res->EOF )
                         ."'$stamp',"
                         ."'Farming debug: $tribe[tribeid] tried $act_do[action] $act_do[crop] with $act_do[actives] actives.')");
         }
-  
-        if( $act_do[action] == 'plow' )
+
+        if( $act_do['action'] == 'plow' )
         {
-            if( $month[count] == '3' | $month[count] == '4' | $month[count] == '5' | $month[count] == '6' || $_REQUEST['farming'] == 1)
+            if( $month['count'] == '3' | $month['count'] == '4' | $month['count'] == '5' | $month['count'] == '6' || $_REQUEST['farming'] == 1)
             {
                 $plow = $db->Execute("SELECT * FROM $dbtables[products] "
                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -79,26 +79,26 @@ while( !$res->EOF )
                 $rakesused = 0;
                 $hoesused = 0;
                 $acres = 8 + $bonus_acres;
-                while( $plowinfo[amount] > 0 && $act_do[actives] > 0 )
+                while( $plowinfo['amount'] > 0 && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[amount] -= 1;
-                    $act_do[actives] -= 1;
+                    $plowinfo['amount'] -= 1;
+                    $act_do['actives'] -= 1;
                     $totalacres += $acres;
                     $plowsused += 1;
                 }
                 $acres = 1 + $bonus_acres;
-                while( $rakeinfo[amount] > 0 && $act_do[actives] > 0 )
+                while( $rakeinfo['amount'] > 0 && $act_do['actives'] > 0 )
                 {
-                    $rakeinfo[amount] -= 1;
-                    $act_do[actives] -= 1;
+                    $rakeinfo['amount'] -= 1;
+                    $act_do['actives'] -= 1;
                     $totalacres += $acres;
                     $rakesused += 1;
                 }
                 $acres = 2 + $bonus_acres;
-                while( $hoeinfo[amount] > 0 && $act_do[actives] > 0 )
+                while( $hoeinfo['amount'] > 0 && $act_do['actives'] > 0 )
                 {
-                    $hoeinfo[amount] -= 1;
-                    $act_do[actives] -= 1;
+                    $hoeinfo['amount'] -= 1;
+                    $act_do['actives'] -= 1;
                     $totalacres += $acres;
                     $hoesused += 1;
                 }
@@ -213,23 +213,23 @@ while( !$res->EOF )
                            ."WHERE hex_id = '$tribe[hex_id]'");
         $hexinfo = $hex->fields;
 
-        if( $hexinfo[terrain] == 'pr' )
+        if( $hexinfo['terrain'] == 'pr' )
         {
             $bonus_acres = 1;
         }
-        elseif( $hexinfo[terrain] == 'gh' )
+        elseif( $hexinfo['terrain'] == 'gh' )
         {
             $bonus_acres = .5;
         }
-        elseif( $hexinfo[terrain] == 'df' | $hexinfo[terrain] == 'cf' | $hexinfo[terrain] == 'jg' )
+        elseif( $hexinfo['terrain'] == 'df' | $hexinfo['terrain'] == 'cf' | $hexinfo['terrain'] == 'jg' )
         {
             $bonus_acres = 0;
         }
-        elseif( $hexinfo[terrain] == 'dh' | $hexinfo[terrain] == 'ch' | $hexinfo[terrain] == 'jh' )
+        elseif( $hexinfo['terrain'] == 'dh' | $hexinfo['terrain'] == 'ch' | $hexinfo['terrain'] == 'jh' )
         {
             $bonus_acres = -.5;
         }
-        elseif( $hexinfo[terrain] == 'sw' | $hexinfo[terrain] == 'ljm' | $hexinfo[terrain] == 'lcm' )
+        elseif( $hexinfo['terrain'] == 'sw' | $hexinfo['terrain'] == 'ljm' | $hexinfo['terrain'] == 'lcm' )
         {
             $bonus_acres = -.75;
         }
@@ -238,7 +238,7 @@ while( !$res->EOF )
             $bonus_acres = -.95;
         }
 
-        if( $act_do[action] == 'plant' )
+        if( $act_do['action'] == 'plant' )
         {
             $acres = 0;
             $plow = $db->Execute("SELECT * FROM $dbtables[farming] "
@@ -247,20 +247,20 @@ while( !$res->EOF )
                                 ."AND crop = 'NONE'");
             if( !$plow->EOF )
             {
-            $plowinfo = $plow->fields; 
+            $plowinfo = $plow->fields;
             $acres_planted = 0;
 
-            if( $act_do[crop] == 'cotton' )
+            if( $act_do['crop'] == 'cotton' )
             {
                 $acres = 3 + $bonus_acres;
-                while( $plowinfo[acres] > $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] > $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -277,7 +277,7 @@ while( !$res->EOF )
                                 ."AND cropid = '$plowinfo[cropid]' "
                                 ."AND hex_id = '$tribe[hex_id]'");
                 }
-                
+
                 $there = $db->Execute("SELECT * FROM $dbtables[farming] "
                                      ."WHERE clanid = '$tribe[clanid]' "
                                      ."AND hex_id = '$tribe[hex_id]' "
@@ -329,17 +329,17 @@ while( !$res->EOF )
 
             }
 
-            if( $act_do[crop] == 'grain' )
+            if( $act_do['crop'] == 'grain' )
             {
                 $acres = 5 + $bonus_acres;
-                while( $plowinfo[acres] >= $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] >= $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -407,17 +407,17 @@ while( !$res->EOF )
             }
 
 
-            if( $act_do[crop] == 'grapes' )
+            if( $act_do['crop'] == 'grapes' )
             {
                 $acres = 2 + $bonus_acres;
-                while( $plowinfo[acres] >= $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] >= $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -484,17 +484,17 @@ while( !$res->EOF )
                             ."'Farming: We planted $acres_planted acres of $act_do[crop].')");
             }
 
-            if( $act_do[crop] == 'sugar' )
+            if( $act_do['crop'] == 'sugar' )
             {
                 $acres = 3 + $bonus_acres;
-                while( $plowinfo[acres] >= $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] >= $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -562,17 +562,17 @@ while( !$res->EOF )
             }
 
 
-            if( $act_do[crop] == 'tobacco' )
+            if( $act_do['crop'] == 'tobacco' )
             {
                 $acres = 2 + $bonus_acres;
-                while( $plowinfo[acres] >= $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] >= $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -639,17 +639,17 @@ while( !$res->EOF )
                             ."'Farming: We planted $acres_planted acres of $act_do[crop].')");
             }
 
-            if( $act_do[crop] == 'flax' )
+            if( $act_do['crop'] == 'flax' )
             {
                 $acres = 3 + $bonus_acres;
-                while( $plowinfo[acres] >= $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] >= $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -716,17 +716,17 @@ while( !$res->EOF )
                             ."'Farming: We planted $acres_planted acres of $act_do[crop].')");
             }
 
-            if( $act_do[crop] == 'hemp' )
+            if( $act_do['crop'] == 'hemp' )
             {
                 $acres = 2 + $bonus_acres;
-                while( $plowinfo[acres] >= $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] >= $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -793,17 +793,17 @@ while( !$res->EOF )
                             ."'Farming: We planted $acres_planted acres of $act_do[crop].')");
             }
 
-            if( $act_do[crop] == 'potatoes' )
+            if( $act_do['crop'] == 'potatoes' )
             {
                 $acres = 3 + $bonus_acres;
-                while( $plowinfo[acres] >= $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] >= $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -870,17 +870,17 @@ while( !$res->EOF )
                             ."'Farming: We planted $acres_planted acres of $act_do[crop].')");
             }
 
-            if( $act_do[crop] == 'corn' )
+            if( $act_do['crop'] == 'corn' )
             {
                 $acres = 5 + $bonus_acres;
-                while( $plowinfo[acres] >= $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] >= $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -947,17 +947,17 @@ while( !$res->EOF )
                             ."'Farming: We planted $acres_planted acres of $act_do[crop].')");
             }
 
-            if( $act_do[crop] == 'herbs' )
+            if( $act_do['crop'] == 'herbs' )
             {
                 $acres = 1 + $bonus_acres;
-                while( $plowinfo[acres] >= $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] >= $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -1024,17 +1024,17 @@ while( !$res->EOF )
                             ."'Farming: We planted $acres_planted acres of $act_do[crop].')");
             }
 
-            if( $act_do[crop] == 'spice' )
+            if( $act_do['crop'] == 'spice' )
             {
                 $acres = 1 + $bonus_acres;
-                while( $plowinfo[acres] >= $acres && $act_do[actives] > 0 )
+                while( $plowinfo['acres'] >= $acres && $act_do['actives'] > 0 )
                 {
-                    $plowinfo[acres] -= $acres;
-                    $act_do[actives] -= 1;
+                    $plowinfo['acres'] -= $acres;
+                    $act_do['actives'] -= 1;
                     $acres_planted += $acres;
                 }
                 $acres_planted = round($acres_planted);
-                if( $plowinfo[acres] < 1 )
+                if( $plowinfo['acres'] < 1 )
                 {
                     $db->Execute("DELETE FROM $dbtables[farming] "
                                 ."WHERE cropid = '$plowinfo[cropid]' "
@@ -1131,7 +1131,7 @@ while( !$res->EOF )
     while( !$act->EOF )
     {
         $act_do = $act->fields;
-        if( $act_do[action] == 'harvest' )
+        if( $act_do['action'] == 'harvest' )
         {
             $crop = $db->Execute("SELECT * FROM $dbtables[farming] "
                                 ."WHERE hex_id = '$tribe[hex_id]' "
@@ -1142,22 +1142,22 @@ while( !$res->EOF )
                 $cropinfo = $crop->fields;
                 $acres_harvested = 0;
                 $cotton_harvest = 0;
-                if( $cropinfo[crop] == 'cotton' )
+                if( $cropinfo['crop'] == 'cotton' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]) * 2;
-                
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']) * 2;
+
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
-                    while( $cropinfo[acres] > 1 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 1 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 2;
+                        $cropinfo['acres'] -= 2;
                         $acres_harvested += 2;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);
-                        
+
                     $db->Execute("UPDATE $dbtables[products] "
                                 ."SET amount = amount + $cotton_harvest "
                                 ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -1183,7 +1183,7 @@ while( !$res->EOF )
                                ."AND crop = '$act_do[crop]'");
                 }
 
-                if( $cropinfo[crop] == 'grain' )
+                if( $cropinfo['crop'] == 'grain' )
                 {
                     $scy = $db->Execute("SELECT * FROM $dbtables[products] "
                                        ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -1191,13 +1191,13 @@ while( !$res->EOF )
                     if( !$scy->EOF )
                     {
                         $scythe = $scy->fields;
-                        $actives = $act_do[actives];
+                        $actives = $act_do['actives'];
                         $scythe_used = 0;
-                        while( $scythe[amount] > 0 && $actives > 0 )
+                        while( $scythe['amount'] > 0 && $actives > 0 )
                         {
-                            $scythe[amount] -= 1;
+                            $scythe['amount'] -= 1;
                             $actives -= 1;
-                            $act_do[actives] += 1;
+                            $act_do['actives'] += 1;
                             $scythe_used += 1;
                         }
                         if( $scythe_used > 0 )
@@ -1213,14 +1213,14 @@ while( !$res->EOF )
                                         ."AND long_name = 'scythe'");
                         }
                     }
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]) * 3;
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']) * 3;
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
-                    while( $cropinfo[acres] > 2 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 2 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 3;
+                        $cropinfo['acres'] -= 3;
                         $acres_harvested += 3;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);
@@ -1249,17 +1249,17 @@ while( !$res->EOF )
                                ."AND crop = '$act_do[crop]'");
                 }
 
-                if( $cropinfo[crop] == 'grapes' )
+                if( $cropinfo['crop'] == 'grapes' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
-                    while( $cropinfo[acres] > 0 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 0 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 1;
+                        $cropinfo['acres'] -= 1;
                         $acres_harvested += 1;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);
@@ -1289,7 +1289,7 @@ while( !$res->EOF )
                                ."AND crop = '$act_do[crop]'");
                 }
 
-                if( $cropinfo[crop] == 'sugar' )
+                if( $cropinfo['crop'] == 'sugar' )
                 {
                     $scy = $db->Execute("SELECT * FROM $dbtables[products] "
                                        ."WHERE tribeid = '$tribe[goods_tribe]' "
@@ -1297,13 +1297,13 @@ while( !$res->EOF )
                     if( !$scy->EOF )
                     {
                         $scythe = $scy->fields;
-                        $actives = $act_do[actives];
+                        $actives = $act_do['actives'];
                         $scythe_used = 0;
-                        while( $scythe[amount] > 0 && $actives > 0 )
+                        while( $scythe['amount'] > 0 && $actives > 0 )
                         {
-                            $scythe[amount] -= 1;
+                            $scythe['amount'] -= 1;
                             $actives -= 1;
-                            $act_do[actives] += 1;
+                            $act_do['actives'] += 1;
                             $scythe_used += 1;
                         }
                         if( $scythe_used > 0 )
@@ -1319,15 +1319,15 @@ while( !$res->EOF )
                                         ."AND long_name = 'scythe'");
                         }
                     }
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]) * 2;
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']) * 2;
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
-                    while( $cropinfo[acres] > 1 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 1 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 2;
+                        $cropinfo['acres'] -= 2;
                         $acres_harvested += 2;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);
@@ -1357,17 +1357,17 @@ while( !$res->EOF )
                                ."AND crop = '$act_do[crop]'");
                 }
 
-                if( $cropinfo[crop] == 'tobacco' )
+                if( $cropinfo['crop'] == 'tobacco' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
-                    while( $cropinfo[acres] > 0 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 0 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 1;
+                        $cropinfo['acres'] -= 1;
                         $acres_harvested += 1;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);
@@ -1396,17 +1396,17 @@ while( !$res->EOF )
                                ."AND action = '$act_do[action]' "
                                ."AND crop = '$act_do[crop]'");
                 }
-                if( $cropinfo[crop] == 'flax' )
+                if( $cropinfo['crop'] == 'flax' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]) * 3;
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']) * 3;
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
-                    while( $cropinfo[acres] > 2 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 2 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 3;
+                        $cropinfo['acres'] -= 3;
                         $acres_harvested += 3;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);
@@ -1436,17 +1436,17 @@ while( !$res->EOF )
                                ."AND crop = '$act_do[crop]'");
                 }
 
-                if( $cropinfo[crop] == 'hemp' )
+                if( $cropinfo['crop'] == 'hemp' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
-                    while( $cropinfo[acres] > 0 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 0 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 1;
+                        $cropinfo['acres'] -= 1;
                         $acres_harvested += 1;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);
@@ -1476,17 +1476,17 @@ while( !$res->EOF )
                                ."AND crop = '$act_do[crop]'");
                 }
 
-                if( $cropinfo[crop] == 'potatoes' )
+                if( $cropinfo['crop'] == 'potatoes' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
-                    while( $cropinfo[acres] > 0 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 0 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 1;
+                        $cropinfo['acres'] -= 1;
                         $acres_harvested += 1;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);
@@ -1516,17 +1516,17 @@ while( !$res->EOF )
                                ."AND crop = '$act_do[crop]'");
                 }
 
-                if( $cropinfo[crop] == 'corn' )
+                if( $cropinfo['crop'] == 'corn' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]) * 3;
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']) * 3;
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
-                    while( $cropinfo[acres] > 2 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 2 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 3;
+                        $cropinfo['acres'] -= 3;
                         $acres_harvested += 3;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);
@@ -1556,17 +1556,17 @@ while( !$res->EOF )
                                ."AND crop = '$act_do[crop]'");
                 }
 
-                if( $cropinfo[crop] == 'herbs' )
+                if( $cropinfo['crop'] == 'herbs' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
-                    while( $cropinfo[acres] > 0 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 0 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 1;
+                        $cropinfo['acres'] -= 1;
                         $acres_harvested += 1;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);
@@ -1595,17 +1595,17 @@ while( !$res->EOF )
                                ."AND action = '$act_do[action]' "
                                ."AND crop = '$act_do[crop]'");
                 }
-                if( $cropinfo[crop] == 'spice' )
+                if( $cropinfo['crop'] == 'spice' )
                 {
-                    $harvest = ($cropinfo[harvest] / $cropinfo[acres]);
+                    $harvest = ($cropinfo['harvest'] / $cropinfo['acres']);
                     $acres_harvested = 0;
                     $cotton_harvest = 0;
 
-                    while( $cropinfo[acres] > 0 && $act_do[actives] > 1 )
+                    while( $cropinfo['acres'] > 0 && $act_do['actives'] > 1 )
                     {
-                        $cropinfo[acres] -= 1;
+                        $cropinfo['acres'] -= 1;
                         $acres_harvested += 1;
-                        $act_do[actives] -= 1;
+                        $act_do['actives'] -= 1;
                         $cotton_harvest += $harvest;
                     }
                     $cotton_harvest = round($cotton_harvest);

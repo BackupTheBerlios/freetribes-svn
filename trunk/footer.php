@@ -10,19 +10,19 @@ echo "<TABLE WIDTH=\"100%\" border=0 cellspacing=0 cellpadding=0>\n";
 
 global $page_name;
 echo "<TR>"
-	."<TD ALIGN=CENTER>"
-	."<FONT CLASS=text_small>";
+    ."<TD ALIGN=CENTER>"
+    ."<FONT CLASS=text_small>";
 echo "<br>";
 global $time_start, $game_version, $game_name, $game_url_path, $theme_default;
 $time_end = getmicrotime();
 $time = getmicrotime() - $time_start;
 if (!ISSET($_SESSION['theme']))
 {
-	$_SESSION['theme'] = $theme_default;
+    $_SESSION['theme'] = $theme_default;
 }
 echo "<TD ALIGN=CENTER>"
-	."<FONT CLASS=text_small><B>$game_name</B><BR>Tribe Strive $game_version</FONT>"
-	."<br><FONT CLASS=text_small>Served in $time seconds.</FONT>"
+    ."<FONT CLASS=text_small><B>$game_name</B><BR>Tribe Strive $game_version</FONT>"
+    ."<br><FONT CLASS=text_small>Served in $time seconds.</FONT>"
 ?>
 </td></tr>
 <tr>
@@ -30,13 +30,11 @@ echo "<TD ALIGN=CENTER>"
 <?php
 
 echo "<TD ALIGN=CENTER colspan=\"2\">"
-	."<A HREF=\"credits.php\">"
-	."<FONT CLASS=text_small>Miscellaneous Credits</A>"
-        ."<FONT COLOR=BLACK><P><B>Powered by</B></FONT><BR>"
-        ."<A HREF=http://www.emceehosting.net>"
-        ."Emcee Webhoisting- The MMORPG specialists</A>"
+    ."<A HREF=\"credits.php\">"
+    ."<FONT CLASS=text_small>Miscellaneous Credits</A>"
+
         ."</TD>"
-	."</TR>";
+    ."</TR>";
 
 echo "</TABLE>";
 

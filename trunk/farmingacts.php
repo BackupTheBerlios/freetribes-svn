@@ -1,4 +1,4 @@
-<?
+<?php
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2 of the License, or (at your
@@ -26,7 +26,7 @@ $module = $_POST['action'];
                         ."WHERE tribeid = '$_SESSION[current_unit]'");
     $devainfo = $deva->fields;
 
-    if( !$devainfo[DeVA] == '0000.00' )
+    if( !$devainfo['DeVA'] == '0000.00' )
     {
         echo 'You are under DeVA, and must break the seige before conducting activities.<BR>';
         page_footer();
@@ -85,13 +85,13 @@ $module = $_POST['action'];
                              ."AND status = 'Seed'");
         if( !$ready->EOF )
         {
-			echo '<OPTION VALUE=harvest>Harvest</OPTION>';
-			$display = true;
+            echo '<OPTION VALUE=harvest>Harvest</OPTION>';
+            $display = true;
         }
         if( !$display == true )
         {
             echo '<OPTION VALUE=none>No Farming Available</OPTION>';
-        } 
+        }
         echo '</SELECT>';
         echo '&nbsp;<INPUT TYPE=SUBMIT VALUE=Submit>';
         echo '</FORM></TD></TR><TR><TD ';
@@ -108,133 +108,133 @@ $module = $_POST['action'];
         }
     $line_col = $color_line1;
     while(!$act_do->EOF)
-	{
-		$act_do_info = $act_do->fields;
-		if($line_col == $color_line1)
-		{
-			$line_col = $color_line2;
-		}
-		elseif($line_col == $color_line2)
-		{
-			$line_col = $color_line1;
-		}
-		echo "<TR bgcolor=$line_col><TD>$act_do_info[crop]</TD><TD>$act_do_info[actives]</TD><TD>$act_do_info[action]</TD><TD ALIGN=CENTER><FORM ACTION=farmingacts.php METHOD=POST><INPUT TYPE=HIDDEN NAME=actives VALUE=\"$act_do_info[actives]\"><INPUT TYPE=HIDDEN NAME=id VALUE=\"$act_do_info[id]\"><INPUT TYPE=HIDDEN NAME=cancel VALUE=\"$act_do_info[crop]\"><INPUT TYPE=SUBMIT VALUE=CANCEL></FORM></TD></TR>";
-		$act_do->MoveNext();
-		}
-		echo "</TABLE>";
-		echo '<P>';
-		echo "<CENTER><TABLE BORDER=0 width=48%><TR><TD bgcolor=$color_header COLSPAN=4 ALIGN=CENTER>Current Crops</TD></TR>";
-		$fm = $db->Execute("SELECT * FROM $dbtables[farming] WHERE hex_id = '$tribeinfo[hex_id]' AND clanid = '$tribeinfo[clanid]'");
-		if($fm->EOF)
-		{
-			echo "<TR bgcolor=$color_line1><TD COLSPAN=4 ALIGN=CENTER>None</TD></TR>";
-		}
-		else
-		{
-			echo "<TR bgcolor=$color_header ALIGN=CENTER><TD>Tile</TD><TD>Crop</TD><TD>Status</TD><TD>Acres</TD></TR>";
-			$line_col = $color_line1;
-			while(!$fm->EOF)
-			{
-				$farm = $fm->fields;
-				echo "<TR BGCOLOR=$line_col ALIGN=CENTER><TD>$farm[hex_id]</TD><TD>$farm[crop]</TD><TD>$farm[status]</TD><TD>$farm[acres]</TD></TR>";
-				if($line_col == $color_line1)
-					{
-					$line_col = $color_line2;
-					}
-				else
-					{
-					$line_col = $color_line1;
-					}
-				$fm->MoveNext();
-			}
-		}
-		echo '</TABLE></CENTER>';
+    {
+        $act_do_info = $act_do->fields;
+        if($line_col == $color_line1)
+        {
+            $line_col = $color_line2;
+        }
+        elseif($line_col == $color_line2)
+        {
+            $line_col = $color_line1;
+        }
+        echo "<TR bgcolor=$line_col><TD>$act_do_info[crop]</TD><TD>$act_do_info[actives]</TD><TD>$act_do_info[action]</TD><TD ALIGN=CENTER><FORM ACTION=farmingacts.php METHOD=POST><INPUT TYPE=HIDDEN NAME=actives VALUE=\"$act_do_info[actives]\"><INPUT TYPE=HIDDEN NAME=id VALUE=\"$act_do_info[id]\"><INPUT TYPE=HIDDEN NAME=cancel VALUE=\"$act_do_info[crop]\"><INPUT TYPE=SUBMIT VALUE=CANCEL></FORM></TD></TR>";
+        $act_do->MoveNext();
+        }
+        echo "</TABLE>";
+        echo '<P>';
+        echo "<CENTER><TABLE BORDER=0 width=48%><TR><TD bgcolor=$color_header COLSPAN=4 ALIGN=CENTER>Current Crops</TD></TR>";
+        $fm = $db->Execute("SELECT * FROM $dbtables[farming] WHERE hex_id = '$tribeinfo[hex_id]' AND clanid = '$tribeinfo[clanid]'");
+        if($fm->EOF)
+        {
+            echo "<TR bgcolor=$color_line1><TD COLSPAN=4 ALIGN=CENTER>None</TD></TR>";
+        }
+        else
+        {
+            echo "<TR bgcolor=$color_header ALIGN=CENTER><TD>Tile</TD><TD>Crop</TD><TD>Status</TD><TD>Acres</TD></TR>";
+            $line_col = $color_line1;
+            while(!$fm->EOF)
+            {
+                $farm = $fm->fields;
+                echo "<TR BGCOLOR=$line_col ALIGN=CENTER><TD>$farm[hex_id]</TD><TD>$farm[crop]</TD><TD>$farm[status]</TD><TD>$farm[acres]</TD></TR>";
+                if($line_col == $color_line1)
+                    {
+                    $line_col = $color_line2;
+                    }
+                else
+                    {
+                    $line_col = $color_line1;
+                    }
+                $fm->MoveNext();
+            }
+        }
+        echo '</TABLE></CENTER>';
 
 
-		echo "</TD><TD><TABLE BORDER=0><TR><TD bgcolor=$color_header COLSPAN=2>Farming Tools Available</TD></TR>";
+        echo "</TD><TD><TABLE BORDER=0><TR><TD bgcolor=$color_header COLSPAN=2>Farming Tools Available</TD></TR>";
 
 
-		$tribe = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$_SESSION[current_unit]'");
-		$tribeinfo = $tribe->fields;
-		$stuff = $db->Execute("SELECT * FROM $dbtables[products] "
-							 ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
-							 ."AND long_name = 'plow' "
-							 ."AND amount > 0 OR "
-							 ."tribeid = '$tribeinfo[goods_tribe]' "
-							 ."AND long_name = 'rake' "
-							 ."AND amount > 0 "
-							 ."OR tribeid = '$tribeinfo[goods_tribe]' "
-							 ."AND long_name = 'hoe' "
-							 ."AND amount > 0");
-		$totalstuff = 0;
-		$linecolor = $color_line2;
+        $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$_SESSION[current_unit]'");
+        $tribeinfo = $tribe->fields;
+        $stuff = $db->Execute("SELECT * FROM $dbtables[products] "
+                             ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
+                             ."AND long_name = 'plow' "
+                             ."AND amount > 0 OR "
+                             ."tribeid = '$tribeinfo[goods_tribe]' "
+                             ."AND long_name = 'rake' "
+                             ."AND amount > 0 "
+                             ."OR tribeid = '$tribeinfo[goods_tribe]' "
+                             ."AND long_name = 'hoe' "
+                             ."AND amount > 0");
+        $totalstuff = 0;
+        $linecolor = $color_line2;
 
-		while(!$stuff->EOF){
-				$stuffinfo = $stuff->fields;
-		if($linecolor == $color_line1){
-		$linecolor = $color_line2;
-		}
-		elseif($linecolor == $color_line2){
-		$linecolor = $color_line1;
-		}
+        while(!$stuff->EOF){
+                $stuffinfo = $stuff->fields;
+        if($linecolor == $color_line1){
+        $linecolor = $color_line2;
+        }
+        elseif($linecolor == $color_line2){
+        $linecolor = $color_line1;
+        }
 
-				echo "<TR bgcolor=$linecolor><TD>$stuffinfo[proper]</TD><TD>$stuffinfo[amount]</TD></TR>";
-				$totalstuff++;
-				$stuff->MoveNext();
-		}
+                echo "<TR bgcolor=$linecolor><TD>$stuffinfo[proper]</TD><TD>$stuffinfo[amount]</TD></TR>";
+                $totalstuff++;
+                $stuff->MoveNext();
+        }
 
-		if($totalstuff < 1){
-				echo "<TR><TD COLSPAN=2>None</TD></TR>";
-		}
-				echo "</TABLE></TD></TR></TABLE>";
+        if($totalstuff < 1){
+                echo "<TR><TD COLSPAN=2>None</TD></TR>";
+        }
+                echo "</TABLE></TD></TR></TABLE>";
 
-	  }
-	  elseif(ISSET($module) && !ISSET($_REQUEST[actives]))
-	  {
-		echo "<TABLE BORDER=0 WIDTH=\"100%\">";
-		echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD COLSPAN=3>";
-		echo "<A HREF=activities.php>Activities</A> | <A HREF=scouting.php>Scouting</A> | <A HREF=garrisons.php>Garrisons</A> | <A HREF=goodstribe.php>Change Goods Tribe</A></TD></TR>";
+      }
+      elseif(ISSET($module) && !ISSET($_REQUEST[actives]))
+      {
+        echo "<TABLE BORDER=0 WIDTH=\"100%\">";
+        echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD COLSPAN=3>";
+        echo "<A HREF=activities.php>Activities</A> | <A HREF=scouting.php>Scouting</A> | <A HREF=garrisons.php>Garrisons</A> | <A HREF=goodstribe.php>Change Goods Tribe</A></TD></TR>";
 
-		echo "<TR><TD COLSPAN=2 ALIGN=CENTER>";
-		echo "<TABLE BORDER=0>";
-		echo "<TR bgcolor=$color_line1><TD>Select the crop desired.</TD><TD>";
-		echo "<FORM ACTION=farmingacts.php METHOD=POST>";
-		echo "<SELECT NAME=produce>";
-		$skill = $db->Execute("SELECT * FROM $dbtables[skills] "
-							 ."WHERE tribeid = '$_SESSION[current_unit]' "
-							 ."AND abbr = 'farm'");
-		$skillinfo = $skill->fields;
-		if( $_REQUEST[action] == 'harvest' )
-		{
-		$res = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$_SESSION[current_unit]'");
-		$tribe = $res->fields;
-		$crop = $db->Execute("SELECT * FROM $dbtables[farming] "
-							."WHERE clanid = '$tribe[clanid]' "
-							."AND hex_id = '$tribe[hex_id]' "
-							."AND status = 'Ready'");
-		while( !$crop->EOF )
-		{
-			$croptype = $crop->fields;
-			echo "<OPTION VALUE=$croptype[crop]>$croptype[crop]</OPTION>";
-			$crop->MoveNext();
-		}
-		}
-		else
-		{
-		$crop = $db->Execute("SELECT * FROM $dbtables[product_table] "
-							."WHERE skill_abbr = 'farm' "
-							."AND skill_level <= '$skillinfo[level]'");
-		while( !$crop->EOF )
-		{
-			$croptype = $crop->fields;
-			echo "<OPTION VALUE=$croptype[long_name]>$croptype[proper]</OPTION>";
-			$crop->MoveNext();
-		}
+        echo "<TR><TD COLSPAN=2 ALIGN=CENTER>";
+        echo "<TABLE BORDER=0>";
+        echo "<TR bgcolor=$color_line1><TD>Select the crop desired.</TD><TD>";
+        echo "<FORM ACTION=farmingacts.php METHOD=POST>";
+        echo "<SELECT NAME=produce>";
+        $skill = $db->Execute("SELECT * FROM $dbtables[skills] "
+                             ."WHERE tribeid = '$_SESSION[current_unit]' "
+                             ."AND abbr = 'farm'");
+        $skillinfo = $skill->fields;
+        if( $_REQUEST[action] == 'harvest' )
+        {
+        $res = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$_SESSION[current_unit]'");
+        $tribe = $res->fields;
+        $crop = $db->Execute("SELECT * FROM $dbtables[farming] "
+                            ."WHERE clanid = '$tribe[clanid]' "
+                            ."AND hex_id = '$tribe[hex_id]' "
+                            ."AND status = 'Ready'");
+        while( !$crop->EOF )
+        {
+            $croptype = $crop->fields;
+            echo "<OPTION VALUE=$croptype[crop]>$croptype[crop]</OPTION>";
+            $crop->MoveNext();
+        }
+        }
+        else
+        {
+        $crop = $db->Execute("SELECT * FROM $dbtables[product_table] "
+                            ."WHERE skill_abbr = 'farm' "
+                            ."AND skill_level <= '$skillinfo[level]'");
+        while( !$crop->EOF )
+        {
+            $croptype = $crop->fields;
+            echo "<OPTION VALUE=$croptype[long_name]>$croptype[proper]</OPTION>";
+            $crop->MoveNext();
+        }
     }
 
-    
+
     echo "</SELECT></TD></TR>";
-    $active = $db->Execute("SELECT * FROM $dbtables[tribes] where tribeid = '$_SESSION[current_unit]'"); 
+    $active = $db->Execute("SELECT * FROM $dbtables[tribes] where tribeid = '$_SESSION[current_unit]'");
     $activeinfo = $active->fields;
     echo "<TR bgcolor=$color_line2><TD>Allocate</TD><TD><INPUT CLASS=edit_area NAME=actives TYPE=TEXT SIZE=5 MAXLENGTH=7 VALUE=''></TD></TR><TR bgcolor=$color_line1><TD>Actives remaining:</TD><TD ALIGN=CENTER>$activeinfo[curam]</TD></TR>";
     echo "<TR><TD ALIGN=CENTER COLSPAN=2><INPUT TYPE=HIDDEN NAME=action VALUE=\"$_REQUEST[action]\"><BR><INPUT TYPE=SUBMIT VALUE=ALLOCATE></FORM></TD></TR></TABLE>";
@@ -261,7 +261,7 @@ $module = $_POST['action'];
     $linecolor = $color_line2;
 
     while(!$stuff->EOF){
-	    $stuffinfo = $stuff->fields;
+        $stuffinfo = $stuff->fields;
     if($linecolor == $color_line1){
     $linecolor = $color_line2;
     }
@@ -269,15 +269,15 @@ $module = $_POST['action'];
     $linecolor = $color_line1;
     }
 
-	    echo "<TR bgcolor=$linecolor><TD>$stuffinfo[proper]</TD><TD>$stuffinfo[amount]</TD></TR>";
-	    $totalstuff++;
-	    $stuff->MoveNext();
+        echo "<TR bgcolor=$linecolor><TD>$stuffinfo[proper]</TD><TD>$stuffinfo[amount]</TD></TR>";
+        $totalstuff++;
+        $stuff->MoveNext();
     }
 
     if($totalstuff < 1){
-	    echo "<TR><TD COLSPAN=2>None</TD></TR>";
+        echo "<TR><TD COLSPAN=2>None</TD></TR>";
     }
-	    echo "</TABLE></TD></TR></TABLE>";
+        echo "</TABLE></TD></TR></TABLE>";
   }
 
 
@@ -319,7 +319,7 @@ $module = $_POST['action'];
         echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0;URL=farmingacts.php\">";;
     }
 
-  
+
 page_footer();
 
-?> 
+?>

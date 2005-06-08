@@ -5,21 +5,20 @@ include("config.php");
 
 connectdb();
 
-$username = $_REQUEST['username'];
-$_SESSION['username'] = $username;
-$password = $_REQUEST['password'];
+$username = $_POST['username'];
+$password = $_POST['password'];
 $md5password = md5($password);
 
 $res = $db->Execute("SELECT * FROM $dbtables[chiefs] WHERE username='$username' LIMIT 1");
 db_op_result($res,__LINE__,__FILE__);
 $playerinfo = $res->fields;
-$_SESSION['tooltip'] = $playerinfo['tooltip'];
-$_SESSION['theme'] = $theme_default;  // This must be set on this page before the header is included
-
-page_header("Login Pass On");
 
 if($playerinfo['password'] == $md5password & !$server_closed == 'true')
 {
+    $_SESSION['username'] = $username;
+     $_SESSION['tooltip'] = $playerinfo['tooltip'];
+     $_SESSION['theme'] = $theme_default;  // This must be set on this page before the header is included
+    page_header("Login Pass On");
     $title="Login Successful";
     bigtitle();
 
@@ -79,6 +78,7 @@ elseif($server_closed == 'true')
     }
     else
     {
+       page_header("Login Pass On");
         $title = "Server Closed";
         bigtitle();
         echo "Please stand by. We're doing something just now. Shouldn't be a moment.<BR>";
@@ -88,9 +88,11 @@ elseif($server_closed == 'true')
 }
 else
 {
+    page_header("Login Pass On");
     $title="Login Failed";
     bigtitle();
     echo "Username or Password incorrect. Click <a href=index.php>here</a> to try again.<br>Or click <a href=new.php>here</a> if you are a new chief <p><br>";
+
 }
 
 

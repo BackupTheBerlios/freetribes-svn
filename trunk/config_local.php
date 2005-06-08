@@ -19,8 +19,8 @@ $ADOdbpath = "ADOdb";
 // $gamedomain = "www.crblah.com";
 // Do not enter slashes for $gamedomain or anything that would come after a slash
 // if you get weird errors with cookies then make sure the game domain has TWO dots
-// i.e. if you reside your game on http://www.blacknova.net put .blacknova.net as $gamedomain. 
-// If your game is on http://www.some.site.net put .some.site.net as your game domain. 
+// i.e. if you reside your game on http://www.blacknova.net put .blacknova.net as $gamedomain.
+// If your game is on http://www.some.site.net put .some.site.net as your game domain.
 // Do not put port numbers in $gamedomain.
 
 $cookie_domain = ".domain.com";
@@ -66,7 +66,7 @@ $dbpass = "db_sql_password";
 $db_type = "mysql";
 
 // Set this to 1 to use db persistent connections, 0 otherwise
-$db_persistent = 0;//persisten connection scan cause server load issues on a busy site... 
+$db_persistent = 0;//persisten connection scan cause server load issues on a busy site...
 
 /* Table prefix for the database. If you want to run more than
 one game of TN on the same database, or if the current table
@@ -85,7 +85,7 @@ $link_forums = "http://forums.crazybri.com";
 $game_name = "TribeStrive Stable";
 
 
-$theme_default = "Original";	// You can set this to any of the directory names in ./themes
+$theme_default = "Original";    // You can set this to any of the directory names in ./themes
 
 // Themes are currently not completely implemented
 // If you use Lagoon, please disable the other themes
@@ -96,38 +96,38 @@ $theme_default = "Original";	// You can set this to any of the directory names i
 
 switch ($_SESSION['theme'])
 {
-	case "Lagoon":
-		$color_bg     = "#60AEF8";		// Page background.            Dark Grey
-		$color_header = "#0054E3";		// Used for most table titles. Bright Blue
-		$color_table  = "#004E98";		// Main table colour           Dark Blue
-		$color_line1  = "#206EB8";		// Alternating rows color      Mid Blue
-		$color_line2  = "#408ED8";		// Alternating rows color      Light Blue
-		break;
-	default:
-		$color_bg     = "#408C57";		// Page background.            Default: Dark Green
-		$color_header = "#af770e";		// Used for most table titles. Default: Orange Brown
-		$color_table  = "#997637";		// Main table colour           Default: Dark Brown
-		$color_line1  = "#aa8748";		// Alternating rows color      Default: Mid Brown
-		$color_line2  = "#Bb9859";		// Alternating rows color      Default: Light Brown
+    case "Lagoon":
+        $color_bg     = "#60AEF8";        // Page background.            Dark Grey
+        $color_header = "#0054E3";        // Used for most table titles. Bright Blue
+        $color_table  = "#004E98";        // Main table colour           Dark Blue
+        $color_line1  = "#206EB8";        // Alternating rows color      Mid Blue
+        $color_line2  = "#408ED8";        // Alternating rows color      Light Blue
+        break;
+    default:
+        $color_bg     = "#408C57";        // Page background.            Default: Dark Green
+        $color_header = "#af770e";        // Used for most table titles. Default: Orange Brown
+        $color_table  = "#997637";        // Main table colour           Default: Dark Brown
+        $color_line1  = "#aa8748";        // Alternating rows color      Default: Mid Brown
+        $color_line2  = "#Bb9859";        // Alternating rows color      Default: Light Brown
 }
 
 
 // The following variables let you define how the game runs and
 // what type of debug tracking you want, if any
 
-	$maxlen_password         = 16;
-	$server_closed           = false;       // true = block logins but not new account creation
-	$account_creation_closed = false;       // true = block new account creation
-	$game_debug              = true;        // true = turns on debug logger
-	$game_debug_move         = true;       // true = turns on the movement debugger
-	$game_debug_xfer         = true;        // true = turns on the transfer debugger
-	$game_skill_debug        = true;       // true = turns on the skill attempts debugger
-	$game_pop_debug          = true;       // true = turns on the population debugger
+    $maxlen_password         = 16;
+    $server_closed           = false;       // true = block logins but not new account creation
+    $account_creation_closed = false;       // true = block new account creation
+    $game_debug              = true;        // true = turns on debug logger
+    $game_debug_move         = true;       // true = turns on the movement debugger
+    $game_debug_xfer         = true;        // true = turns on the transfer debugger
+    $game_skill_debug        = true;       // true = turns on the skill attempts debugger
+    $game_pop_debug          = true;       // true = turns on the population debugger
 
-	$default_lang            = 'english';
+    $default_lang            = 'english';
 
-	$display_password        = false;       // If true, will display password on signup screen.
-	$sched_type              = 0;           // 0 = Cron based, 1 = player triggered.
+    $display_password        = false;       // If true, will display password on signup screen.
+    $sched_type              = 0;           // 0 = Cron based, 1 = player triggered.
 
 
 ?>

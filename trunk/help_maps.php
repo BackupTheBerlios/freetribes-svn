@@ -1,10 +1,10 @@
-<?
+<?php
 session_start();
 header("Cache-control: private");
 
 if (!ISSET($_SESSION['theme']))
 {
-	$_SESSION['theme'] = $theme_default;  // This must be set on this page before the header is included
+    $_SESSION['theme'] = $theme_default;  // This must be set on this page before the header is included
 }
 
 include("config.php");
@@ -101,11 +101,11 @@ echo "<TD>There are $total Gem resources.</TD>";
 
 
 echo "</TR>";
-$res = $db->Execute("SELECT COUNT(*) as count from $dbtables[mapping] WHERE `0000` = 'Y'");
+$res = $db->Execute("SELECT COUNT(*) as count from $dbtables[mapping] WHERE `admin_0000` = '1'");
 $row = $res->fields;
 $percent = round($row[count]/37500, 2);
 $percent = $percent * 100;
-$total = NUMBER($row[count]);
+$total = NUMBER($row['count']);
 echo "<TR ALIGN=CENTER><TD COLSPAN=2>And $total ($percent%) of them have been explored to date.</TD><TR></TABLE><BR></CENTER>";
 
 
@@ -119,4 +119,4 @@ echo "</CENTER>";
 
 page_footer();
 
-?> 
+?>

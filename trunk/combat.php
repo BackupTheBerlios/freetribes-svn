@@ -1,4 +1,4 @@
-<?
+<?php
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2 of the License, or (at your
@@ -15,44 +15,44 @@ page_header("Tribal Combat");
 
 connectdb();
 
-    if( $_REQUEST[uniqueid] == '' )
+    if( $_REQUEST['uniqueid'] == '' )
     {
         $uniqueid = uniqid(microtime(),1);
     }
     else
     {
-        $uniqueid = $_REQUEST[uniqueid];
+        $uniqueid = $_REQUEST['uniqueid'];
     }
     $uniqueid2 = uniqid(microtime(),1);
 
-if( !ISSET( $_REQUEST[orders] ) )
+if( !ISSET( $_REQUEST['orders'] ) )
 {
-    if( $_REQUEST[orders] == 'cancel' | $_REQUEST[target] == 'cancel' )
+    if( $_REQUEST['orders'] == 'cancel' | $_REQUEST['target'] == 'cancel' )
     {
-        $db->Execute("DELETE FROM $dbtables[combats] "
-                    ."WHERE combat_id = '$uniqueid'");
+        $canc = $db->Execute("DELETE FROM $dbtables[combats] WHERE combat_id = '$uniqueid'");
+        db_op_result($canc,__LINE__,__FILE__);
         header("location:main.php");
     }
 
-    $move = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                        ."WHERE tribeid = '$_SESSION[current_unit]'");
+    $move = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$_SESSION[current_unit]'");
+    db_op_result($move,__LINE__,__FILE__);
     $moves = $move->fields;
 
-    $nwbe_clan = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                             ."WHERE tribeid = '$_REQUEST[target]'");
+    $nwbe_clan = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$_REQUEST[target]'");
+    db_op_result($nwbe_clan,__LINE__,__FILE__);
     $newbie_clan = $nwbe_clan->fields;
 
-    $nwbe = $db->Execute("SELECT * FROM $dbtables[chiefs] "
-                        ."WHERE clanid = '$newbie_clan[clanid]'");
+    $nwbe = $db->Execute("SELECT * FROM $dbtables[chiefs]WHERE clanid = '$newbie_clan[clanid]'");
+    db_op_result($nwbe,__LINE__,__FILE__);
     $newbie = $nwbe->fields;
 
-    if( $newbie[clanid] == $_SESSION[clanid] )
+    if( $newbie['clanid'] == $_SESSION['clanid'] )
     {
         echo 'You cannot attack yourself.<BR>';
         page_footer();
     }
 
-    if( $newbie[active] < 25 )
+    if( $newbie['active'] < 25 )
     {
         echo 'This tribe is under Newbie Protection.<BR>';
         page_footer();
@@ -65,31 +65,31 @@ if( !ISSET( $_REQUEST[orders] ) )
 //        header("location:main.php");
 //    }
 
-    if( $moves[move_pts] < 1)
-    { 
-        header("location:main.php"); 
+    if( $moves['move_pts'] < 1)
+    {
+        header("location:main.php");
     }
 
-    $target = $_REQUEST[target];
+    $target = $_REQUEST['target'];
     $tabletarget = explode('.', $target);
-    $tableattacker = explode('.', $_SESSION[current_unit]);
-    $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                         ."WHERE tribeid = '$target'");
+    $tableattacker = explode('.', $_SESSION['current_unit']);
+    $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$target'");
+    db_op_result($tribe,__LINE__,__FILE__);
     $tribeinfo = $tribe->fields;
 
 ////////////////////////////Remind ourselves who we have for soldiers////////////////////
-    $gar = $db->Execute("SELECT * FROM $dbtables[garrisons] "
-                       ."WHERE tribeid = '$_SESSION[current_unit]'");
+    $gar = $db->Execute("SELECT * FROM $dbtables[garrisons] WHERE tribeid = '$_SESSION[current_unit]'");
+    db_op_result($gar,__LINE__,__FILE__);
     $afor = 0;
 
     while( !$gar->EOF )
     {
         $garrison = $gar->fields;
-        $sectorforce1 = round($garrison[force]/4);
-        $sectorforce3 = round($garrison[force]/4);
-        $sectorforce2 = $garrison[force] - ($sectorforce1 + $sectorforce3);
+        $sectorforce1 = round($garrison['force']/4);
+        $sectorforce3 = round($garrison['force']/4);
+        $sectorforce2 = $garrison['force'] - ($sectorforce1 + $sectorforce3);
 
-        $db->Execute("INSERT INTO $dbtables[combats] "
+        $cmbts = $db->Execute("INSERT INTO $dbtables[combats] "
                     ."VALUES("
                     ."'$uniqueid',"
                     ."'A',"
@@ -118,31 +118,31 @@ if( !ISSET( $_REQUEST[orders] ) )
                     ."'$sectorforce3',"
                     ."'$tribeinfo[hex_id]'"
                     .")");
-
-        $afor += $garrison[force];
+        db_op_result($cmbts,__LINE__,__FILE__);
+        $afor += $garrison['force'];
         $gar->MoveNext();
     }
 
 
 //////////////////////////////////////Gather info about the target////////////////////////
-    $target = $_REQUEST[target];
-    $tar = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                       ."WHERE tribeid = '$target'");
+    $target = $_REQUEST['target'];
+    $tar = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$target'");
+    db_op_result($tar,__LINE__,__FILE__);
     $targetinfo = $tar->fields;
 
     $gar = array();
-    $gar = $db->Execute("SELECT * FROM $dbtables[garrisons] "
-                       ."WHERE tribeid = '$target'");
+    $gar = $db->Execute("SELECT * FROM $dbtables[garrisons] WHERE tribeid = '$target'");
+    db_op_result($gar,__LINE__,__FILE__);
     $tfor = 0;
 
     while( !$gar->EOF )
     {
         $garrison = $gar->fields;
-        $sectorforce1 = round($garrison[force]/4);
-        $sectorforce3 = round($garrison[force]/4);
-        $sectorforce2 = $garrison[force] - ($sectorforce1 + $sectorforce3);
+        $sectorforce1 = round($garrison['force']/4);
+        $sectorforce3 = round($garrison['force']/4);
+        $sectorforce2 = $garrison['force'] - ($sectorforce1 + $sectorforce3);
 
-        $db->Execute("INSERT INTO $dbtables[combats] "
+        $cmbts = $db->Execute("INSERT INTO $dbtables[combats] "
                     ."VALUES("
                     ."'$uniqueid',"
                     ."'D',"
@@ -171,27 +171,24 @@ if( !ISSET( $_REQUEST[orders] ) )
                     ."'$sectorforce3',"
                     ."'$garrison[hex_id]'"
                     .")");
-
+        db_op_result($cmbts,__LINE__,__FILE__);
         $tfor += $garrison[force];
         $gar->MoveNext();
     }
 
 /////////////////////////////////////Gather info about possible clanmates////////////////////////
-    $rei = $db->Execute("SELECT * FROM $dbtables[garrisons] "
-                       ."WHERE tribeid <> '$target' "
-                       ."AND hex_id = '$targetinfo[hex_id]' "
-                       ."AND clanid = '$targetinfo[clanid]'");
-
+    $rei = $db->Execute("SELECT * FROM $dbtables[garrisons] WHERE tribeid <> '$target' AND hex_id = '$targetinfo[hex_id]' AND clanid = '$targetinfo[clanid]'");
+    db_op_result($rei,__LINE__,__FILE__);
     while( !$rei->EOF )
     {
         $garrison = $rei->fields;
-        $clanrein = round($garrison[force]/2);
+        $clanrein = round($garrison['force']/2);
         $sectorforce1 = round($clanrein/4);
         $sectorforce3 = round($clanrein/4);
         $sectorforce2 = $clanrein - ($sectorforce1 + $sectorforce3);
         $tfor += $clanrein;
 
-        $db->Execute("INSERT INTO $dbtables[combats] "
+        $cmbts = $db->Execute("INSERT INTO $dbtables[combats] "
                     ."VALUES("
                     ."'$uniqueid',"
                     ."'D',"
@@ -219,7 +216,7 @@ if( !ISSET( $_REQUEST[orders] ) )
                     ."'$sectorforce3',"
                     ."'$garrison[hex_id]'"
                     .")");
-
+        db_op_result($cmbts,__LINE__,__FILE__);
         $rei->MoveNext();
     }
 
@@ -227,36 +224,30 @@ if( !ISSET( $_REQUEST[orders] ) )
 ////////////////////////////////////Gather info about possible allies/////////////////////////////
     $garrison = array();
 
-    $all = $db->Execute("SELECT * FROM $dbtables[garrisons] "
-                       ."WHERE hex_id = '$targetinfo[hex_id]' "
-                       ."AND clanid <> '$targetinfo[clanid]'");
-
+    $all = $db->Execute("SELECT * FROM $dbtables[garrisons] WHERE hex_id = '$targetinfo[hex_id]' AND clanid <> '$targetinfo[clanid]'");
+    db_op_result($all,__LINE__,__FILE__);
     while( !$all->EOF )
     {
         $garrison = $all->fields;
-        $ally = $db->Execute("SELECT * FROM $dbtables[alliances] "
-                            ."WHERE offerer_id = '$targetinfo[clanid]' "
-                            ."AND receipt_id = '$garrison[clanid]' "
-                            ."AND accept = 'Y'");
+        $ally = $db->Execute("SELECT * FROM $dbtables[alliances] WHERE offerer_id = '$targetinfo[clanid]' AND receipt_id = '$garrison[clanid]' AND accept = 'Y'");
+        db_op_result($ally,__LINE__,__FILE__);
         $ally1info = $ally->fields;
 
-        if( $ally1info[offerer_id] == '' )
+        if( $ally1info['offerer_id'] == '' )
         {
-            $ally2 = $db->Execute("SELECT * FROM $dbtables[alliances] "
-                                 ."WHERE offerer_id = '$garrison[clanid]' "
-                                 ."AND receipt_id = '$targetinfo[clanid]' "
-                                 ."AND accept = 'Y'");
+            $ally2 = $db->Execute("SELECT * FROM $dbtables[alliances] WHERE offerer_id = '$garrison[clanid]' AND receipt_id = '$targetinfo[clanid]' AND accept = 'Y'");
+            db_op_result($ally2,__LINE__,__FILE__);
             $ally2info = $ally2->fields;
         }
 
-        if( $ally1info[receipt_id] )
-        { 
-            $allied_reinforcement = round($garrison[force]/3);
+        if( $ally1info['receipt_id'] )
+        {
+            $allied_reinforcement = round($garrison['force']/3);
             $sectorforce1 = round($allied_reinforcement/4);
             $sectorforce3 = round($allied_reinforcement/4);
             $sectorforce2 = $allied_reinforcement - ($sectorforce1 + $sectorforce3);
 
-            $db->Execute("INSERT INTO $dbtables[combats] "
+            $cmbts = $db->Execute("INSERT INTO $dbtables[combats] "
                         ."VALUES("
                         ."'$uniqueid',"
                         ."'D',"
@@ -285,17 +276,17 @@ if( !ISSET( $_REQUEST[orders] ) )
                         ."'$sectorforce3',"
                         ."'$garrison[hex_id]'"
                         .")");
-
+            db_op_result($cmbts,__LINE__,__FILE__);
             $tfor += $allied_reinforcement;
         }
-        elseif( $ally2info[receipt_id] )
+        elseif( $ally2info['receipt_id'] )
         {
-            $allied_reinforcement = round($garrison[force]/3);
+            $allied_reinforcement = round($garrison['force']/3);
             $sectorforce1 = round($allied_reinforcement/4);
             $sectorforce3 = round($allied_reinforcement/4);
             $sectorforce2 = $allied_reinforcement - ($sectorforce1 + $sectorforce3);
 
-            $db->Execute("INSERT INTO $dbtables[combats] "
+            $cmbts = $db->Execute("INSERT INTO $dbtables[combats] "
                         ."VALUES("
                         ."'$uniqueid',"
                         ."'D',"
@@ -324,18 +315,16 @@ if( !ISSET( $_REQUEST[orders] ) )
                         ."'$sectorforce3',"
                         ."'$garrison[hex_id]'"
                         .")");
-
+            db_op_result($cmbts,__LINE__,__FILE__);
             $tfor += $allied_reinforcement;
         }
         $all->MoveNext();
     }
-   
 
-    $attacker = $db->Execute("SELECT * FROM $dbtables[combats] "
-                            ."WHERE side = 'A' "
-                            ."AND combat_id = '$uniqueid'");
 
-    
+    $attacker = $db->Execute("SELECT * FROM $dbtables[combats] WHERE side = 'A' AND combat_id = '$uniqueid'");
+    db_op_result($attacker,__LINE__,__FILE__);
+
     echo '<CENTER><TABLE BORDER=0><TR BGCOLOR=';
     echo "$color_header";
     echo '><TD ALIGN=CENTER COLSPAN=12><FONT SIZE=+2>You Have Run Across Unallied Tribe ';
@@ -398,27 +387,27 @@ if( !ISSET( $_REQUEST[orders] ) )
         echo "$agarinfo[horses]";
         echo '</TD><TD>';
 
-        if( $agarinfo[experience] < 6 )
+        if( $agarinfo['experience'] < 6 )
         {
             echo 'Recruits';
         }
-        elseif( $agarinfo[experience] < 12 )
+        elseif( $agarinfo['experience'] < 12 )
         {
             echo 'Green';
         }
-        elseif( $agarinfo[experience] < 24 )
+        elseif( $agarinfo['experience'] < 24 )
         {
             echo 'Seasoned';
         }
-        elseif( $agarinfo[experience] < 48 )
+        elseif( $agarinfo['experience'] < 48 )
         {
             echo 'Veteran';
         }
-        elseif( $agarinfo[experience] <78 )
+        elseif( $agarinfo['experience'] <78 )
         {
             echo 'Elite';
         }
-        elseif( $agarinfo[experience] < 100 )
+        elseif( $agarinfo['experience'] < 100 )
         {
             echo 'Crack';
         }
@@ -431,7 +420,7 @@ if( !ISSET( $_REQUEST[orders] ) )
         echo "$agarinfo[weapon1]";
         echo '</TD><TD>';
 
-        if( $agarinfo[weapon2] == '' )
+        if( $agarinfo['weapon2'] == '' )
         {
             echo 'None';
         }
@@ -441,7 +430,7 @@ if( !ISSET( $_REQUEST[orders] ) )
         }
         echo '</TD><TD>';
 
-        if( $agarinfo[head_armor] == '' )
+        if( $agarinfo['head_armor'] == '' )
         {
             echo 'None';
         }
@@ -451,7 +440,7 @@ if( !ISSET( $_REQUEST[orders] ) )
         }
         echo '</TD><TD>';
 
-        if( $agarinfo[otorso_armor] == '' )
+        if( $agarinfo['otorso_armor'] == '' )
         {
             echo 'None';
         }
@@ -461,7 +450,7 @@ if( !ISSET( $_REQUEST[orders] ) )
         }
         echo '</TD><TD>';
 
-        if( $agarinfo[torso_armor] == '' )
+        if( $agarinfo['torso_armor'] == '' )
         {
             echo 'None';
         }
@@ -471,7 +460,7 @@ if( !ISSET( $_REQUEST[orders] ) )
         }
         echo '</TD><TD>';
 
-        if( $agarinfo[legs_armor] == '' )
+        if( $agarinfo['legs_armor'] == '' )
         {
             echo 'None';
         }
@@ -481,7 +470,7 @@ if( !ISSET( $_REQUEST[orders] ) )
         }
         echo '</TD><TD>';
 
-        if( $agarinfo[shield] == '' )
+        if( $agarinfo['shield'] == '' )
         {
             echo 'None';
         }
@@ -491,7 +480,7 @@ if( !ISSET( $_REQUEST[orders] ) )
         }
         echo '</TD><TD>';
 
-        if( $agarinfo[horse_armor] == '' )
+        if( $agarinfo['horse_armor'] == '' )
         {
             echo 'None';
         }
@@ -509,39 +498,39 @@ if( !ISSET( $_REQUEST[orders] ) )
 
 }
 
-if( $_REQUEST[orders] == 'cancel' | $_REQUEST[target] == 'cancel' )
+if( $_REQUEST['orders'] == 'cancel' || $_REQUEST['target'] == 'cancel' )
 {
-    $db->Execute("DELETE FROM $dbtables[combats] "
-                ."WHERE combat_id = '$uniqueid'");
+    $cmbts = $db->Execute("DELETE FROM $dbtables[combats] WHERE combat_id = '$uniqueid'");
+    db_op_result($cmbts,__LINE__,__FILE__);
     header("location:main.php");
-    $target = explode('.', $_REQUEST[target]);
+    $target = explode('.', $_REQUEST['target']);  //What the FUCK does this do?
 }
-elseif( $_REQUEST[orders] == 'DeVA' )
+elseif( $_REQUEST['orders'] == 'DeVA' )
 {
-    $target = $_REQUEST[target];
+    $target = $_REQUEST['target'];
 
-    $hex = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                       ."WHERE tribeid = '$target'");
+    $hex = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$target'");
+    db_op_result($hex,__LINE__,__FILE__);
     $hexinfo = $hex->fields;
 
-    $db->Execute("UPDATE $dbtables[tribes] "
+    $cmbts = $db->Execute("UPDATE $dbtables[tribes] "
                 ."SET move_pts = '0', "
                 ."hex_id = '$hexinfo[hex_id]' "
                 ."WHERE goods_tribe = '$_SESSION[current_unit]'");
-
-    $db->Execute("UPDATE $dbtables[mapping] "
+    db_op_result($cmbts,__LINE__,__FILE__);
+    $cmbts = $db->Execute("UPDATE $dbtables[mapping] "
                 ."SET `$_SESSION[clanid]` = 'Y' "
                 ."WHERE hex_id = '$hexinfo[hex_id]'");
-
-    $db->Execute("UPDATE $dbtables[garrisons] "
+    db_op_result($cmbts,__LINE__,__FILE__);
+    $cmbts = $db->Execute("UPDATE $dbtables[garrisons] "
                 ."SET hex_id = '$hexinfo[hex_id]' "
                 ."WHERE tribeid = '$_SESSION[current_unit]'");
-
-    $db->Execute("UPDATE $dbtables[tribes] "
+    db_op_result($cmbts,__LINE__,__FILE__);
+    $cmbts = $db->Execute("UPDATE $dbtables[tribes] "
                 ."SET DeVA = '$_SESSION[current_unit]' "
                 ."WHERE tribeid = '$target'");
-
-    $db->Execute("INSERT INTO $dbtables[logs] "
+    db_op_result($cmbts,__LINE__,__FILE__);
+    $cmbts = $db->Execute("INSERT INTO $dbtables[logs] "
                 ."VALUES("
                 ."'',"
                 ."'$month[count]',"
@@ -553,8 +542,8 @@ elseif( $_REQUEST[orders] == 'DeVA' )
                 ."'War Activity: $_SESSION[current_unit] has "
                 ."established seige to $target and will begin to "
                 ."deny extra village activities (DeVA).')");
-
-    $db->Execute("INSERT INTO $dbtables[logs] "
+    db_op_result($cmbts,__LINE__,__FILE__);
+    $cmbts = $db->Execute("INSERT INTO $dbtables[logs] "
                 ."VALUES("
                 ."'',"
                 ."'$month[count]',"
@@ -566,8 +555,8 @@ elseif( $_REQUEST[orders] == 'DeVA' )
                 ."'War Activity: $_SESSION[current_unit] has "
                 ."established seige to $target and will begin to "
                 ."deny extra village activities (DeVA).')");
-
-    $db->Execute("INSERT INTO $dbtables[logs] "
+    db_op_result($cmbts,__LINE__,__FILE__);
+    $cmbts = $db->Execute("INSERT INTO $dbtables[logs] "
                 ."VALUES("
                 ."'',"
                 ."'$month[count]',"
@@ -579,38 +568,37 @@ elseif( $_REQUEST[orders] == 'DeVA' )
                 ."'War Activity: $_SESSION[current_unit] has "
                 ."established seige to $target and will begin "
                 ."to deny extra village activities (DeVA).')");
-
-    $db->Execute("DELETE $dbtables[activities] "
+    db_op_result($cmbts,__LINE__,__FILE__);
+    $cmbts = $db->Execute("DELETE $dbtables[activities] "
                 ."WHERE tribeid = '$target'");
+    db_op_result($cmbts,__LINE__,__FILE__);
     echo "You are now laying seige to $target.<BR>";
     TEXT_GOTOMAIN();
 }
-elseif( $_REQUEST[orders] == 'attack' )
+elseif( $_REQUEST['orders'] == 'attack' )
 {
-
-    $checkdone = $db->Execute("SELECT * FROM $dbtables[subtribe_id] "
-                             ."WHERE unique_id = '$uniqueid'");
+    //uniqueid checks are worthless - child's play to mess with them
+    $checkdone = $db->Execute("SELECT * FROM $dbtables[subtribe_id] WHERE unique_id = '$uniqueid'");
+    db_op_result($checkdone,__LINE__,__FILE__);
     if( !$checkdone->EOF )
     {
         echo "<P>You must have hit backspace or refresh by \"accident\".<BR>";
         page_footer();
     }
-    $db->Execute("INSERT INTO $dbtables[subtribe_id] "
-                ."VALUES("
-                ."'$uniqueid')");
-    $targetclan = explode( '.', $_REQUEST[target] );
-    $currentunit = explode('.', $_SESSION[current_unit]);
-    $chief = $db->Execute("SELECT * FROM $dbtables[chiefs] "
-                         ."WHERE clanid = '$_SESSION[clanid]'");
+    $cmbts = $db->Execute("INSERT INTO $dbtables[subtribe_id] VALUES( '$uniqueid')");
+    db_op_result($cmbts,__LINE__,__FILE__);
+    $targetclan = explode( '.', $_REQUEST['target'] );
+    $currentunit = explode('.', $_SESSION['current_unit']);
+    $chief = $db->Execute("SELECT * FROM $dbtables[chiefs] WHERE clanid = '$_SESSION[clanid]'");
+    db_op_result($chief,__LINE__,__FILE__);
     $chiefinfo = $chief->fields;
-    if( $chiefinfo[active] < 24 )
+    if( $chiefinfo['active'] < 24 )
     {
         ///
         ///Make New Chiefs non-protected if they choose to attack someone.
         ///
-        $db->Execute("UPDATE $dbtables[chiefs] "
-                    ."SET active = 24 "
-                    ."WHERE clanid = '$chiefinfo[clanid]'");
+        $cmbts = $db->Execute("UPDATE $dbtables[chiefs] SET active = 24 WHERE clanid = '$chiefinfo[clanid]'");
+        db_op_result($cmbts,__LINE__,__FILE__);
     }
 
     echo "<CENTER><TABLE WIDTH=\"80%\" BORDER=1><TR><TD><TABLE BORDER=0 WIDTH=\"100%\">";
@@ -619,24 +607,22 @@ elseif( $_REQUEST[orders] == 'attack' )
     $totaldef = 0;
     $totalhorseatt = 0;
     $totalhorsedef = 0;
-    $attfor = $db->Execute("SELECT * FROM $dbtables[combats] "
-                          ."WHERE side = 'A' "
-                          ."AND combat_id = '$uniqueid'");
+    $attfor = $db->Execute("SELECT * FROM $dbtables[combats] WHERE side = 'A' AND combat_id = '$uniqueid'");
+    db_op_result($attfor,__LINE__,__FILE__);
     while( !$attfor->EOF )
     {
         $attforce = $attfor->fields;
-        $totalatt += $attforce[startforce];
-        $totalhorseatt += $attforce[horses];
+        $totalatt += $attforce['startforce'];
+        $totalhorseatt += $attforce['horses'];
         $attfor->MoveNext();
     }
-    $deffor = $db->Execute("SELECT * FROM $dbtables[combats] "
-                          ."WHERE side = 'D' "
-                          ."AND combat_id = '$uniqueid'");
+    $deffor = $db->Execute("SELECT * FROM $dbtables[combats] WHERE side = 'D' AND combat_id = '$uniqueid'");
+    db_op_result($deffor,__LINE__,__FILE__);
     while( !$deffor->EOF )
     {
         $defforce = $deffor->fields;
-        $totaldef += $defforce[startforce];
-        $totalhorsedef += $defforce[horses];
+        $totaldef += $defforce['startforce'];
+        $totalhorsedef += $defforce['horses'];
         $deffor->MoveNext();
     }
     echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD><FONT SIZE=+1>";
@@ -665,7 +651,7 @@ elseif( $_REQUEST[orders] == 'attack' )
                        ."AND side = 'D' "
                        ."AND combat_id = '$uniqueid' "
                        ."AND trooptype = 'C'");
-
+     db_op_result($def,__LINE__,__FILE__);
     $titlecount = 0;
     if( $def->EOF )
     {
@@ -690,42 +676,42 @@ elseif( $_REQUEST[orders] == 'attack' )
 
         ///////////Get the right variables//////////////////////////////////////////////////////////////////////
         echo "<TR><TD COLSPAN=3>&nbsp;</TD></TR>";
-        $weap = $db->Execute("SELECT * FROM $dbtables[missile_types] "
-                            ."WHERE type = '$definfo[weapon1]'");
+        $weap = $db->Execute("SELECT * FROM $dbtables[missile_types] WHERE type = '$definfo[weapon1]'");
+        db_op_result($weap,__LINE__,__FILE__);
         $weapon1 = $weap->fields;
 
-        $skarc = $db->Execute("SELECT * FROM $dbtables[skills] "
-                             ."WHERE tribeid = '$definfo[tribeid]' "
-                             ."AND abbr = 'arc'");
+        $skarc = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$definfo[tribeid]' AND abbr = 'arc'");
+        db_op_result($skarc,__LINE__,__FILE__);
         $archery = $skarc->fields;
 
-        if( $definfo[trooptype] == 'A' | $definfo[trooptype] == 'C' )
+        if( $definfo['trooptype'] == 'A' | $definfo['trooptype'] == 'C' )
         {
-            $arr = $db->Execute("SELECT * FROM $dbtables[products] "
-                               ."WHERE tribeid = '$definfo[tribeid]' "
-                               ."AND long_name = 'arrows'");
+            $arr = $db->Execute("SELECT * FROM $dbtables[products] WHERE tribeid = '$definfo[tribeid]' AND long_name = 'arrows'");
+            db_op_result($arr,__LINE__,__FILE__);
             $arrows = $arr->fields;
             $ammotype = 'arrows';
         }
-        elseif( $definfo[trooptype] == 'B' )
+        elseif( $definfo['trooptype'] == 'B' )
         {
             $arr = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$definfo[tribeid]' "
                                ."AND long_name = 'pellets'");
+           db_op_result($arr,__LINE__,__FILE__);
             $arrows = $arr->fields;
             $ammotype = 'pellets';
         }
-        elseif( $definfo[trooptype] == 'Q' )
+        elseif( $definfo['trooptype'] == 'Q' )
         {
             $arr = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$definfo[tribeid]' "
                                ."AND long_name = 'quarrels'");
+            db_op_result($arr,__LINE__,__FILE__);
             $arrows = $arr->fields;
             $ammotype = 'quarrels';
         }
         else
         {
-            $arrows[amount] = 0;
+            $arrows['amount'] = 0;
             $ammotype = 'none';
         }
 
@@ -734,171 +720,202 @@ elseif( $_REQUEST[orders] == 'attack' )
         $skldr = $db->Execute("SELECT * FROM $dbtables[skills] "
                              ."WHERE tribeid = '$definfo[tribeid]' "
                              ."AND abbr = 'ldr'");
+        db_op_result($skldr,__LINE__,__FILE__);
         $leadership = $skldr->fields;
 
         $mor = $db->Execute("SELECT * FROM $dbtables[tribes] "
                            ."WHERE tribeid = '$definfo[tribeid]'");
+        db_op_result($mor,__LINE__,__FILE__);
         $morale = $mor->fields;
 
         $eff = $db->Execute("SELECT * FROM $dbtables[combat_terrain_effect] "
                            ."WHERE type = 'archery'");
+        db_op_result($eff,__LINE__,__FILE__);
         $terrain_effect = $eff->fields;
 
         $ter = $db->Execute("SELECT * FROM $dbtables[hexes] "
                            ."WHERE hex_id = '$definfo[hex_id]'");
+        db_op_result($ter,__LINE__,__FILE__);
         $terrain = $ter->fields;
 
         $ter_mods = $db->Execute("SELECT * from $dbtables[combat_terrain_mods]");
+        db_op_result($ter_mods,__LINE__,__FILE__);
         $terrainmods = $ter_mods->fields;
 
         $cw = $db->Execute("SELECT * FROM $dbtables[weather] "
                           ."WHERE current_type = 'Y'");
+        db_op_result($cw,__LINE__,__FILE__);
         $cur_weath = $cw->fields;
 
         $weath = $db->Execute("SELECT * FROM $dbtables[combat_weather] "
                              ."WHERE type = '$weapon1[long_name]'");
+        db_op_result($weath,__LINE__,__FILE__);
         $weather = $weath->fields;
 
-        $modify = $terrain[terrain];
-        $hownow = $cur_weath[weather_id];
+        $modify = $terrain['terrain'];
+        $hownow = $cur_weath['weather_id'];
         //////////////////////////Select a target and get the armor info//////////////////////////////////////////
         $attackers1 = $db->Execute("SELECT COUNT(*) AS total FROM $dbtables[combats] "
                                   ."WHERE side = 'A' "
                                   ."AND combat_id = '$uniqueid' "
                                   ."AND sector1 > 0");
+        db_op_result($attackers1,__LINE__,__FILE__);
         $numattackers1 = $attackers1->fields;
-        $numattackers1[total] -= 1;
-        $selection1 = rand(0,$numattackers1[total]);
+        $numattackers1['total'] -= 1;
+        $selection1 = rand(0,$numattackers1['total']);
 
         $select1 = $db->Execute("SELECT * FROM $dbtables[combats] "
                                ."WHERE side = 'A' "
                                ."AND combat_id = '$uniqueid' "
                                ."AND sector1 > 0 "
                                ."LIMIT $selection1, 1");
+        db_op_result($select1,__LINE__,__FILE__);
         $selected1 = $select1->fields;
 
         $attackers2 = $db->Execute("SELECT COUNT(*) AS total FROM $dbtables[combats] "
                                   ."WHERE side = 'A' "
                                   ."AND combat_id = '$uniqueid' "
                                   ."AND sector2 > 0");
+        db_op_result($attackers2,__LINE__,__FILE__);
         $numattackers2 = $attackers2->fields;
-        $numattackers2[total] -= 1;
-        $selection2 = rand(0,$numattackers2[total]);
+        $numattackers2['total'] -= 1;
+        $selection2 = rand(0,$numattackers2['total']);
 
         $select2 = $db->Execute("SELECT * FROM $dbtables[combats] "
                                ."WHERE side = 'A' "
                                ."AND combat_id = '$uniqueid' "
                                ."AND sector2 > 0 "
                                ."LIMIT $selection2, 1");
+        db_op_result($select2,__LINE__,__FILE__);
         $selected2 = $select2->fields;
 
         $attackers3 = $db->Execute("SELECT COUNT(*) AS total FROM $dbtables[combats] "
                                   ."WHERE side = 'A' "
                                   ."AND combat_id = '$uniqueid' "
                                   ."AND sector3 > 0");
+        db_op_result($attackers3,__LINE__,__FILE__);
         $numattackers3 = $attackers3->fields;
-        $numattackers3[total] -= 1;
-        $selection3 = rand(0,$numattackers3[total]);
+        $numattackers3['total'] -= 1;
+        $selection3 = rand(0,$numattackers3['total']);
 
         $select3 = $db->Execute("SELECT * FROM $dbtables[combats] "
                                ."WHERE side = 'A' "
                                ."AND combat_id = '$uniqueid' "
                                ."AND sector3 > 0 "
                                ."LIMIT $selection3, 1");
+        db_op_result($select3,__LINE__,__FILE__);
         $selected3 = $select3->fields;
 
 
         $head = $db->Execute("SELECT * FROM $dbtables[armor] "
                             ."WHERE proper = '$selected1[head_armor]'");
+        db_op_result($head,__LINE__,__FILE__);
         $head_armor1 = $head->fields;
 
         $torso = $db->Execute("SELECT * FROM $dbtables[armor] "
                              ."WHERE proper = '$selected1[torso_armor]'");
-        $torso_armor1 = $torso->fields;
+         db_op_result($torso,__LINE__,__FILE__);
+       $torso_armor1 = $torso->fields;
 
         $otorso = $db->Execute("SELECT * FROM $dbtables[armor] "
                               ."WHERE proper = '$selected1[otorso_armor]'");
+        db_op_result($otorso,__LINE__,__FILE__);
         $otorso_armor1 = $otorso->fields;
 
         $legs = $db->Execute("SELECT * FROM $dbtables[armor] "
                             ."WHERE proper = '$selected1[legs_armor]'");
+        db_op_result($legs,__LINE__,__FILE__);
         $legs_armor1 = $legs->fields;
 
         $shield = $db->Execute("SELECT * FROM $dbtables[armor] "
                               ."WHERE proper = '$selected1[shield]'");
+        db_op_result($shield,__LINE__,__FILE__);
         $shield_armor1 = $shield->fields;
 
         $horse = $db->Execute("SELECT * FROM $dbtables[armor] "
                              ."WHERE proper = '$selected1[horse_armor]'");
+        db_op_result($horse,__LINE__,__FILE__);
         $horse_armor1 = $horse->fields;
 
 
         $head = $db->Execute("SELECT * FROM $dbtables[armor] "
                             ."WHERE proper = '$selected2[head_armor]'");
+        db_op_result($head,__LINE__,__FILE__);
         $head_armor2 = $head->fields;
 
         $torso = $db->Execute("SELECT * FROM $dbtables[armor] "
                              ."WHERE proper = '$selected2[torso_armor]'");
+         db_op_result($torso,__LINE__,__FILE__);
         $torso_armor2 = $torso->fields;
 
         $otorso = $db->Execute("SELECT * FROM $dbtables[armor] "
                               ."WHERE proper = '$selected2[otorso_armor]'");
+        db_op_result($otorso,__LINE__,__FILE__);
         $otorso_armor2 = $otorso->fields;
 
         $legs = $db->Execute("SELECT * FROM $dbtables[armor] "
                             ."WHERE proper = '$selected2[legs_armor]'");
+        db_op_result($legs,__LINE__,__FILE__);
         $legs_armor2 = $legs->fields;
 
         $shield = $db->Execute("SELECT * FROM $dbtables[armor] "
                               ."WHERE proper = '$selected2[shield]'");
+        db_op_result($shield,__LINE__,__FILE__);
         $shield_armor2 = $shield->fields;
 
         $horse = $db->Execute("SELECT * FROM $dbtables[armor] "
                              ."WHERE proper = '$selected2[horse_armor]'");
+        db_op_result($horse,__LINE__,__FILE__);
         $horse_armor2 = $horse->fields;
 
         $head = $db->Execute("SELECT * FROM $dbtables[armor] "
                             ."WHERE proper = '$selected3[head_armor]'");
+        db_op_result($head,__LINE__,__FILE__);
         $head_armor3 = $head->fields;
 
         $torso = $db->Execute("SELECT * FROM $dbtables[armor] "
                              ."WHERE proper = '$selected3[torso_armor]'");
+        db_op_result($torso,__LINE__,__FILE__);
         $torso_armor3 = $torso->fields;
 
         $otorso = $db->Execute("SELECT * FROM $dbtables[armor] "
                               ."WHERE proper = '$selected3[otorso_armor]'");
+        db_op_result($otorso,__LINE__,__FILE__);
         $otorso_armor3 = $otorso->fields;
 
         $legs = $db->Execute("SELECT * FROM $dbtables[armor] "
                             ."WHERE proper = '$selected3[legs_armor]'");
+        db_op_result($legs,__LINE__,__FILE__);
         $legs_armor3 = $legs->fields;
 
         $shield = $db->Execute("SELECT * FROM $dbtables[armor] "
                               ."WHERE proper = '$selected3[shield]'");
+        db_op_result($shield,__LINE__,__FILE__);
         $shield_armor3 = $shield->fields;
 
         $horse = $db->Execute("SELECT * FROM $dbtables[armor] "
                              ."WHERE proper = '$selected3[horse_armor]'");
+        db_op_result($horse,__LINE__,__FILE__);
         $horse_armor3 = $horse->fields;
 
 
-        if( $definfo[trooptype] == 'A' )
+        if( $definfo['trooptype'] == 'A' )
         {
             $armortype = 'arrow';
         }
-        elseif( $definfo[trooptype] == 'Q' )
+        elseif( $definfo['trooptype'] == 'Q' )
         {
             $armortype = 'quarrel';
         }
-        elseif( $definfo[trooptype] == 'B' )
+        elseif( $definfo['trooptype'] == 'B' )
         {
             $armortype = 'pellet';
         }
-        elseif( $definfo[trooptype] == 'C' )
+        elseif( $definfo['trooptype'] == 'C' )
         {
             $armortype = 'arrow';
         }
-        elseif( $definfo[weapon1] == 'Horsebow' )
+        elseif( $definfo['weapon1'] == 'Horsebow' )
         {
             $armortype = 'arrow';
         }
@@ -909,51 +926,51 @@ elseif( $_REQUEST[orders] == 'attack' )
         $sector1archers = 0;
         $sector2archers = 0;
         $sector3archers = 0;
-        if( $definfo[sector1] > 0 )
+        if( $definfo['sector1'] > 0 )
         {
             $random1 = rand( 1,12 );
             $arrowbonus = 0;
-            while( $arrows[amount] > 4 && $arrowbonus < $definfo[startsector1] )
+            while( $arrows['amount'] > 4 && $arrowbonus < $definfo['startsector1'] )
             {
-                $arrows[amount] -= 5;
+                $arrows['amount'] -= 5;
                 $arrowbonus += 1;
             }
-            $definfo[startsector1] += $arrowbonus;
-            $sector1archers = round(($weapon1[value] + ($archery[level] * $weapon1[skill_mult])) * $definfo[startsector1] * $terrainmods[$modify] * $weather[$hownow] * ($leadership[level] + $definfo[exp] + 10)/10 * $morale[morale] * (3 + $archery[level] + $leadership[level] + $random1/2)/10);
+            $definfo['startsector1'] += $arrowbonus;
+            $sector1archers = round(($weapon1['value'] + ($archery['level'] * $weapon1['skill_mult'])) * $definfo['startsector1'] * $terrainmods[$modify] * $weather[$hownow] * ($leadership['level'] + $definfo['exp'] + 10)/10 * $morale['morale'] * (3 + $archery['level'] + $leadership['level'] + $random1/2)/10);
         }
-        if( $definfo[sector2] > 0 )
+        if( $definfo['sector2'] > 0 )
         {
             $random2 = rand( 1,12 );
             $arrowbonus = 0;
-            while( $arrows[amount] > 4 && $arrowbonus < $definfo[startsector2] )
+            while( $arrows['amount'] > 4 && $arrowbonus < $definfo['startsector2'] )
             {
-                $arrows[amount] -= 5;
+                $arrows['amount'] -= 5;
                 $arrowbonus += 1;
             }
-            $definfo[startsector2] += $arrowbonus;
-            $sector2archers = round(($weapon1[value] + ($archery[level] * $weapon1[skill_mult])) * $definfo[startsector2] * $terrainmods[$modify] * $weather[$hownow] * ($leadership[level] + $definfo[exp] + 10)/10 * $morale[morale] * (3 + $archery[level] + $leadership[level] + $random2/2)/10);
+            $definfo['startsector2'] += $arrowbonus;
+            $sector2archers = round(($weapon1['value'] + ($archery['level'] * $weapon1['skill_mult'])) * $definfo['startsector2'] * $terrainmods[$modify] * $weather[$hownow] * ($leadership['level'] + $definfo['exp'] + 10)/10 * $morale['morale'] * (3 + $archery['level'] + $leadership['level'] + $random2/2)/10);
         }
-        if( $definfo[sector3] > 0 )
+        if( $definfo['sector3'] > 0 )
         {
             $random3 = rand( 1,12 );
             $arrowbonus = 0;
-            while( $arrows[amount] > 4 && $arrowbonus < $definfo[startsector3] )
+            while( $arrows['amount'] > 4 && $arrowbonus < $definfo['startsector3'] )
             {
-                $arrows[amount] -= 5;
+                $arrows['amount'] -= 5;
                 $arrowbonus += 1;
             }
-            $definfo[startsector3] += $arrowbonus;
-            $sector3archers = round(($weapon1[value] + ($archery[level] * $weapon1[skill_mult])) * $definfo[startsector3] * $terrainmods[$modify] * $weather[$hownow] * ($leadership[level] + $definfo[exp] + 10)/10 * $morale[morale] * (3 + $archery[level] + $leadership[level] + $random3/2)/10);
+            $definfo['startsector3'] += $arrowbonus;
+            $sector3archers = round(($weapon1['value'] + ($archery['level'] * $weapon1['skill_mult'])) * $definfo['startsector3'] * $terrainmods[$modify] * $weather[$hownow] * ($leadership['level'] + $definfo['exp'] + 10)/10 * $morale['morale'] * (3 + $archery['level'] + $leadership['level'] + $random3/2)/10);
         }
 
-$db->Execute("UPDATE $dbtables[products] "
+$cmbts = $db->Execute("UPDATE $dbtables[products] "
             ."SET amount = $arrows[amount] "
             ."WHERE tribeid = $definfo[tribeid] "
             ."AND long_name = '$ammotype'");
-
+db_op_result($cmbts,__LINE__,__FILE__);
 $sector1archers = round(($sector1archers - round($armormod1 * ($sector1archers/10)))/10);
-if($sector1archers < 10 && $definfo[sector1] > 0){
-$sector1archers = round(($leadership[level] + $archery[level] + $morale[morale]) * 10);
+if($sector1archers < 10 && $definfo['sector1'] > 0){
+$sector1archers = round(($leadership['level'] + $archery['level'] + $morale['morale']) * 10);
 }
 if($sector1archers < 0){
 $sector1archers = 0;
@@ -965,10 +982,10 @@ $sector1defendingarchercasualties += $rand10;
 $work1 -= 10;
 }
 
-if($sector1defendingarchercasualties > $selected1[sector1]){
-$sector1defendingarchercasualties = $selected1[sector1];
+if($sector1defendingarchercasualties > $selected1['sector1']){
+$sector1defendingarchercasualties = $selected1['sector1'];
 }
-if($sector1defendingarchercasualties > 0 && $selected1[sector1] < 1){
+if($sector1defendingarchercasualties > 0 && $selected1['sector1'] < 1){
 $sector1defendingarchercasualties = 0;
 }
 if($sector1defendingarchercasualties < 0){
@@ -984,8 +1001,8 @@ if(!$total1sectoratt){ $total1sectoratt = 0; }
 
 
 $sector2archers = round(($sector2archers - round($armormod2 * ($sector2archers/10)))/10);
-if($sector2archers < 10 && $definfo[sector2] > 0){
-$sector2archers = round(($leadership[level] + $archery[level] + $morale[morale]) * 10);
+if($sector2archers < 10 && $definfo['sector2'] > 0){
+$sector2archers = round(($leadership['level'] + $archery['level'] + $morale['morale']) * 10);
 }
 if($sector2archers < 0){
 $sector2archers = 0;
@@ -997,10 +1014,10 @@ $sector2defendingarchercasualties += $rand10;
 $work2 -= 10;
 }
 
-if($sector2defendingarchercasualties > $selected2[sector2]){
-$sector2defendingarchercasualties = $selected2[sector2];
+if($sector2defendingarchercasualties > $selected2['sector2']){
+$sector2defendingarchercasualties = $selected2['sector2'];
 }
-if($sector2defendingarchercasualties > 0 && $selected2[sector2] < 1){
+if($sector2defendingarchercasualties > 0 && $selected2['sector2'] < 1){
 $sector2defendingarchercasualties = 0;
 }
 if($sector2defendingarchercasualties < 0){
@@ -1016,8 +1033,8 @@ if(!$total2sectoratt){ $total2sectoratt = 0; }
 
 
 $sector3archers = round(($sector3archers - round($armormod3 * ($sector3archers/10)))/10);
-if($sector3archers < 10 && $definfo[sector3] > 0){
-$sector3archers = round(($leadership[level] + $archery[level] + $morale[morale]) * 10);
+if($sector3archers < 10 && $definfo['sector3'] > 0){
+$sector3archers = round(($leadership['level'] + $archery['level'] + $morale['morale']) * 10);
 }
 if($sector3archers < 0){
 $sector3archers = 0;
@@ -1029,10 +1046,10 @@ $sector3defendingarchercasualties += $rand10;
 $work3 -= 10;
 }
 
-if($sector3defendingarchercasualties > $selected3[sector3]){
-$sector3defendingarchercasualties = $selected3[sector3];
+if($sector3defendingarchercasualties > $selected3['sector3']){
+$sector3defendingarchercasualties = $selected3['sector3'];
 }
-if($sector3defendingarchercasualties > 0 && $selected3[sector3] < 1){
+if($sector3defendingarchercasualties > 0 && $selected3['sector3'] < 1){
 $sector3defendingarchercasualties = 0;
 }
 if($sector3defendingarchercasualties < 0){
@@ -1047,38 +1064,38 @@ if(!$total3sectoratt){ $total3sectoratt = 0; }
 
 
 echo "<TR>";
-if($definfo[sector1] > 0){
+if($definfo['sector1'] > 0){
 echo "<TD>Force: $definfo[sector1] from Garrison $definfo[garid]</TD>";
 }
 else{
 echo "<TD>$definfo[garid] Routed</TD>";
 }
-if($definfo[sector2] > 0){
+if($definfo['sector2'] > 0){
 echo "<TD>Force: $definfo[sector2] from Garrison $definfo[garid]</TD>";
 }
 else{
 echo "<TD>$definfo[garid] Routed</TD>";
 }
-if($definfo[sector3] > 0){
+if($definfo['sector3'] > 0){
 echo "<TD>Force: $definfo[sector3] from Garrison $definfo[garid]</TD>";
 }
 else{
 echo "<TD>$definfo[garid] Routed</TD>";
 }
 echo "</TR><TR>";
-if($selected1[sector1] > 0){
+if($selected1['sector1'] > 0){
 echo "<TD>Attacking $selected1[sector1] from Garrison $selected1[garid]</TD>";
 }
 else{
 echo "<TD>Looting</TD>";
 }
-if($selected2[sector2] > 0){
+if($selected2['sector2'] > 0){
 echo "<TD>Attacking $selected2[sector2] from Garrison $selected2[garid]</TD>";
 }
 else{
 echo "<TD>Looting</TD>";
 }
-if($selected3[sector3] > 0){
+if($selected3['sector3'] > 0){
 echo "<TD>Attacking $selected3[sector3] from Garrison $selected3[garid]</TD>";
 }
 else{
@@ -1087,9 +1104,12 @@ echo "<TD>Looting</TD>";
 echo "</TR>";
 echo "<TR><TD><FONT COLOR=RED>Casualties: $sector1defendingarchercasualties</FONT></TD><TD><FONT COLOR=RED>Casualties: $sector2defendingarchercasualties</FONT></TD><TD><FONT COLOR=RED>Casualties: $sector3defendingarchercasualties</FONT></TD></TR>";
 
-$db->Execute("UPDATE $dbtables[combats] SET sector1 = sector1 - '$sector1defendingarchercasualties', curforce = curforce - '$sector1defendingarchercasualties' where garid = '$selected1[garid]' AND combat_id = '$uniqueid'");
-$db->Execute("UPDATE $dbtables[combats] SET sector2 = sector2 - '$sector2defendingarchercasualties', curforce = curforce - '$sector2defendingarchercasualties' where garid = '$selected2[garid]' AND combat_id = '$uniqueid'");
-$db->Execute("UPDATE $dbtables[combats] SET sector3 = sector3 - '$sector3defendingarchercasualties', curforce = curforce - '$sector3defendingarchercasualties' where garid = '$selected3[garid]' AND combat_id = '$uniqueid'");
+$cmbts = $db->Execute("UPDATE $dbtables[combats] SET sector1 = sector1 - '$sector1defendingarchercasualties', curforce = curforce - '$sector1defendingarchercasualties' where garid = '$selected1[garid]' AND combat_id = '$uniqueid'");
+db_op_result($cmbts,__LINE__,__FILE__);
+$cmbts = $db->Execute("UPDATE $dbtables[combats] SET sector2 = sector2 - '$sector2defendingarchercasualties', curforce = curforce - '$sector2defendingarchercasualties' where garid = '$selected2[garid]' AND combat_id = '$uniqueid'");
+db_op_result($cmbts,__LINE__,__FILE__);
+$cmbts = $db->Execute("UPDATE $dbtables[combats] SET sector3 = sector3 - '$sector3defendingarchercasualties', curforce = curforce - '$sector3defendingarchercasualties' where garid = '$selected3[garid]' AND combat_id = '$uniqueid'");
+db_op_result($cmbts,__LINE__,__FILE__);
 $sector1defendingarchercasualties = 0;
 $sector2defendingarchercasualties = 0;
 $sector3defendingarchercasualties = 0;
@@ -1116,7 +1136,7 @@ $att = $db->Execute("SELECT * FROM $dbtables[combats] "
                    ."AND side = 'A' "
                    ."AND trooptype = 'C' "
                    ."AND combat_id = '$uniqueid'");
-
+db_op_result($att,__LINE__,__FILE__);
 echo "<TR BGCOLOR=$color_header><TD><FONT SIZE=+1>Sector One</FONT></TD><TD><FONT SIZE=+1>Sector Two</FONT></TD><TD><FONT SIZE=+1>Sector Three</FONT></TD></TR>";
 $titlecount = 0;
 if($att->EOF){
@@ -1132,155 +1152,191 @@ $titlecount++;
 ///////////Get the right variables//////////////////////////////////////////////////////////////////////
 echo "<TR><TD COLSPAN=3>&nbsp;</TD></TR>";
 $weap = $db->Execute("SELECT * FROM $dbtables[missile_types] WHERE type = '$attinfo[weapon1]'");
+db_op_result($weap,__LINE__,__FILE__);
 $weapon1 = $weap->fields;
 $skarc = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$attinfo[tribeid]' AND abbr = 'arc'");
+db_op_result($skarc,__LINE__,__FILE__);
 $archery = $skarc->fields;
-if( $attinfo[trooptype] == 'A' | $attinfo[trooptype] == 'C' )
+if( $attinfo['trooptype'] == 'A' | $attinfo['trooptype'] == 'C' )
 {
 $arr = $db->Execute("SELECT * FROM $dbtables[products] "
                    ."WHERE tribeid = '$attinfo[tribeid]' "
                    ."AND long_name = 'arrows'");
+db_op_result($arr,__LINE__,__FILE__);
 $arrows = $arr->fields;
 $ammotype = 'arrows';
 }
-        elseif( $definfo[trooptype] == 'B' )
+        elseif( $definfo['trooptype'] == 'B' )
         {
             $arr = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$definfo[tribeid]' "
                                ."AND long_name = 'pellets'");
+            db_op_result($arr,__LINE__,__FILE__);
             $arrows = $arr->fields;
             $ammotype = 'pellets';
         }
-        elseif( $definfo[trooptype] == 'Q' )
+        elseif( $definfo['trooptype'] == 'Q' )
         {
             $arr = $db->Execute("SELECT * FROM $dbtables[products] "
                                ."WHERE tribeid = '$definfo[tribeid]' "
                                ."AND long_name = 'quarrels'");
+             db_op_result($arr,__LINE__,__FILE__);
             $arrows = $arr->fields;
             $ammotype = 'quarrels';
         }
         else
         {
-            $arrows[amount] = 0;
+            $arrows['amount'] = 0;
             $ammotype = 'none';
-        } 
+        }
 
 
 $skldr = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$attinfo[tribeid]' AND abbr = 'ldr'");
+db_op_result($skldr,__LINE__,__FILE__);
 $leadership = $skldr->fields;
 $mor = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$attinfo[tribeid]'");
+db_op_result($mor,__LINE__,__FILE__);
 $morale = $mor->fields;
 $eff = $db->Execute("SELECT * FROM $dbtables[combat_terrain_effect] WHERE type = 'archery'");
+db_op_result($eff,__LINE__,__FILE__);
 $terrain_effect = $eff->fields;
 $ter = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$definfo[hex_id]'");
+db_op_result($ter,__LINE__,__FILE__);
 $terrain = $ter->fields;
 $ter_mods = $db->Execute("SELECT * from $dbtables[combat_terrain_mods]");
+db_op_result($ter_mods,__LINE__,__FILE__);
 $terrainmods = $ter_mods->fields;
 $cw = $db->Execute("SELECT * FROM $dbtables[weather] WHERE current_type = 'Y'");
+db_op_result($cw,__LINE__,__FILE__);
 $cur_weath = $cw->fields;
 $weath = $db->Execute("SELECT * FROM $dbtables[combat_weather] WHERE type = '$weapon1[long_name]'");
+db_op_result($weath,__LINE__,__FILE__);
 $weather = $weath->fields;
-$modify = $terrain[terrain];
-$hownow = $cur_weath[weather_id];
+$modify = $terrain['terrain'];
+$hownow = $cur_weath['weather_id'];
 //////////////////////////Select a target and get the armor info//////////////////////////////////////////
 
 $defenders1 = $db->Execute("SELECT COUNT(*) AS total FROM $dbtables[combats] "
                           ."WHERE side = 'D' "
                           ."AND combat_id = '$uniqueid' "
                           ."AND sector1 > 0");
+db_op_result($defenders1,__LINE__,__FILE__);
 $numdefenders1 = $defenders1->fields;
-$numdefenders1[total] -= 1;
+$numdefenders1['total'] -= 1;
 $selection1 = rand(0,$numdefenders1[total]);
 $select1 = $db->Execute("SELECT * FROM $dbtables[combats] "
                        ."WHERE side = 'D' "
                        ."AND combat_id = '$uniqueid' "
                        ."AND sector1 > 0 "
                        ."LIMIT $selection1, 1");
+db_op_result($select1,__LINE__,__FILE__);
 $selected1 = $select1->fields;
 
 $defenders2 = $db->Execute("SELECT COUNT(*) AS total FROM $dbtables[combats] "
                           ."WHERE side = 'D' "
                           ."AND combat_id = '$uniqueid' "
                           ."AND sector2 > 0");
+db_op_result($defenders2,__LINE__,__FILE__);
 $numdefenders2 = $defenders2->fields;
-$numdefenders2[total] -= 1;
-$selection2 = rand(0,$numdefenders2[total]);
+$numdefenders2['total'] -= 1;
+$selection2 = rand(0,$numdefenders2['total']);
 $select2 = $db->Execute("SELECT * FROM $dbtables[combats] "
                        ."WHERE side = 'D' "
                        ."AND combat_id = '$uniqueid' "
                        ."AND sector2 > 0 "
                        ."LIMIT $selection2, 1");
+db_op_result($select2,__LINE__,__FILE__);
 $selected2 = $select2->fields;
 
 $defenders3 = $db->Execute("SELECT COUNT(*) AS total FROM $dbtables[combats] "
                           ."WHERE side = 'D' "
                           ."AND combat_id = '$uniqueid' "
                           ."AND sector3 > 0");
+db_op_result($defenders3,__LINE__,__FILE__);
 $numdefenders3 = $defenders3->fields;
-$numdefenders3[total] -= 1;
-$selection3 = rand(0,$numdefenders3[total]);
+$numdefenders3['total'] -= 1;
+$selection3 = rand(0,$numdefenders3['total']);
 $select3 = $db->Execute("SELECT * FROM $dbtables[combats] "
                        ."WHERE side = 'D' "
                        ."AND combat_id = '$uniqueid' "
                        ."AND sector3 > 0 "
                        ."LIMIT $selection3, 1");
+db_op_result($select3,__LINE__,__FILE__);
 $selected3 = $select3->fields;
 
 
 $head = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected1[head_armor]'");
+db_op_result($head,__LINE__,__FILE__);
 $head_armor1 = $head->fields;
 $torso = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected1[torso_armor]'");
+db_op_result($torso,__LINE__,__FILE__);
 $torso_armor1 = $torso->fields;
 $otorso = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected1[otorso_armor]'");
+db_op_result($otorso,__LINE__,__FILE__);
 $otorso_armor1 = $otorso->fields;
 $legs = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected1[legs_armor]'");
+db_op_result($legs,__LINE__,__FILE__);
 $legs_armor1 = $legs->fields;
 $shield = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected1[shield]'");
+db_op_result($shield,__LINE__,__FILE__);
 $shield_armor1 = $shield->fields;
 $horse = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected1[horse_armor]'");
+db_op_result($horse,__LINE__,__FILE__);
 $horse_armor1 = $horse->fields;
 
 
 $head = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected2[head_armor]'");
+db_op_result($head,__LINE__,__FILE__);
 $head_armor2 = $head->fields;
 $torso = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected2[torso_armor]'");
+db_op_result($torso,__LINE__,__FILE__);
 $torso_armor2 = $torso->fields;
 $otorso = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected2[otorso_armor]'");
+db_op_result($otorso,__LINE__,__FILE__);
 $otorso_armor2 = $otorso->fields;
 $legs = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected2[legs_armor]'");
+db_op_result($legs,__LINE__,__FILE__);
 $legs_armor2 = $legs->fields;
 $shield = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected2[shield]'");
+db_op_result($shield,__LINE__,__FILE__);
 $shield_armor2 = $shield->fields;
 $horse = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected2[horse_armor]'");
+db_op_result($horse,__LINE__,__FILE__);
 $horse_armor2 = $horse->fields;
 
 $head = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected3[head_armor]'");
+db_op_result($head,__LINE__,__FILE__);
 $head_armor3 = $head->fields;
 $torso = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected3[torso_armor]'");
+db_op_result($torso,__LINE__,__FILE__);
 $torso_armor3 = $torso->fields;
 $otorso = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected3[otorso_armor]'");
+db_op_result($otorso,__LINE__,__FILE__);
 $otorso_armor3 = $otorso->fields;
 $legs = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected3[legs_armor]'");
+db_op_result($legs,__LINE__,__FILE__);
 $legs_armor3 = $legs->fields;
 $shield = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected3[shield]'");
+db_op_result($shield,__LINE__,__FILE__);
 $shield_armor3 = $shield->fields;
 $horse = $db->Execute("SELECT * FROM $dbtables[armor] WHERE proper = '$selected3[horse_armor]'");
+db_op_result($horse,__LINE__,__FILE__);
 $horse_armor3 = $horse->fields;
 
 
-if($attinfo[trooptype] == 'A'){
+if($attinfo['trooptype'] == 'A'){
 $armortype = 'arrow';
 }
-elseif($attinfo[trooptype] == 'Q'){
+elseif($attinfo['trooptype'] == 'Q'){
 $armortype = 'quarrel';
 }
-elseif($attinfo[trooptype] == 'B'){
+elseif($attinfo['trooptype'] == 'B'){
 $armortype = 'pellet';
 }
-elseif($attinfo[trooptype] == 'C'){
+elseif($attinfo['trooptype'] == 'C'){
 $armortype = 'arrow';
 }
-elseif($attinfo[weapon1] == 'Horsebow'){
+elseif($attinfo['weapon1'] == 'Horsebow'){
 $armortype = 'arrow';
 }
 
@@ -1292,47 +1348,48 @@ $sector1archers = 0;
 $sector2archers = 0;
 $sector3archers = 0;
 
-if($attinfo[sector1] > 0){
+if($attinfo['sector1'] > 0){
 $random1 = rand(1,12);
             $arrowbonus = 0;
-            while( $arrows[amount] > 4 && $arrowbonus < $attinfo[startsector1] )
+            while( $arrows['amount'] > 4 && $arrowbonus < $attinfo['startsector1'] )
             {
-                $arrows[amount] -= 5;
+                $arrows['amount'] -= 5;
                 $arrowbonus += 1;
             }
-            $attinfo[startsector1] += $arrowbonus;
-$sector1archers = round(($weapon1[value] + ($archery[level] * $weapon1[skill_mult])) * $attinfo[startsector1] * $terrainmods[$modify] * $weather[$hownow] * ($leadership[level] + $attinfo[exp] + 10)/10 * $morale[morale] * (3 + $archery[level] + $leadership[level] + $random1/2)/10);
+            $attinfo['startsector1'] += $arrowbonus;
+$sector1archers = round(($weapon1['value'] + ($archery['level'] * $weapon1['skill_mult'])) * $attinfo['startsector1'] * $terrainmods[$modify] * $weather[$hownow] * ($leadership['level'] + $attinfo['exp'] + 10)/10 * $morale['morale'] * (3 + $archery['level'] + $leadership['level'] + $random1/2)/10);
 }
-if($attinfo[sector2] > 0){
+if($attinfo['sector2'] > 0){
 $random2 = rand(1,12);
             $arrowbonus = 0;
-            while( $arrows[amount] > 4 && $arrowbonus < $attinfo[startsector2] )
+            while( $arrows['amount'] > 4 && $arrowbonus < $attinfo['startsector2'] )
             {
-                $arrows[amount] -= 5;
+                $arrows['amount'] -= 5;
                 $arrowbonus += 1;
             }
-            $attinfo[startsector2] += $arrowbonus;
-$sector2archers = round(($weapon1[value] + ($archery[level] * $weapon1[skill_mult])) * $attinfo[startsector2] * $terrainmods[$modify] * $weather[$hownow] * ($leadership[level] + $attinfo[exp] + 10)/10 * $morale[morale] * (3 + $archery[level] + $leadership[level] + $random2/2)/10);
+            $attinfo['startsector2'] += $arrowbonus;
+$sector2archers = round(($weapon1['value'] + ($archery['level'] * $weapon1['skill_mult'])) * $attinfo['startsector2'] * $terrainmods[$modify] * $weather[$hownow] * ($leadership['level'] + $attinfo['exp'] + 10)/10 * $morale['morale'] * (3 + $archery['level'] + $leadership['level'] + $random2/2)/10);
 }
-if($attinfo[sector3] > 0){
+if($attinfo['sector3'] > 0){
 $random3 = rand(1,12);
             $arrowbonus = 0;
-            while( $arrows[amount] > 4 && $arrowbonus < $attinfo[startsector3] )
+            while( $arrows['amount'] > 4 && $arrowbonus < $attinfo['startsector3'] )
             {
-                $arrows[amount] -= 5;
+                $arrows['amount'] -= 5;
                 $arrowbonus += 1;
             }
-            $attinfo[startsector3] += $arrowbonus;
-$sector3archers = round(($weapon1[value] + ($archery[level] * $weapon1[skill_mult])) * $attinfo[startsector3] * $terrainmods[$modify] * $weather[$hownow] * ($leadership[level] + $attinfo[exp] + 10)/10 * $morale[morale] * (3 + $archery[level] + $leadership[level] + $random3/2)/10);
+            $attinfo['startsector3'] += $arrowbonus;
+$sector3archers = round(($weapon1['value'] + ($archery['level'] * $weapon1['skill_mult'])) * $attinfo['startsector3'] * $terrainmods[$modify] * $weather[$hownow] * ($leadership['level'] + $attinfo['exp'] + 10)/10 * $morale['morale'] * (3 + $archery['level'] + $leadership['level'] + $random3/2)/10);
 }
 
-$db->Execute("UPDATE $dbtables[products] "
+$cmbts = $db->Execute("UPDATE $dbtables[products] "
             ."SET amount = $arrows[amount] "
             ."WHERE tribeid = '$attinfo[tribeid]' "
             ."AND long_name = '$ammotype'");
+db_op_result($cmbts,__LINE__,__FILE__);
 $sector1archers = round(($sector1archers - round($armormod1 * ($sector1archers/10)))/10);
-if($sector1archers < 10 && $attinfo[sector1] > 0){
-$sector1archers = round(($leadership[level] + $archery[level] + $morale[morale]) * 10);
+if($sector1archers < 10 && $attinfo['sector1'] > 0){
+$sector1archers = round(($leadership['level'] + $archery['level'] + $morale['morale']) * 10);
 }
 if($sector1archers < 0){
 $sector1archers = 0;
@@ -1344,13 +1401,13 @@ $sector1archercasualties += $rand10;
 $work1 -= 10;
 }
 
-if($sector1archercasualties > $selected1[sector1]){
-$sector1archercasualties = $selected1[sector1];
+if($sector1archercasualties > $selected1['sector1']){
+$sector1archercasualties = $selected1['sector1'];
 }
 if($sector1archercasualties < 0){
 $sector1archercasualties = 0;
 }
-if($sector1archercasualties > 0 && $selected1[sector1] < 1){
+if($sector1archercasualties > 0 && $selected1['sector1'] < 1){
 $sector1archercasualties = 0;
 }
 
@@ -1362,8 +1419,8 @@ $total1sectordef = 0;
 
 
 $sector2archers = round(($sector2archers - round($armormod2 * ($sector2archers/10)))/10);
-if($sector2archers < 10 && $attinfo[sector2] > 0){
-$sector2archers = round(($leadership[level] + $archery[level] + $morale[morale]) * 10);
+if($sector2archers < 10 && $attinfo['sector2'] > 0){
+$sector2archers = round(($leadership['level'] + $archery['level'] + $morale['morale']) * 10);
 }
 if($sector2archers < 0){
 $sector2archers = 0;
@@ -1375,13 +1432,13 @@ $sector2archercasualties += $rand10;
 $work2 -= 10;
 }
 
-if($sector2archercasualties > $selected2[sector2]){
-$sector1archercasualties = $selected2[sector2];
+if($sector2archercasualties > $selected2['sector2']){
+$sector1archercasualties = $selected2['sector2'];
 }
 if($sector2archercasualties < 0){
 $sector2archercasualties = 0;
 }
-if($sector2archercasualties > 0 && $selected2[sector2] < 1){
+if($sector2archercasualties > 0 && $selected2['sector2'] < 1){
 $sector2archercasualties = 0;
 }
 
@@ -1393,8 +1450,8 @@ $total2sectordef = 0;
 
 
 $sector3archers = round(($sector3archers - round($armormod3 * ($sector3archers/10)))/10);
-if($sector3archers < 10 && $attinfo[sector3] > 0){
-$sector3archers = round(($leadership[level] + $archery[level] + $morale[morale]) * 10);
+if($sector3archers < 10 && $attinfo['sector3'] > 0){
+$sector3archers = round(($leadership['level'] + $archery['level'] + $morale['morale']) * 10);
 }
 if($sector3archers < 0){
 $sector3archers = 0;
@@ -1406,10 +1463,10 @@ $sector3archercasualties += $rand10;
 $work3 -= 10;
 }
 
-if($sector3archercasualties > $selected3[sector3]){
-$sector3archercasualties = $selected3[sector3];
+if($sector3archercasualties > $selected3['sector3']){
+$sector3archercasualties = $selected3['sector3'];
 }
-if($sector3archercasualties > 0 && $selected3[sector3] < 1){
+if($sector3archercasualties > 0 && $selected3['sector3'] < 1){
 $sector3archercasualties = 0;
 }
 if($sector3archercasualties < 0){
@@ -1425,38 +1482,38 @@ $total3sectordef = 0;
 }
 
 echo "<TR>";
-if($attinfo[sector1] > 0){
+if($attinfo['sector1'] > 0){
 echo "<TD>Force: $attinfo[startsector1] from Garrison $attinfo[garid]</TD>";
 }
 else{
 echo "<TD>$attinfo[garid] Routed</TD>";
 }
-if($attinfo[sector2] > 0){
+if($attinfo['sector2'] > 0){
 echo "<TD>Force: $attinfo[startsector2] from Garrison $attinfo[garid]</TD>";
 }
 else{
 echo "<TD>$attinfo[garid] Routed</TD>";
 }
-if($attinfo[sector3] > 0){
+if($attinfo['sector3'] > 0){
 echo "<TD>Force: $attinfo[startsector3] from Garrison $attinfo[garid]</TD>";
 }
 else {
 echo "<TD>$attinfo[garid] Routed</TD>";
 }
 echo "</TR><TR>";
-if($selected1[sector1] > 0){
+if($selected1['sector1'] > 0){
 echo "<TD>Attacking $selected1[sector1] from Garrison $selected1[garid]</TD>";
 }
 else {
 echo "<TD>Looting</TD>";
 }
-if($selected2[sector2] > 0){
+if($selected2['sector2'] > 0){
 echo "<TD>Attacking $selected2[sector2] from Garrison $selected2[garid]</TD>";
 }
 else{
 echo "<TD>Looting</TD>";
 }
-if($selected3[sector3] > 0){
+if($selected3['sector3'] > 0){
 echo "<TD>Attacking $selected3[sector3] from Garrison $selected3[garid]</TD>";
 }
 else{
@@ -1465,86 +1522,88 @@ echo "<TD>Looting</TD>";
 echo "</TR>";
 echo "<TR><TD><FONT COLOR=RED>Casualties: $sector1archercasualties</FONT></TD><TD><FONT COLOR=RED>Casualties: $sector2archercasualties</FONT></TD><TD><FONT COLOR=RED>Casualties: $sector3archercasualties</FONT></TD></TR>";
 echo "<TR><TD>";
-if($attinfo[weapon1]){
+if($attinfo['weapon1']){
 echo "$attinfo[weapon1]<BR>";
 }
-if($attinfo[weapon2]){
+if($attinfo['weapon2']){
 echo "$attinfo[weapon2]<BR>";
 }
-if($attinfo[head_armor]){
+if($attinfo['head_armor']){
 echo "$attinfo[head_armor]<BR>";
 }
-if($attinfo[torso_armor]){
+if($attinfo['torso_armor']){
 echo "$attinfo[torso_armor]<BR>";
 }
-if($attinfo[otorso_armor]){
+if($attinfo['otorso_armor']){
 echo "$attinfo[otorso_armor]<BR>";
 }
-if($attinfo[legs_armor]){
+if($attinfo['legs_armor']){
 echo "$attinfo[legs_armor]<BR>";
 }
-if($attinfo[shield]){
+if($attinfo['shield']){
 echo "$attinfo[shield]<BR>";
 }
-if($attinfo[horse_armor]){
+if($attinfo['horse_armor']){
 echo "$attinfo[horse_armor]<BR>";
 }
 echo "</TD><TD>";
-if($attinfo[weapon1]){
+if($attinfo['weapon1']){
 echo "$attinfo[weapon1]<BR>";
 }
-if($attinfo[weapon2]){
+if($attinfo['weapon2']){
 echo "$attinfo[weapon2]<BR>";
 }
-if($attinfo[head_armor]){
+if($attinfo['head_armor']){
 echo "$attinfo[head_armor]<BR>";
 }
-if($attinfo[torso_armor]){
+if($attinfo['torso_armor']){
 echo "$attinfo[torso_armor]<BR>";
 }
-if($attinfo[otorso_armor]){
+if($attinfo['otorso_armor']){
 echo "$attinfo[otorso_armor]<BR>";
 }
-if($attinfo[legs_armor]){
+if($attinfo['legs_armor']){
 echo "$attinfo[legs_armor]<BR>";
 }
-if($attinfo[shield]){
+if($attinfo['shield']){
 echo "$attinfo[shield]<BR>";
 }
-if($attinfo[horse_armor]){
+if($attinfo['horse_armor']){
 echo "$attinfo[horse_armor]<BR>";
 }
 echo "</TD><TD>";
-if($attinfo[weapon1]){
+if($attinfo['weapon1']){
 echo "$attinfo[weapon1]<BR>";
 }
-if($attinfo[weapon2]){
+if($attinfo['weapon2']){
 echo "$attinfo[weapon2]<BR>";
 }
-if($attinfo[head_armor]){
+if($attinfo['head_armor']){
 echo "$attinfo[head_armor]<BR>";
 }
-if($attinfo[torso_armor]){
+if($attinfo['torso_armor']){
 echo "$attinfo[torso_armor]<BR>";
 }
-if($attinfo[otorso_armor]){
+if($attinfo['otorso_armor']){
 echo "$attinfo[otorso_armor]<BR>";
 }
-if($attinfo[legs_armor]){
+if($attinfo['legs_armor']){
 echo "$attinfo[legs_armor]<BR>";
 }
-if($attinfo[shield]){
+if($attinfo['shield']){
 echo "$attinfo[shield]<BR>";
 }
-if($attinfo[horse_armor]){
+if($attinfo['horse_armor']){
 echo "$attinfo[horse_armor]<BR>";
 }
 echo "</TD></TR>";
 
-$db->Execute("UPDATE $dbtables[combats] set sector1 = sector1 - '$sector1archercasualties', curforce = curforce - '$sector1archercasulaties' where garid = '$selected1[garid]' AND combat_id = '$uniqueid'");
-$db->Execute("UPDATE $dbtables[combats] set sector2 = sector2 - '$sector2archercasualties', curforce = curforce - '$sector2archercasualties' where garid = '$selected2[garid]' AND combat_id = '$uniqueid'");
-$db->Execute("UPDATE $dbtables[combats] set sector3 = sector3 - '$sector3archercasualties', curforce = curforce - '$sector3archercasualties' where garid = '$selected3[garid]' AND combat_id = '$uniqueid'");
-
+$cmbts = $db->Execute("UPDATE $dbtables[combats] set sector1 = sector1 - '$sector1archercasualties', curforce = curforce - '$sector1archercasulaties' where garid = '$selected1[garid]' AND combat_id = '$uniqueid'");
+db_op_result($cmbts,__LINE__,__FILE__);
+$cmbts = $db->Execute("UPDATE $dbtables[combats] set sector2 = sector2 - '$sector2archercasualties', curforce = curforce - '$sector2archercasualties' where garid = '$selected2[garid]' AND combat_id = '$uniqueid'");
+db_op_result($cmbts,__LINE__,__FILE__);
+$cmbts = $db->Execute("UPDATE $dbtables[combats] set sector3 = sector3 - '$sector3archercasualties', curforce = curforce - '$sector3archercasualties' where garid = '$selected3[garid]' AND combat_id = '$uniqueid'");
+ db_op_result($cmbts,__LINE__,__FILE__);
 $sector1archercasualties = 0;
 $sector2archercasualties = 0;
 $sector3archercasualties = 0;
@@ -1563,40 +1622,46 @@ echo "</TD></TR></TABLE></TD></TR></TABLE></CENTER>";
 
 $morale = $db->Execute("SELECT * FROM $dbtables[combats] "
                       ."WHERE combat_id = '$uniqueid'");
+ db_op_result($morale,__LINE__,__FILE__);
 $cleanuptitle = 0;
 $line_color = $color_line1;
 while(!$morale->EOF){
 $moraleinfo = $morale->fields;
 $skldr = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$moraleinfo[tribeid]' AND abbr = 'ldr'");
+db_op_result($skldr,__LINE__,__FILE__);
 $leadership = $skldr->fields;
 $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$moraleinfo[tribeid]'");
-$tribeinfo = $tribe->fields; 
-if($moraleinfo[sector1] < 0){
-$db->Execute("UPDATE $dbtables[combats] "
+db_op_result($tribe,__LINE__,__FILE__);
+$tribeinfo = $tribe->fields;
+if($moraleinfo['sector1'] < 0){
+$cmbts = $db->Execute("UPDATE $dbtables[combats] "
             ."set sector1 = 0 "
             ."WHERE tribeid = '$moraleinfo[tribeid]' "
             ."AND combat_id = '$uniqueid' "
             ."AND garid = '$moraleinfo[garid]'");
-$moraleinfo[sector1] = 0;
+db_op_result($cmbts,__LINE__,__FILE__);
+$moraleinfo['sector1'] = 0;
 }
-if($moraleinfo[sector2] < 0){
-$db->Execute("UPDATE $dbtables[combats] "
+if($moraleinfo['sector2'] < 0){
+$cmbts = $db->Execute("UPDATE $dbtables[combats] "
             ."set sector2 = 0 "
             ."WHERE tribeid = '$moraleinfo[tribeid]' "
             ."AND combat_id = '$uniqueid' "
             ."AND garid = '$moraleinfo[garid]'");
-$moraleinfo[sector2] = 0;
+db_op_result($cmbts,__LINE__,__FILE__);
+$moraleinfo['sector2'] = 0;
 }
-if($moraleinfo[sector3] < 0){
-$db->Execute("UPDATE $dbtables[combats] "
+if($moraleinfo['sector3'] < 0){
+$cmbts = $db->Execute("UPDATE $dbtables[combats] "
             ."set sector3 = 0 "
             ."WHERE tribeid = '$moraleinfo[tribeid]' "
             ."AND combat_id = '$uniqueid' "
             ."AND garid = '$moraleinfo[garid]'");
-$moraleinfo[sector3] = 0;
+ db_op_result($cmbts,__LINE__,__FILE__);
+$moraleinfo['sector3'] = 0;
 }
 //////////////////////////////sector1 morale checks///////////////////////////////////////////////////////
-$percentwounded = round(1 - ($moraleinfo[sector1]/$moraleinfo[startsector1]), 2);
+$percentwounded = round(1 - ($moraleinfo['sector1']/$moraleinfo['startsector1']), 2);
 $survivors = round((1 - $percentwounded), 2);
 $percentwounded = explode('.', $percentwounded);
 $percentwounded = $percentwounded[1];
@@ -1913,7 +1978,7 @@ if($type2 == '2'){
 $tar2 = $db->Execute("SELECT * FROM $dbtables[combats] "
                     ."WHERE side = 'A' "
                     ."AND combat_id = '$uniqueid' "
-                    ."AND sector2 > 0 " 
+                    ."AND sector2 > 0 "
                     ."LIMIT $target2, 1");
 }
 elseif($type2 == '1'){
@@ -2172,7 +2237,7 @@ $db->Execute("UPDATE $dbtables[combats] "
 $db->Execute("UPDATE $dbtables[combats] "
             ."set sector3 = sector3 - '$actual3', "
             ."curforce = curforce - '$actual3' "
-            ."WHERE garid = '$target3[garid]' " 
+            ."WHERE garid = '$target3[garid]' "
             ."AND combat_id = '$uniqueid'");
 
 
@@ -4293,7 +4358,7 @@ $randprod = rand(0, $chance[count]);
 $prod = $db->Execute("SELECT * FROM $dbtables[products] WHERE tribeid = '$targetinfo[tribeid]' AND amount > 0 LIMIT $randprod, 1");
 $product = $prod->fields;
 $db->Execute("UPDATE $dbtables[products] SET amount = amount - 1 WHERE tribeid = '$targetinfo[tribeid]' AND proper = '$product[proper]'");
-$db->Execute("UPDATE $dbtables[products] SET amount = amount + 1 WHERE tribeid = '$_SESSION[current_unit]' AND proper = '$product[proper]'"); 
+$db->Execute("UPDATE $dbtables[products] SET amount = amount + 1 WHERE tribeid = '$_SESSION[current_unit]' AND proper = '$product[proper]'");
 }
 elseif($randloot == 2){
 $livchance = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[livestock] WHERE tribeid = '$targetinfo[tribeid]' AND amount > 0");
@@ -4334,12 +4399,8 @@ echo "</TABLE></TD></TR></TABLE></CENTER>";
 
 TEXT_GOTOMAIN();
 
-
-
-
-
 }
 }
 page_footer();
 
-?> 
+?>

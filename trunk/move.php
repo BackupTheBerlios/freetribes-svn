@@ -1,4 +1,4 @@
-<?
+<?php
 session_start();
 header("Cache-control: private");
 include("config.php");
@@ -10,16 +10,17 @@ connectdb();
 
 
 $dest = '';
-$dest = $_GET[dest];
-if(!isset($_SESSION[hex_id])){
-	echo "You cannot access this page directly.\n<BR>";
-	page_footer();
-	}
+$dest = $_GET['dest'];
+if(!isset($_SESSION['hex_id']))
+{
+    echo "You cannot access this page directly.\n<BR>";
+    page_footer();
+}
 
 if(!isset($dest))
 {
-	echo "There seems to be something wrong, here... you're going nowhere?.<BR>";
-	page_footer();
+    echo "There seems to be something wrong, here... you're going nowhere?.<BR>";
+    page_footer();
 }
 
 $username = $_SESSION['username'];
@@ -46,9 +47,9 @@ echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"2;URL=main.php\">";
 //and if so return to the main menu
 if ($tribeinfo[move_pts]<1)
 {
-	echo "You do not have any more movement points to go further. <BR><BR>";
-	echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"2;URL=main.php\">";
-	page_footer();
+    echo "You do not have any more movement points to go further. <BR><BR>";
+    echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"2;URL=main.php\">";
+    page_footer();
 }
 
 //Retrieve all the hex information about the current hex
@@ -61,7 +62,7 @@ if($hexinfo[move] > $tribeinfo[move_pts])
   echo "You do not have enough move points to move further.<BR><BR>";
   echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"2;URL=main.php\">";
 }
-elseif($hexinfo[terrain] == 'o' | $hexinfo[terrain] == 'l') 
+elseif($hexinfo[terrain] == 'o' | $hexinfo[terrain] == 'l')
 {
   echo "You cannot move onto water.<BR><BR>";
   $stamp = date("Y-m-d H:i:s");
@@ -73,7 +74,7 @@ elseif($tribeinfo[curweight] > $tribeinfo[maxweight])
 {
   echo 'You are too encumbered to move!<BR><BR>';
   echo "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"2;URL=main.php\">";
-}  
+}
 else
 {
     if($hexinfo[terrain] == 'jh' | $hexinfo[terrain] == 'sw')
@@ -111,15 +112,15 @@ else{
 if($table == 0){
 echo "<CENTER>$ally1info[alliance_id]</CENTER><BR>";
 
-	echo "<CENTER><TABLE BORDER=0 WIDTH=\"80%\"><TR BGCOLOR=$color_header><TD ALIGN=CENTER COLSPAN=2><FONT SIZE=+2>You have stumbled upon some unfriendlies!</FONT></TD></TR>";
-	echo "<TR BGCOLOR=$color_line1><TD ALIGN=CENTER>Please select a target.</TD>";
-	echo "<TD ALIGN=CENTER><FORM ACTION=combat.php METHOD=POST><SELECT NAME=target>";
-	echo "<OPTION VALUE=cancel>Cancel</OPTION>";
-	echo "<OPTION VALUE=$defender[tribeid]>$defender[tribeid]</OPTION>";
-	$table++;
+    echo "<CENTER><TABLE BORDER=0 WIDTH=\"80%\"><TR BGCOLOR=$color_header><TD ALIGN=CENTER COLSPAN=2><FONT SIZE=+2>You have stumbled upon some unfriendlies!</FONT></TD></TR>";
+    echo "<TR BGCOLOR=$color_line1><TD ALIGN=CENTER>Please select a target.</TD>";
+    echo "<TD ALIGN=CENTER><FORM ACTION=combat.php METHOD=POST><SELECT NAME=target>";
+    echo "<OPTION VALUE=cancel>Cancel</OPTION>";
+    echo "<OPTION VALUE=$defender[tribeid]>$defender[tribeid]</OPTION>";
+    $table++;
 }
 else{
-	echo "<OPTION VALUE=$defender[tribeid]>$defender[tribeid]</OPTION>";
+    echo "<OPTION VALUE=$defender[tribeid]>$defender[tribeid]</OPTION>";
 }
 }
 $eld->MoveNext();
@@ -127,7 +128,7 @@ $eld->MoveNext();
 $def->MoveNext();
 }
 if($table > 0){
-	echo "</SELECT><INPUT TYPE=SUBMIT VALUE=Submit></FORM></TD></TR></TABLE></CENTER>";
+    echo "</SELECT><INPUT TYPE=SUBMIT VALUE=Submit></FORM></TD></TR></TABLE></CENTER>";
         page_footer();
 }
 
@@ -153,8 +154,8 @@ if($table > 0){
        $restype = $db->Execute("SELECT * FROM $dbtables[gd_resources] "
                               ."WHERE name = '$hexinfo[res_type]'");
        $res = $restype->fields;
-       if( $min_skill[level] < $hexinfo[prospect] || $hexinfo[res_type] == '' )
-       { 
+       if( $min_skill['level'] < $hexinfo['prospect'] || $hexinfo['res_type'] == '' )
+       {
            if( $curmap[$clanid] < $res[res_code] )
            {
                $db->Execute("UPDATE $dbtables[mapping] SET `clanid_$tribeinfo[clanid]` = '1', `admin_0000` = '1' WHERE hex_id = '$dest'");
