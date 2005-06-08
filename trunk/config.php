@@ -20,7 +20,7 @@ ini_set("register_globals", "Off");
 // Path on the filesystem where the Tribe Strive files will reside
 // You MUST set this variable correctly to reflect your local game path
 
-$game_root = "/var/www/tribes/";
+$game_root = "/var/www/freetribes/";
 $gameroot = $game_root;
 include($game_root."config_local.php");
 
@@ -54,11 +54,11 @@ $ip = getenv("REMOTE_ADDR");
    $maxlen_password         = 16;
    $server_closed           = false;       // true = block logins but not new account creation
    $account_creation_closed = false;       // true = block new account creation
-   $game_debug              = true;        // true = turns on debug logger
-   $game_debug_move         = true;       // true = turns on the movement debugger
-   $game_debug_xfer         = true;        // true = turns on the transfer debugger
-   $game_skill_debug        = true;       // true = turns on the skill attempts debugger
-   $game_pop_debug          = true;       // true = turns on the population debugger
+   $game_debug              = false;        // true = turns on debug logger
+   $game_debug_move         = false;       // true = turns on the movement debugger
+   $game_debug_xfer         = false;        // true = turns on the transfer debugger
+   $game_skill_debug        = false;       // true = turns on the skill attempts debugger
+   $game_pop_debug          = false;       // true = turns on the population debugger
 
    $default_lang            = 'english';
 

@@ -25,8 +25,8 @@ connectdb();
     print_r($_REQUEST);
     echo "</PRE>";
 */
-    $deva = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                        ."WHERE tribeid = '$_SESSION[current_unit]'");
+    $deva = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$_SESSION[current_unit]'");
+    db_op_result($deva,__LINE__,__FILE__);
     $devainfo = $deva->fields;
 
     if( !$devainfo[DeVA] == '0000.00' )
@@ -58,13 +58,13 @@ echo "</FORM>"
     if( ISSET( $_REQUEST['repeat'] ) )
     {
         ////////////FIRST, get how many actives we have to duplicate///////////
-        $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                           ."WHERE tribeid = '$_SESSION[current_unit]'");
+        $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$_SESSION[current_unit]'");
+        db_op_result($tribe,__LINE__,__FILE__);
         $actives = $tribe->fields;
         echo "$actives[curam] actives available.<BR>";
         ////////////Now, let's figure out what they did last turn/////////
-        $act = $db->Execute("SELECT * FROM $dbtables[last_turn] "
-                           ."WHERE tribeid = '$_SESSION[current_unit]'");
+        $act = $db->Execute("SELECT * FROM $dbtables[last_turn] WHERE tribeid = '$_SESSION[current_unit]'");
+        db_op_result($act,__LINE__,__FILE__);
         while( !$act->EOF  && $actives['curam'] > 0 )
         {
             $act_do = $act->fields;
@@ -104,32 +104,35 @@ echo "</FORM>"
                     $required_herders = abs($cattle+$horse+$dogs+$elephants+$goat+$sheep+$pigs);
                     $act_do['actives'] = $required_herders;
                 }
-                $db->Execute("INSERT INTO $dbtables[activities] "
+                $query = $db->Execute("INSERT INTO $dbtables[activities] "
                             ."VALUES("
                             ."'',"
                             ."'$act_do[tribeid]',"
                             ."'$act_do[skill_abbr]',"
                             ."'$act_do[product]',"
                             ."'$act_do[actives]')");
+               db_op_result($query,__LINE__,__FILE__);
             }
-            $actives[curam] -= $act_do[actives];
-            $db->Execute("UPDATE $dbtables[tribes] "
+            $actives['curam'] -= $act_do['actives'];
+            $query = $db->Execute("UPDATE $dbtables[tribes] "
                         ."SET curam = $actives[curam] "
                         ."WHERE tribeid = '$_SESSION[current_unit]'");
+            db_op_result($query,__LINE__,__FILE__);
             $act->MoveNext();
         }
     }
     if( !ISSET( $module ) && ISSET( $_REQUEST['cancel'] ) )
     {
-        $db->Execute("DELETE FROM $dbtables[activities] "
+        $query = $db->Execute("DELETE FROM $dbtables[activities] "
                     ."WHERE tribeid = '$_SESSION[current_unit]' "
                     ."AND id = '$_REQUEST[id]' "
                     ."AND skill_abbr = '$_REQUEST[skill_abbr]' "
                     ."AND product = '$_REQUEST[cancel]'");
-
-        $db->Execute("UPDATE $dbtables[tribes] "
+       db_op_result($query,__LINE__,__FILE__);
+        $query = $db->Execute("UPDATE $dbtables[tribes] "
                     ."SET curam = curam + '$_REQUEST[actives]' "
                     ."WHERE tribeid = '$_SESSION[current_unit]'");
+        db_op_result($query,__LINE__,__FILE__);
     }
     if( !ISSET( $module ) )
     {
@@ -152,10 +155,10 @@ echo "</FORM>"
         $skill = $db->Execute("SELECT * from $dbtables[skills] "
                              ."WHERE tribeid = '$_SESSION[current_unit]' "
                              ."ORDER BY long_name ");
-
+        db_op_result($skill,__LINE__,__FILE__);
         $act_do = $db->Execute("SELECT * FROM $dbtables[activities] "
                               ."WHERE tribeid = '$_SESSION[current_unit]'");
-
+        db_op_result($act_do,__LINE__,__FILE__);
         echo "<OPTION VALUE=\"\" SELECTED></OPTION>";
 
         while( !$skill->EOF )
@@ -165,6 +168,7 @@ echo "</FORM>"
                                ."WHERE abbr = '$skillinfo[abbr]' "
                                ."AND min_level <= '$skillinfo[level]' "
                                ."AND auto = 'N'");
+            db_op_result($act,__LINE__,__FILE__);
             $actinfo = $act->fields;
 
             if( ISSET( $actinfo[display] ) )
@@ -217,12 +221,14 @@ echo "</FORM>"
         echo '<P>';
         $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] "
                              ."WHERE tribeid = '$_SESSION[current_unit]'");
+        db_op_result($tribe,__LINE__,__FILE__);
         $tribeinfo = $tribe->fields;
         echo "<CENTER><TABLE BORDER=0 width=48%><TR>";
         echo "<TD CLASS=color_header COLSPAN=4 ALIGN=CENTER>Current Crops</TD></TR>";
         $fm = $db->Execute("SELECT * FROM $dbtables[farming] "
                           ."WHERE hex_id = '$tribeinfo[hex_id]' "
                           ."AND clanid = '$tribeinfo[clanid]'");
+        db_op_result($fm,__LINE__,__FILE__);
         if( $fm->EOF )
         {
             echo "<TR CLASS=color_row0><TD COLSPAN=4 ALIGN=CENTER>None</TD></TR>";
@@ -262,6 +268,7 @@ echo "</FORM>"
                              ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                              ."AND amount > 0 "
                              ."ORDER BY long_name");
+        db_op_result($stuff,__LINE__,__FILE__);
         $totalstuff = 0;
         $r = 0;
         while( !$stuff->EOF )
@@ -280,6 +287,7 @@ echo "</FORM>"
                              ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                              ."AND amount > 0 "
                              ."ORDER BY long_name");
+        db_op_result($stuff,__LINE__,__FILE__);
         while( !$stuff->EOF )
         {
             $stuffinfo = $stuff->fields;
@@ -296,6 +304,7 @@ echo "</FORM>"
                              ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                              ."AND amount > 0 "
                              ."ORDER BY type");
+         db_op_result($stuff,__LINE__,__FILE__);
         while( !$stuff->EOF )
         {
             $stuffinfo = $stuff->fields;
@@ -332,20 +341,23 @@ echo "</FORM>"
             $skill = $db->Execute("SELECT * FROM $dbtables[skills] "
                                  ."WHERE tribeid = '$_SESSION[current_unit]' "
                                  ."AND abbr = '$abbr'");
+             db_op_result($skill,__LINE__,__FILE__);
             $skillinfo = $skill->fields;
-            $res = $db->Execute("SELECT * FROM $dbtables[product_table] "
+            $res1 = $db->Execute("SELECT * FROM $dbtables[product_table] "
                                ."WHERE skill_abbr = '$abbr' "
                                ."AND skill_level <= '$skillinfo[level]'"
                                ."ORDER BY proper");
-            while( !$res->EOF )
+            db_op_result($res1,__LINE__,__FILE__);
+            while( !$res1->EOF )
             {
-                $resinfo = $res->fields;
+                $resinfo = $res1->fields;
                 $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] "
                                      ."WHERE tribeid = '$_SESSION[current_unit]'");
+                db_op_result($tribe,__LINE__,__FILE__);
                 $tribeinfo = $tribe->fields;
                 $option++;
                 echo "<OPTION VALUE=$resinfo[long_name].$resinfo[prod_id]>$resinfo[proper]</OPTION>";
-                $res->MoveNext();
+                $res1->MoveNext();
             }
         }
         echo "</SELECT></TD></TR>";
@@ -362,6 +374,7 @@ echo "</FORM>"
 
         $active = $db->Execute("SELECT * FROM $dbtables[tribes] "
                               ."WHERE tribeid = '$_SESSION[current_unit]'");
+        db_op_result($active,__LINE__,__FILE__);
         $activeinfo = $active->fields;
         if( $resinfo['skill_abbr'] == 'herd' )
         {
@@ -415,10 +428,12 @@ echo "</FORM>"
         }
         $cap = $db->Execute("SELECT * FROM $dbtables[skill_table] "
                            ."WHERE abbr = '$_REQUEST[skilltype]'");
+        db_op_result($cap,__LINE__,__FILE__);
         $capinfo = $cap->fields;
         $skill = $db->Execute("SELECT * FROM $dbtables[skills] "
                              ."WHERE tribeid = '$_SESSION[current_unit]' "
                              ."AND abbr = '$_POST[skilltype]'");
+         db_op_result($skill,__LINE__,__FILE__);
         $skillinfo = $skill->fields;
         if( $capinfo['level_cap'] == 'Y' && $skillinfo['level'] < 10 )
         {
@@ -440,11 +455,13 @@ echo "</FORM>"
         echo "<TR><TD CLASS=color_header COLSPAN=2>Resources And Products Available</TD></TR>";
         $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] "
                              ."WHERE tribeid = '$_SESSION[current_unit]'");
+        db_op_result($tribe,__LINE__,__FILE__);
         $tribeinfo = $tribe->fields;
         $stuff = $db->Execute("SELECT * FROM $dbtables[products] "
                              ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                              ."AND amount > 0 "
                              ."ORDER BY long_name");
+         db_op_result($stuff,__LINE__,__FILE__);
         $totalstuff = 0;
         $r = 0;
         while( !$stuff->EOF )
@@ -462,6 +479,7 @@ echo "</FORM>"
                              ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                              ."AND amount > 0 "
                              ."ORDER BY long_name");
+        db_op_result($stuff,__LINE__,__FILE__);
         while( !$stuff->EOF )
         {
             $stuffinfo = $stuff->fields;
@@ -484,7 +502,7 @@ echo "</FORM>"
         }
         echo "</TABLE></TD></TR></TABLE>";
     }
-    elseif( ISSET( $module ) && ISSET( $_REQUEST[actives] ) && $_REQUEST[actives] > 0 )
+    elseif( ISSET( $module ) && ISSET( $_REQUEST['actives'] ) && $_REQUEST['actives'] > 0 )
     {
         foreach( $_REQUEST as $long_name )
         {
@@ -492,6 +510,7 @@ echo "</FORM>"
             $abb = $db->Execute("SELECT skill_abbr FROM $dbtables[product_table] "
                                ."WHERE long_name = '$group[0]' "
                                ."AND prod_id = '$group[1]'");
+            db_op_result($abb,__LINE__,__FILE__);
             if( !$abb->EOF )
             {
                 $abbinfo = $abb->fields;
@@ -499,36 +518,41 @@ echo "</FORM>"
         }
         $check = $db->Execute("SELECT curam FROM $dbtables[tribes] "
                              ."WHERE tribeid = $_SESSION[current_unit]");
+         db_op_result($check,__LINE__,__FILE__);
         $checkinfo = $check->fields;
-        if( $checkinfo[curam] >= $_REQUEST[actives] )
+        if( $checkinfo['curam'] >= $_REQUEST['actives'] )
         {
-            $group = explode( '.', $_REQUEST[produce] );
-            if( $abbinfo[skill_abbr] == '' && $group[0] == '' )
+            $group = explode( '.', $_REQUEST['produce'] );
+            if( $abbinfo['skill_abbr'] == '' && $group[0] == '' )
             {
-                $abbinfo[skill_abbr] = 'Relax';
+                $abbinfo['skill_abbr'] = 'Relax';
                 $group[0] = 'Meditation';
             }
             $here = $db->Execute("SELECT * FROM $dbtables[activities] "
                                 ."WHERE skill_abbr = '$abbinfo[skill_abbr]' "
                                 ."AND product = '$group[0]' "
                                 ."AND tribeid = '$_SESSION[current_unit]'");
+             db_op_result($here,__LINE__,__FILE__);
             if( $here->EOF )
             {
-                $db->Execute("INSERT INTO $dbtables[activities] "
+                $query = $db->Execute("INSERT INTO $dbtables[activities] "
                             ."VALUES("
                             ."'',"
                             ."'$_SESSION[current_unit]',"
                             ."'$abbinfo[skill_abbr]',"
                             ."'$group[0]',"
                             ."'$_REQUEST[actives]')");
-                $db->Execute("UPDATE $dbtables[tribes] "
+                 db_op_result($query,__LINE__,__FILE__);
+                $query = $db->Execute("UPDATE $dbtables[tribes] "
                             ."SET curam = curam - $_REQUEST[actives] "
                             ."WHERE tribeid = '$_SESSION[current_unit]'");
-                $db->Execute("UPDATE $dbtables[skills] "
+                 db_op_result($query,__LINE__,__FILE__);
+                $query = $db->Execute("UPDATE $dbtables[skills] "
                             ."SET turn_done = 'Y' "
                             ."WHERE tribeid = '$_SESSION[current_unit]' "
                             ."AND abbr = '$abbinfo[skill_abbr]'");
-                $job = $_REQUEST[actives] . '.' . $group[0];
+                 db_op_result($query,__LINE__,__FILE__);
+                $job = $_REQUEST['actives'] . '.' . $group[0];
             }
             else
             {

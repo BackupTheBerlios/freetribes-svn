@@ -5,13 +5,8 @@
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
-
-
-// The ADOdb db module is now required to run TN. You
-// can find it at http://php.weblogs.com/ADODB. Enter the
-// path where it is installed here. I suggest simply putting
-// every ADOdb file in a subdir of TN.
-$ADOdbpath = "ADOdb";
+//this may be changed if you want to use an adodb instance from elsewhere
+$ADOdbpath = "adodb";
 
 // Domain & path of the game on your webserver (used to validate login cookie)
 // This is the domain name part of the URL people enter to access your game.
@@ -32,7 +27,7 @@ $game_url = "www.your-website.net";
 // If you enter www.blah.com/blacknova to access the game, you would leave the line as it is.
 // If you do not need to specify TribeStrive, just enter a single slash eg:
 // $gamepath = "/";
-$game_url_path = "/tribestrive/";
+$game_url_path = "/freetribes/";
 $gamepath = $game_url_path;
 $gamedomain = $game_url_path;
 // Hostname and port of the database server:
@@ -51,25 +46,14 @@ $dbuname = "db_user";
 $dbpass = "db_sql_password";
 
 // Type of the SQL database. This can be anything supported by ADOdb. Here are a few:
-// "access" for MS Access databases. You need to create an ODBC DSN.
-// "ado" for ADO databases
-// "ibase" for Interbase 6 or earlier
-// "borland_ibase" for Borland Interbase 6.5 or up
-// "mssql" for Microsoft SQL
-// "mysql" for MySQL
-// "oci8" for Oracle8/9
-// "odbc" for a generic ODBC database
-// "postgres" for PostgreSQL ver < 7
-// "postgres7" for PostgreSQL ver 7 and up
-// "sybase" for a SyBase database
-// NOTE: only mysql work as of right now, due to SQL compat code
+//DO NOT CHANGE THIS VALUE. Only MySQL is supported at this time
 $db_type = "mysql";
 
 // Set this to 1 to use db persistent connections, 0 otherwise
 $db_persistent = 0;//persisten connection scan cause server load issues on a busy site...
 
 /* Table prefix for the database. If you want to run more than
-one game of TN on the same database, or if the current table
+one game of FT on the same database, or if the current table
 names conflict with tables you already have in your db, you will
 need to change this */
 $db_prefix = "tstr__";
@@ -82,7 +66,7 @@ $admin_mail = "whoever@whatever.domain";
 $link_forums = "http://forums.crazybri.com";
 
 // The name of the local game
-$game_name = "TribeStrive Stable";
+$game_name = "FreeTribes Stable";
 
 
 $theme_default = "Original";    // You can set this to any of the directory names in ./themes
@@ -112,22 +96,6 @@ switch ($_SESSION['theme'])
 }
 
 
-// The following variables let you define how the game runs and
-// what type of debug tracking you want, if any
-
-    $maxlen_password         = 16;
-    $server_closed           = false;       // true = block logins but not new account creation
-    $account_creation_closed = false;       // true = block new account creation
-    $game_debug              = true;        // true = turns on debug logger
-    $game_debug_move         = true;       // true = turns on the movement debugger
-    $game_debug_xfer         = true;        // true = turns on the transfer debugger
-    $game_skill_debug        = true;       // true = turns on the skill attempts debugger
-    $game_pop_debug          = true;       // true = turns on the population debugger
-
-    $default_lang            = 'english';
-
-    $display_password        = false;       // If true, will display password on signup screen.
-    $sched_type              = 0;           // 0 = Cron based, 1 = player triggered.
 
 
 ?>

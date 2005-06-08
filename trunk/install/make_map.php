@@ -152,7 +152,9 @@ function ZColor ($z0)
         }
 
     $val = "";
-
+//TODO: This insertmap shit needs to be re-worked- logically , it is illogical, causing database errors
+//and likely some resources or events end up running incorrectly
+//I believe a better method for this is a switch/case series instead of if/else
     if ($t1<=$LEVEL_WATER)
     {
                 $terrain = "o";
@@ -943,7 +945,10 @@ function insertmap($display, $terrain, $res_pres, $resource, $move, $safe, $game
             }
             $i -= $map_width;
         }
-        $result2 = $db->Execute("INSERT INTO $dbtables[hexes] VALUES("
+        //OK- TODO - Up above, the if/else shit is making this do exactly what you tell it to
+        //however it causes duplicate key errors , so temporarily its an insert ignore.
+        //the if/else shit needs to be made a switch/case instead.... added to TODO for V 1.0
+        $result2 = $db->Execute("INSERT IGNORE INTO $dbtables[hexes] VALUES("
                                ."'$display',"
                                ."'$terrain',"
                                ."'$north',"
