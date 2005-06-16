@@ -47,7 +47,7 @@ if(!empty($_POST['set']))
     $interval = $_POST['interval'];
     $intval = $_POST['intval'];
     $first_part = date("Y-m-d");
-    $seond_part = $time.":00";
+    $second_part = $time.":00";
     $lastrun = $first_part." ".$second_part;
     if($intval == "H")
     {
@@ -65,7 +65,11 @@ echo"Set Last Run Time to:<select name='time'>\n";
 $i=23;
 while($i >= 0)
 {
-   echo "<option value='{$i}:00'>{$i}:00</option>\n";
+   if($i < 10)
+   {
+     $p = 0;
+   }
+   echo "<option value='{$p}{$i}:00'>{$p}{$i}:00</option>\n";
    $i--;
 }
 echo "</select> Hours<br>\n";

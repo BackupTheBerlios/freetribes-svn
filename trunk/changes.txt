@@ -1,4 +1,8 @@
-2005-06-14
+########## Changes File Newest first ######################
+
+
+2005-06-14  - the following fixes contained in patch-0.9.4.1 located in the patches section
+of http://developer.berlios.de/projects/freetribes/
 
 FIXED: Bug 4249- Mapping inconsistencies.
 FIXED: Bug 4263- Combat.php database error.
@@ -21,6 +25,4 @@ Fixed minor bug in scheduler cleanup.php- didnt drop dead clan's mapping data
 Fixed bug in combat.php - map tables were not being updated
 Fixed bug in Combat.php - "DELETE" query didnt have "FROM"
 
-
-
-
+############# EOF ###################
