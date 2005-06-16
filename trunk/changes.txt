@@ -1,147 +1,26 @@
-2005-05-26 7 PM
-3 new functions added
-get_game_time(empty_array);
-create an empty array, pass it to teh function, it returns a multi dimensional array containing
-month,year,day,weather,gameseason arrays - replaces the constant inclusion of game_time.php
-which was causing a slow down in teh scheduler. it hasnt been completely implemented but it is working, and it will
-recieve further optimization in the future.
-it is also created because the game information table is slated for remopval,
-and game date will be maintained in configuration data
+2005-06-14
 
-playerlog(tribeid,clanid,type,month,year,data,dbtables_array)
+FIXED: Bug 4249- Mapping inconsistencies.
+FIXED: Bug 4263- Combat.php database error.
+FIXED: Bug 4225- undefined index in scouting.php
+FIXED: Bug 4226- DB error in weaponmaking.php
+Fixed db error in activities.php - sometimes it *ISNT* a good idea to break long lines into sections..
+Fixed db error in garrisons - sometimes if($_POST['key'] == '') returns true, even when empty
+Fixed db error in player_log -sometimes when logging out or hitting that page without being logged in, clanid  may be empty
+Population.php scheduler- now logs to player_log
+Engineering.php- scheduler now reports to player_log - shaved over 100 lines from the code
+Fixed bug in mstsck_list that was causing an empty query. mstsck needs fixed or re-written.
+drop gd_rq table I think :)
 
-returns a true on completion - type can be a defined constant or a literal value such as 'HUNTING'
-month and year values are game date values gotten from get_game_date
+TEMP FIX- (mstsck problem) - commented out the use of mstsck_list database incomplete SELECT * FROM tstr_skills WHERE ='0001.00' AND abbr='eng' AND >='5'     ERROR: You have an error in your SQL syntax. Check the manual that corresponds to your MySQL server version for the right syntax to use near '='0001.00' AND abbr='eng' AND >='5'' at line 1
+phplogix.com/tribes/activities.php
+tweaked engineering some more- reduced wasteful processing that wasnt needed. still not as smooth as it could be, but better
+FIXED: Bug 4288 - structures not showing construction status
+Combat - now working fully, and we can start discussing how it *should* work, and locate bugs/issues
+Fixed minor bug in scheduler cleanup.php- didnt drop dead clan's mapping data
+Fixed bug in combat.php - map tables were not being updated
+Fixed bug in Combat.php - "DELETE" query didnt have "FROM"
 
-get_weight(tribeid)
-Returns an integer value of the total weight of the tribe, which will be used against carry capacity
-this function already existed, I just fixed it to work
-
-Added a great deal of debug code, added adodb's logsql tool to the admin panel
-(which will be turned *OFF* and/or removed in teh released code)
-fixed many many bugs reported in teh game code.
-
-TODO's :
-bug reporting: set up a centralized database and client/server scripts so
-that the main server can query any registered remote server and grab the bug details
-via http so all bug reports can be centralized and sorted
-
-player logging function needs to replace all db queries
-
-also while we are at it when fixing or optimizting a query, convert it to adodb bind variables
-
-
-2005-04-28 11 PM
-more scheduler fixes-
-table $dbtables[map_table] doesnt exist/isnt created by installer- I am not sure of the create table structure, so I copied movement_log, since it enters teh same identical data
-- will find out if and when a bug shows up that uses that table, or I get updated sql from jarmaug
-Fixed an error on scheduler.php - optimize table table "elements" doesnt exist
-
-fixed an error in scouting.php - created map_table
-
-fixed an error in garexp.php - where math is used to :quote: set exp = exp + .01
-The .01 is a decimal, *not* an integer, therefore, it *must* be single-quoted.
-
-Merged changes over to the slow game which should now work much better as well as in the fast game..
-
-TODO
-$Id$
-
-Scheduler needs extensive cleanup and optimization work.. currently it may have a tendency to time out...
-
-Signup process needs some work and error trapping- a new user signed up and immediately got -1 totems
-this was temporarily fixed by setting the database field type property to 'unsigned'
-
-
-tables need indexes and optimizations
-
-
-CHANGES
-tweaked global_funcs.php for log type='DBERROR' to find it easier in admin panel
-BUG: scheduler/cleanup.php  "force" is a mysql function, therefore teh field name must be enclosed in backtick quotes
-otherwise it breaks
-      $res = $db->Execute("DELETE FROM $dbtables[garrisons] WHERE `force` < 3");
-BUG scores.php clanid_ missing in sql query line 20 (selecting on mappng table )
-
-BUG distilling.php DELETE FROM .. not DELETE * FROM .. :) (line 378 approx)
-BUG scouting.php movement_log doesnt exist and this insert would be better done as a function log_move($tribeid,$clanid,$hex)
-
-  CREATE TABLE `tstr_movement_log` (
-  `move_id` bigint(20) unsigned NOT NULL auto_increment,
-  `tribe_id` int(4) unsigned NOT NULL default '0',
-  `clan_id` decimal(6,2) unsigned zerofill NOT NULL default '0000.00',
-  `hex` int(11) unsigned NOT NULL default '0',
-  `stamp` datetime NOT NULL default '0000-00-00 00:00:00',
-  PRIMARY KEY  (`move_id`),
-  KEY `tribe_id` (`tribe_id`,`clan_id`)
-) TYPE=MyISAM AUTO_INCREMENT=1 ;
-
-data field for logs was changed from varchar(255) to text
-db_op_result function borrowed from TKI and worked into all scheduler DB calls. this resulted in several scheduler file
-fixes. - this will be an ongoing process
-
-admin_log function edited and tweaked to work with db_op_result
-
-config.php
-----------
-added setting for default theme
-added flag '$use_local' to let people switch between default files and local versions, mostly to allow site specific settings and cosmetic changes in appearance of headers footers etc
-
-
-Global_funcs.php
-----------------
-Cut out the purely GUI related functions and put them in the file gui/global_funcs.php to make finding where functions are easier. The new file ins included by config.php
-Adde a function called 'x_include' that will include files from the 'local/' directory if they exist and the $use_local flag is set
-
-
-Options.php
------------
-Added theme selector
-
-
-AdminReimburse
---------------
-sorted the lists alphabetically
-
-
-Bugtracker.php
---------------
-Sorted skills and products alphabetically (should especially make it easier to select the product that is affected)
-
-
-GameReset & DB Convert
-----------------------
-Options avoided since I did not know if they prompted for confirmation
-
-
-
-all files in main directory
----------------------------
-Added 'CLASS=edit_area' to all tags <INPUT TYPE=TEXT>
-
-
-local/config_local
-------------------
-Allows people to set local config settings without having them overwritten if they install a new release of the source
-
-
-local/game_vars
----------------
-Another optional file that lets people running a separate server have their on game variables set
-
-
-local/motd_*.html
------------------
-These files are included by index.php and allow the various parts of the index page to have locally relevant messages from admin
-
-
-local/header.php & local/footer.php
------------------------------------
-Optional local header/footer files
-
-gui/helper.php
---------------
-Bug fixed in the help_page_link() function
 
 
 

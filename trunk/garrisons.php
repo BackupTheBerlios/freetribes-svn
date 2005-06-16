@@ -549,71 +549,71 @@ if(ISSET($_POST['force']))
                     ."AND type = 'Horses'");
         db_op_result($hoss,__LINE__,__FILE__);
         $prod = $db->Execute("UPDATE $dbtables[products] "
-                    ."SET amount = amount - $horses "
+                    ."SET amount = amount - '$horses' "
                     ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                     ."AND long_name = 'saddle'");
         db_op_result($prod,__LINE__,__FILE__);
     }
-    if(!$_POST['weapon1'] == '')
+    if(!empty($_POST['weapon1']))
     {
          $weap = $db->Execute("UPDATE $dbtables[products] "
-                    ."SET amount = amount - $_POST[force] "
+                    ."SET amount = amount - '$_POST[force]' "
                     ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                     ."AND long_name = '$_POST[weapon1]'");
          db_op_result($weap,__LINE__,__FILE__);
     }
-    if(!$_POST['weapon2'] == '')
+    if(!empty($_POST['weapon2']))
     {
         $weap = $db->Execute("UPDATE $dbtables[products] "
-                    ."SET amount = amount - $_POST[force] "
+                    ."SET amount = amount - '$_POST[force]' "
                     ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                     ."AND long_name = '$_POST[weapon2]'");
         db_op_result($weap,__LINE__,__FILE__);
     }
-    if(!$_POST['head'] == '')
+    if(!empty($_POST['head']))
     {
         $weap = $db->Execute("UPDATE $dbtables[products] "
-                    ."SET amount = amount - $_POST[force] "
+                    ."SET amount = amount - '$_POST[force]' "
                     ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                     ."AND long_name = '$_POST[head]'");
          db_op_result($weap,__LINE__,__FILE__);
     }
-    if(!$_POST['torso'] == '')
+    if(!empty($_POST['torso']))
     {
         $weap = $db->Execute("UPDATE $dbtables[products] "
-                    ."SET amount = amount - $_POST[force] "
+                    ."SET amount = amount - '$_POST[force]' "
                     ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                     ."AND long_name = '$_POST[torso]'");
         db_op_result($weap,__LINE__,__FILE__);
     }
-    if(!$_POST['otorso'] == '')
+    if(!empty($_POST['otorso']))
     {
         $weap = $db->Execute("UPDATE $dbtables[products] "
-                    ."SET amount = amount - $_POST[force] "
+                    ."SET amount = amount - '$_POST[force]' "
                     ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                     ."AND long_name = '$_POST[otorso]'");
         db_op_result($weap,__LINE__,__FILE__);
     }
-    if(!$_POST['leg'] == '')
+    if(!empty($_POST['leg']))
     {
         $weap = $db->Execute("UPDATE $dbtables[products] "
-                    ."SET amount = amount - $_POST[force] "
+                    ."SET amount = amount - '$_POST[force]' "
                     ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                     ."AND long_name = '$_POST[leg]'");
          db_op_result($weap,__LINE__,__FILE__);
     }
-    if(!$_POST['shield'] == '')
+    if(!empty($_POST['shield']))
     {
         $weap = $db->Execute("UPDATE $dbtables[products] "
-                    ."SET amount = amount - $_POST[force] "
+                    ."SET amount = amount - '$_POST[force]' "
                     ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                     ."AND long_name = '$_POST[shield]'");
           db_op_result($weap,__LINE__,__FILE__);
     }
-    if(!$_POST['barding'] == '')
+    if(!empty($_POST['barding']))
     {
         $weap = $db->Execute("UPDATE $dbtables[products] "
-                    ."SET amount = amount - $_POST[force] "
+                    ."SET amount = amount - '$_POST[force]' "
                     ."WHERE tribeid = '$tribeinfo[goods_tribe]' "
                     ."AND long_name = '$_POST[barding]'");
          db_op_result($weap,__LINE__,__FILE__);

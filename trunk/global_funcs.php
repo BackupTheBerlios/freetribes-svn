@@ -135,6 +135,10 @@ function playerlog($tribeid,$clanid,$log_type,$month,$year,$data = '',$dbtables)
 {
   global $db;
   /* write log_entry to the player's log - identified by player's ship_id - sid. */
+  if(empty($clanid))
+  {
+     return false;
+  }
   if ($tribeid != "" && !empty($log_type))
   {
     $logsql = $db->Prepare("INSERT INTO $dbtables[player_logs] (month,year,tribeid,clanid,type,time,data) VALUES (?,?,?,?,?,NOW(),?)");

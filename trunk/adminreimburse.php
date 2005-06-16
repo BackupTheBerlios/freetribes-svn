@@ -1,4 +1,4 @@
-<?
+<?php
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2 of the License, or (at your
@@ -11,7 +11,7 @@ $admincheck = $_SESSION['username'];
 //here we should query the db to get admin's username or id or some such to auth
 if($admincheck !== 'admin')
 {
-die("You Do Not	Have permissions to view this page!");
+    die("You Do Not Have permissions to view this page!");
 }
 include("config.php");
 include("game_time.php");
@@ -24,12 +24,13 @@ bigtitle();
 
 $username = $_SESSION['username'];
 $admin = $db->Execute("SELECT * FROM $dbtables[chiefs] WHERE username = '$username'");
+db_op_result($admin,__LINE__,__FILE__);
 $admininfo = $admin->fields;
 
 
-$module = $_REQUEST[menu];
+$module = $_POST['menu'];
 
-if( !$admininfo[admin] >= '2' )
+if( !$admininfo['admin'] >= '2' )
 {
     echo "You must be an administrator to use this tool.<BR>\n";
     TEXT_GOTOMAIN();
@@ -38,11 +39,12 @@ if( !$admininfo[admin] >= '2' )
 
 
 ////////////////////////////////////First, display a list of tribes to move.//////////////////
-if( $_REQUEST[newhex] == '' && $_REQUEST[tribe] == '' )
+if( $_POST['newhex'] == '' && $_POST['tribe'] == '' )
 {
     $res = $db->Execute("SELECT * FROM $dbtables[tribes] "
                        ."WHERE tribeid = goods_tribe "
                        ."ORDER BY tribeid");
+    db_op_result($res,__LINE__,__FILE__);
     echo '<CENTER><FONT SIZE=+2 COLOR=WHITE>Reimburse which tribe?</FONT>';
     echo '<CENTER><TABLE BORDER=0 CELLPADDING=0 WIDTH=60%><TR ALIGN=CENTER><TD>';
     echo '<BR>Select a Tribe:</TD><TD>';
@@ -53,6 +55,7 @@ if( $_REQUEST[newhex] == '' && $_REQUEST[tribe] == '' )
         $tribe = $res->fields;
         $chf = $db->Execute("SELECT * FROM $dbtables[chiefs] "
                            ."WHERE clanid = '$tribe[clanid]'");
+        db_op_result($chf,__LINE__,__FILE___);
         $chief = $chf->fields;
         echo "<OPTION VALUE=$tribe[tribeid]>$tribe[tribeid] ($chief[username] / $chief[chiefname])</OPTION>";
 
@@ -78,12 +81,12 @@ if( $_REQUEST[newhex] == '' && $_REQUEST[tribe] == '' )
     echo "<TR><TD COLSPAN=2 ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=Continue></FORM></TD></TR></TABLE>";
 }
 
-if( !$_REQUEST[type] == '' && !$_REQUEST[tribe] == '' && !$_REQUEST[action] == '')
+if( !$_POST['type'] == '' && !$_POST['tribe'] == '' && !$_POST['action'] == '')
 {
     echo "<CENTER><TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0><TR><TD>";
     echo '<FORM ACTION=adminreimburse.php METHOD=POST>';
     echo '<SELECT NAME=item>';
-    if( $_REQUEST[type] == 'resource' )
+    if( $_POST[type] == 'resource' )
     {
         $reim = $db->Execute("SELECT DISTINCT long_name, dbname FROM $dbtables[resources] ORDER BY long_name");
         while( !$reim->EOF )
@@ -93,7 +96,7 @@ if( !$_REQUEST[type] == '' && !$_REQUEST[tribe] == '' && !$_REQUEST[action] == '
             $reim->MoveNext();
         }
     }
-    elseif( $_REQUEST[type] == 'livestock' )
+    elseif( $_POST['type'] == 'livestock' )
     {
         $reim = $db->Execute("SELECT DISTINCT type FROM $dbtables[livestock] ORDER BY type");
         while( !$reim->EOF )
@@ -103,7 +106,7 @@ if( !$_REQUEST[type] == '' && !$_REQUEST[tribe] == '' && !$_REQUEST[action] == '
             $reim->MoveNext();
         }
     }
-    elseif( $_REQUEST[type] == 'products' )
+    elseif( $_POST['type'] == 'products' )
     {
         $reim = $db->Execute("SELECT DISTINCT long_name, proper FROM $dbtables[products] ORDER BY proper");
         while( !$reim->EOF )
@@ -114,114 +117,123 @@ if( !$_REQUEST[type] == '' && !$_REQUEST[tribe] == '' && !$_REQUEST[action] == '
         }
     }
     echo "</SELECT></TD><TD>";
-    if( $_REQUEST[action] == 'add' )
+    if( $_POST['action'] == 'add' )
     {
         echo " + ";
     }
-    elseif( $_REQUEST[action] == 'set' )
+    elseif( $_POST['action'] == 'set' )
     {
         echo " = ";
     }
-    elseif( $_REQUEST[action] == 'subtract' )
+    elseif( $_POST['action'] == 'subtract' )
     {
         echo " - ";
     }
     echo "<INPUT CLASS=edit_area TYPE=TEXT NAME=amount VALUE=''>";
     echo "</TD></TR>";
-    echo "<INPUT TYPE=HIDDEN NAME=tribe VALUE=$_REQUEST[tribe]>";
-    echo "<INPUT TYPE=HIDDEN NAME=action VALUE=$_REQUEST[action]>";
-    echo "<INPUT TYPE=HIDDEN NAME=type VALUE=$_REQUEST[type]>";
+    echo "<INPUT TYPE=HIDDEN NAME=tribe VALUE=$_POST[tribe]>";
+    echo "<INPUT TYPE=HIDDEN NAME=action VALUE=$_POST[action]>";
+    echo "<INPUT TYPE=HIDDEN NAME=type VALUE=$_POST[type]>";
     echo "<TR ALIGN=CENTER><TD COLSPAN=2>";
     echo "<INPUT TYPE=SUBMIT VALUE='Reimburse'>";
     echo "</TD></FORM></TABLE>";
 }
 
-if( !$_REQUEST[amount] == '' && !$_REQUEST[item] == '' )
+if( !$_POST['amount'] == '' && !$_POST['item'] == '' )
 {
 
-    if( $_REQUEST[type] == 'resource' )
+    if( $_POST['type'] == 'resource' )
     {
-        if( $_REQUEST[action] == 'add' )
+        if( $_POST['action'] == 'add' )
         {
-            $db->Execute("UPDATE $dbtables[resources] "
-                        ."SET amount = amount + $_REQUEST[amount] "
-                        ."WHERE tribeid = '$_REQUEST[tribe]' "
-                        ."AND dbname = '$_REQUEST[item]'");
+            $qry = $db->Execute("UPDATE $dbtables[resources] "
+                        ."SET amount = amount + $_POST[amount] "
+                        ."WHERE tribeid = '$_POST[tribe]' "
+                        ."AND dbname = '$_POST[item]'");
+            db_op_result($qry,__LINE__,__FILE__);
             $verb = 'added to';
         }
-        elseif( $_REQUEST[action] == 'set' )
+        elseif( $_POST['action'] == 'set' )
         {
-            $db->Execute("UPDATE $dbtables[resources] "
-                        ."SET amount = $_REQUEST[amount] "
-                        ."WHERE tribeid = '$_REQUEST[tribe]' "
-                        ."AND dbname = '$_REQUEST[item]'");
+           $qry = $db->Execute("UPDATE $dbtables[resources] "
+                        ."SET amount = $_POST[amount] "
+                        ."WHERE tribeid = '$_POST[tribe]' "
+                        ."AND dbname = '$_POST[item]'");
+            db_op_result($qry,__LINE__,__FILE__);
             $verb = 'set to';
         }
-        elseif( $_REQUEST[action] == 'subtract' )
+        elseif( $_POST['action'] == 'subtract' )
         {
-            $db->Execute("UPDATE $dbtables[resources] "
-                        ."SET amount = amount - '$_REQUEST[amount] "
-                        ."WHERE tribeid = '$_REQUEST[tribe]' "
-                        ."AND dbname = '$_REQUEST[item]'");
+            $qry = $db->Execute("UPDATE $dbtables[resources] "
+                        ."SET amount = amount - '$_POST[amount] "
+                        ."WHERE tribeid = '$_POST[tribe]' "
+                        ."AND dbname = '$_POST[item]'");
+            db_op_result($qry,__LINE__,__FILE__);
             $verb = 'subtracted from';
         }
     }
-    elseif( $_REQUEST[type] == 'livestock' )
+    elseif( $_POST['type'] == 'livestock' )
         {
-        if( $_REQUEST[action] == 'add' )
+        if( $_POST['action'] == 'add' )
         {
-            $db->Execute("UPDATE $dbtables[livestock] "
-                        ."SET amount = amount + $_REQUEST[amount] "
-                        ."WHERE tribeid = '$_REQUEST[tribe]' "
-                        ."AND type = '$_REQUEST[item]'");
+            $qry = $db->Execute("UPDATE $dbtables[livestock] "
+                        ."SET amount = amount + $_POST[amount] "
+                        ."WHERE tribeid = '$_POST[tribe]' "
+                        ."AND type = '$_POST[item]'");
+            db_op_result($qry,__LINE__,__FILE__);
             $verb = 'added to';
         }
-        elseif( $_REQUEST[action] == 'set' )
+        elseif( $_POST['action'] == 'set' )
         {
-            $db->Execute("UPDATE $dbtables[livestock] "
-                        ."SET amount = $_REQUEST[amount] "
-                        ."WHERE tribeid = '$_REQUEST[tribe]' "
-                        ."AND type = '$_REQUEST[item]'");
+            $qry = $db->Execute("UPDATE $dbtables[livestock] "
+                        ."SET amount = $_POST[amount] "
+                        ."WHERE tribeid = '$_POST[tribe]' "
+                        ."AND type = '$_POST[item]'");
+            db_op_result($qry,__LINE__,__FILE__);
             $verb = 'set to';
         }
-        elseif( $_REQUEST[action] == 'subtract' )
+        elseif( $_POST['action'] == 'subtract' )
         {
-            $db->Execute("UPDATE $dbtables[livestock] "
-                        ."SET amount = amount - '$_REQUEST[amount] "
-                        ."WHERE tribeid = '$_REQUEST[tribe]' "
-                        ."AND type = '$_REQUEST[item]'");
+            $qry = $db->Execute("UPDATE $dbtables[livestock] "
+                        ."SET amount = amount - '$_POST[amount] "
+                        ."WHERE tribeid = '$_POST[tribe]' "
+                        ."AND type = '$_POST[item]'");
+             db_op_result($qry,__LINE__,__FILE__);
             $verb = 'subtracted from';
         }
     }
-    elseif( $_REQUEST[type] == 'products' )
+    elseif( $_POST['type'] == 'products' )
         {
-        if( $_REQUEST[action] == 'add' )
+        if( $_POST['action'] == 'add' )
         {
-            $db->Execute("UPDATE $dbtables[products] "
-                        ."SET amount = amount + $_REQUEST[amount] "
-                        ."WHERE tribeid = '$_REQUEST[tribe]' "
-                        ."AND long_name = '$_REQUEST[item]'");
+            $qry = $db->Execute("UPDATE $dbtables[products] "
+                        ."SET amount = amount + $_POST[amount] "
+                        ."WHERE tribeid = '$_POST[tribe]' "
+                        ."AND long_name = '$_POST[item]'");
+             db_op_result($qry,__LINE__,__FILE__);
             $verb = 'added to';
         }
-        elseif( $_REQUEST[action] == 'set' )
+        elseif( $_POST['action'] == 'set' )
         {
-            $db->Execute("UPDATE $dbtables[products] "
-                        ."SET amount = $_REQUEST[amount] "
-                        ."WHERE tribeid = '$_REQUEST[tribe]' "
-                        ."AND long_name = '$_REQUEST[item]'");
+            $qry = $db->Execute("UPDATE $dbtables[products] "
+                        ."SET amount = $_POST[amount] "
+                        ."WHERE tribeid = '$_POST[tribe]' "
+                        ."AND long_name = '$_POST[item]'");
+            db_op_result($qry,__LINE__,__FILE__);
             $verb = 'set to';
         }
-        elseif( $_REQUEST[action] == 'subtract' )
+        elseif( $_POST['action'] == 'subtract' )
         {
-            $db->Execute("UPDATE $dbtables[products] "
-                        ."SET amount = amount - '$_REQUEST[amount] "
-                        ."WHERE tribeid = '$_REQUEST[tribe]' "
-                        ."AND long_name = '$_REQUEST[item]'");
+            $qry = $db->Execute("UPDATE $dbtables[products] "
+                        ."SET amount = amount - '$_POST[amount] "
+                        ."WHERE tribeid = '$_POST[tribe]' "
+                        ."AND long_name = '$_POST[item]'");
+            db_op_result($qry,__LINE__,__FILE__);
             $verb = 'subtracted from';
         }
     }
 
-    $db->Execute("INSERT INTO $dbtables[logs] "
+   $qry =  $db->Execute("INSERT INTO $dbtables[logs] "
                 ."VALUES("
                 ."'',"
                 ."'$month[count]',"
@@ -230,9 +242,9 @@ if( !$_REQUEST[amount] == '' && !$_REQUEST[item] == '' )
                 ."'0000.00',"
                 ."'REIMB',"
                 ."'$stamp',"
-                ."'Admin: $_REQUEST[amount] $_REQUEST[item] $verb $_REQUEST[tribe] by $_SESSION[clanid].')");
-
-    echo "<CENTER>$_REQUEST[tribe] $_REQUEST[item] $verb $_REQUEST[amount]</CENTER><BR>";
+                ."'Admin: $_POST[amount] $_POST[item] $verb $_POST[tribe] by $_SESSION[clanid].')");
+   db_op_result($qry,__LINE__,__FILE__);
+    echo "<CENTER>$_POST[tribe] $_POST[item] $verb $_POST[amount]</CENTER><BR>";
 
 }
 

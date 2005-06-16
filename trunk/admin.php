@@ -77,9 +77,10 @@ $md5password = md5($_POST['password']);
     echo "</FORM>";
   }
 
-    if($_POST['menu'] == "passreset" & !ISSET($_POST['resettribe']))
+    if($_POST['menu'] == "passreset" && empty($_POST['resettribe']))
     {
         $tribe = $db->Execute("SELECT * FROM $dbtables[chiefs]");
+        db_op_result($tribe,__LINE__,__FILE__);
         echo "<FORM ACTION=admin.php METHOD=POST><SELECT NAME=resettribe>";
         while(!$tribe->EOF)
         {
@@ -89,7 +90,7 @@ $md5password = md5($_POST['password']);
         }
         echo "</SELECT><INPUT TYPE=HIDDEN NAME=menu VALUE=\"passreset\"><INPUT TYPE=SUBMIT VALUE=\"RESET PASSWD\">";
     }
-    else
+    elseif(!empty($_POST['resettribe']))
     {
         $makepass="";
         $syllables="er,in,tia,wol,fe,pre,vet,jo,nes,al,len,son,cha,ir,ler,bo,ok,tio,nar,sim,ple,bla,ten,toe,cho,co,lat,spe,ak,er,po,co,lor,pen,cil,li,ght,wh,at,the,he,ck,is,mam,bo,no,fi,ve,any,way,pol,iti,cs,ra,dio,sou,rce,sea,rch,pa,per,com,bo,sp,eak,st,fi,rst,gr,oup,boy,ea,gle,tr,ail,bi,ble,brb,pri,dee,kay,en,be,se";
@@ -107,8 +108,10 @@ $md5password = md5($_POST['password']);
             }
           }
         $hashed_pass = md5($makepass);
-        $db->Execute("UPDATE $dbtables[chiefs] SET password = '$hashed_pass' WHERE clanid = '$_POST[resettribe]'");
+        $qry = $db->Execute("UPDATE $dbtables[chiefs] SET password = '$hashed_pass' WHERE clanid = '$_POST[resettribe]'");
+        db_op_result($qry,__LINE__,__FILE__);
         $clan = $db->Execute("SELECT * FROM $dbtables[chiefs] WHERE clanid = '$_POST[resettribe]'");
+         db_op_result($clan,__LINE__,__FILE__);
         $claninfo = $clan->fields;
         $email = $claninfo['email'];
     $l_new_message = "Greetings Chief $claninfo[chiefname],\n\nBased on your request,\n Admin has Reset your tribestrive password.\n\nYour Username is: [user]\n\nYour password is: [pass]\n\nThank you\n\nThe TribeStrive web team. \n\n";

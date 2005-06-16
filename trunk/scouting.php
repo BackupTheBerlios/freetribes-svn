@@ -201,7 +201,7 @@ if( ISSET( $_POST['disband'] ) )
 }   db_op_result($qtribe,__LINE__,__FILE__);
 
 
-if( $_POST['action'] == 'recruit' )
+if(!empty($_POST['action']) && $_POST['action'] == 'recruit' )
 {
     $linecolor = $color_line1;
     $hs = $db->Execute("SELECT * FROM $dbtables[livestock] WHERE tribeid = '$_SESSION[current_unit]' AND type = 'Horses'");

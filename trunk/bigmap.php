@@ -1,4 +1,4 @@
-<?
+<?php
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2 of the License, or (at your
@@ -24,14 +24,15 @@ connectdb();
 
 $view = $db->Execute("SELECT * FROM $dbtables[map_view] "
                     ."WHERE clanid = '$_SESSION[clanid]'");
+db_op_result($view,__LINE__,__FILE__);
 $viewinfo = $view->fields;
 
 if( !$view->EOF )
 {
-    if( $viewinfo[times] > 4 )
+    if( $viewinfo['times'] >= 5 )
     {
         echo 'You are allowed only 5 views of the big map per turn.';
-	die();
+    die();
     }
     else
     {
@@ -45,9 +46,10 @@ else
     $db->Execute("INSERT INTO $dbtables[map_view] "
                 ."VALUES('$_SESSION[clanid]','1')");
 }
-          
+
 $result = $db->Execute("SELECT hex_id, res_type, terrain FROM $dbtables[hexes] "
                       ."ORDER BY hex_id ASC");
+db_op_result($result,__LINE__,__FILE__);
 $row = $result->fields;
 
 echo '<TABLE border=0 cellpadding=0 bgcolor=black>';
@@ -57,26 +59,27 @@ while( !$result->EOF )
     $i = 0;
     while( $i < 64 )
     {
-        $clanmap = "clanid_" . $_SESSION[clanid];
+        $clanmap = "clanid_" . $_SESSION['clanid'];
         $here = $db->Execute("SELECT * FROM $dbtables[mapping] "
                             ."WHERE hex_id = $row[hex_id] "
                             ."AND `$clanmap` > '0'");
+        db_op_result($here,__LINE__,__FILE__);
         $hereres = $here->fields;
         if( !$here->EOF )
         {
             if( $hereres[$clanmap] != '1' )
             {
-                $port = $row[terrain] . $row[res_type];
+                $port = $row['terrain'] . $row['res_type'];
             }
             else
             {
-                $port = $row[terrain];
+                $port = $row['terrain'];
             }
-            $alt = $row[hex_id];
+            $alt = $row['hex_id'];
             $tile = "<TD><img src=images/$port.png title=$alt border=0></TD>";
         }
         else
-        { 
+        {
             $tile = '<TD><IMG SRC=images/unknown.png></TD>';
         }
         echo $tile;
@@ -115,4 +118,4 @@ echo '<TR><TD><img src=images/unknown.png></TD><TD>Unexplored</TD></TR>';
 echo '</TABLE>';
 
 include('footer.php');
-?> 
+?>

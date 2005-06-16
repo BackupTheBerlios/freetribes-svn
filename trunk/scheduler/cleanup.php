@@ -62,8 +62,7 @@ while( !$res->EOF )
         $query = $db->Execute("DELETE FROM $dbtables[logs] "
                     ."WHERE clanid = '0000' and type in ('HOURLYTICK','BENCHMARK','UPDATE') and time < date_sub(now(),INTERVAL 4 day)");
            db_op_result($query,__LINE__,__FILE__);
-        $query = $db->Execute("ALTER TABLE $dbtables[mapping] "
-                    ."DROP `$tribe[clanid]`");
+        $query = $db->Execute("ALTER TABLE $dbtables[mapping] DROP `clanid_$tribe[clanid]`");
            db_op_result($query,__LINE__,__FILE__);
         $query = $db->Execute("INSERT INTO $dbtables[logs] "
                     ."VALUES("

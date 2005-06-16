@@ -186,27 +186,16 @@ else
                     ."<TD>$to_tribe</TD>"
                     ."</TR>";
 
-                $db->Execute("UPDATE $dbtables[products] "
+                $query = $db->Execute("UPDATE $dbtables[products] "
                             ."SET amount = amount + '$prod' "
                             ."WHERE long_name = '$rec_prod[long_name]' "
                             ."AND tribeid = '$to_tribe'");
-                $db->Execute("UPDATE $dbtables[products] "
+                db_op_result($query,__LINE__,__FILE__);
+                $query = $db->Execute("UPDATE $dbtables[products] "
                             ."SET amount = amount - '$prod' "
                             ."WHERE long_name = '$giv_prod[long_name]' "
                             ."AND tribeid = '$from_tribe'");
-                if( $game_debug_xfer )
-                {
-                $db->Execute("INSERT INTO $dbtables[logs] "
-                            ."VALUES("
-                            ."'',"
-                            ."'$month[count]',"
-                            ."'$year[count]',"
-                            ."'0000',"
-                            ."'0000.00',"
-                            ."'DEBUG',"
-                            ."'$stamp',"
-                            ."'PROD TRANS: $from_tribe transferred $prod $giv_prod[proper] to $to_tribe.')");
-                }
+                db_op_result($query,__LINE__,__FILE__);
                 include("weight.php");
             }
             else

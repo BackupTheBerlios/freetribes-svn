@@ -24,6 +24,10 @@ connectdb();
         $uniqueid = $_REQUEST['uniqueid'];
     }
     $uniqueid2 = uniqid(microtime(),1);
+ //unique id used to track attacking and attempt to prevent race conditions...
+ //not quite effective, however, what we'll do when this is re-coded is , each phase of attack is going to have
+ //its own page and after the final submit, it will redirect to combat_results
+//so we store a timestamp on submit and if less than 30 seconds has elapsed, we redirect to error page
 
 if( !ISSET( $_REQUEST['orders'] ) )
 {
@@ -42,7 +46,7 @@ if( !ISSET( $_REQUEST['orders'] ) )
     db_op_result($nwbe_clan,__LINE__,__FILE__);
     $newbie_clan = $nwbe_clan->fields;
 
-    $nwbe = $db->Execute("SELECT * FROM $dbtables[chiefs]WHERE clanid = '$newbie_clan[clanid]'");
+    $nwbe = $db->Execute("SELECT * FROM $dbtables[chiefs] WHERE clanid = '$newbie_clan[clanid]'");
     db_op_result($nwbe,__LINE__,__FILE__);
     $newbie = $nwbe->fields;
 
@@ -125,6 +129,7 @@ if( !ISSET( $_REQUEST['orders'] ) )
 
 
 //////////////////////////////////////Gather info about the target////////////////////////
+  //  $result = get_target_info();
     $target = $_REQUEST['target'];
     $tar = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$target'");
     db_op_result($tar,__LINE__,__FILE__);
@@ -172,7 +177,7 @@ if( !ISSET( $_REQUEST['orders'] ) )
                     ."'$garrison[hex_id]'"
                     .")");
         db_op_result($cmbts,__LINE__,__FILE__);
-        $tfor += $garrison[force];
+        $tfor += $garrison['force'];
         $gar->MoveNext();
     }
 
@@ -518,9 +523,7 @@ elseif( $_REQUEST['orders'] == 'DeVA' )
                 ."hex_id = '$hexinfo[hex_id]' "
                 ."WHERE goods_tribe = '$_SESSION[current_unit]'");
     db_op_result($cmbts,__LINE__,__FILE__);
-    $cmbts = $db->Execute("UPDATE $dbtables[mapping] "
-                ."SET `$_SESSION[clanid]` = 'Y' "
-                ."WHERE hex_id = '$hexinfo[hex_id]'");
+    $cmbts = $db->Execute("UPDATE $dbtables[mapping] SET `clanid_$_SESSION[clanid]` = '1' WHERE hex_id = '$hexinfo[hex_id]'");
     db_op_result($cmbts,__LINE__,__FILE__);
     $cmbts = $db->Execute("UPDATE $dbtables[garrisons] "
                 ."SET hex_id = '$hexinfo[hex_id]' "
@@ -569,8 +572,7 @@ elseif( $_REQUEST['orders'] == 'DeVA' )
                 ."established seige to $target and will begin "
                 ."to deny extra village activities (DeVA).')");
     db_op_result($cmbts,__LINE__,__FILE__);
-    $cmbts = $db->Execute("DELETE $dbtables[activities] "
-                ."WHERE tribeid = '$target'");
+    $cmbts = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$target'");
     db_op_result($cmbts,__LINE__,__FILE__);
     echo "You are now laying seige to $target.<BR>";
     TEXT_GOTOMAIN();
@@ -1673,7 +1675,7 @@ $survivors = 0;
 if($percentwounded < 0 | !$percentwounded){
 $percentwounded = 0;
 }
-$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo[morale]);
+$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo['morale']);
 if($routechance < 0){
 $routechance = 0;
 }
@@ -1731,7 +1733,7 @@ echo "<TR BGCOLOR=$line_color ALIGN=CENTER><TD>$moraleinfo[garid]</TD><TD>$moral
 }
 }
 ///////////////////////////////sector2 morale checks/////////////////////////////////////////////////////
-$percentwounded = round(1 - ($moraleinfo[sector2]/$moraleinfo[startsector2]), 2);
+$percentwounded = round(1 - ($moraleinfo['sector2']/$moraleinfo['startsector2']), 2);
 $survivors = round((1 - $percentwounded), 2);
 $percentwounded = explode('.', $percentwounded);
 $percentwounded = $percentwounded[1];
@@ -1739,7 +1741,7 @@ $survivors = explode('.', $survivors);
 $survivors = $survivors[1];
 if($survivors < 0 | !$survivors){ $survivors = 0; }
 if($percentwounded < 0 | !$percentwounded){ $percentwounded = 0; }
-$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo[morale]);
+$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo['morale']);
 if($routechance < 0){ $routechance = 0; }
 if($percentwounded == 0){ $routechance = 0; }
 if($routechance > 0){
@@ -1777,7 +1779,7 @@ echo "<TR BGCOLOR=$line_color ALIGN=CENTER><TD>$moraleinfo[garid]</TD><TD>$moral
 }
 }
 ////////////////////////////////sector3 morale checks/////////////////////////////////////////////////////
-$percentwounded = round(1 - ($moraleinfo[sector3]/$moraleinfo[startsector3]), 2);
+$percentwounded = round(1 - ($moraleinfo['sector3']/$moraleinfo['startsector3']), 2);
 $survivors = round((1 - $percentwounded), 2);
 $percentwounded = explode('.', $percentwounded);
 $percentwounded = $percentwounded[1];
@@ -1785,7 +1787,7 @@ $survivors = explode('.', $survivors);
 $survivors = $survivors[1];
 if($survivors < 0 | !$survivors){ $survivors = 0; }
 if($percentwounded < 0 | !$percentwounded){ $percentwounded = 0; }
-$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo[morale]);
+$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo['morale']);
 if($routechance < 0){ $routechance = 0; }
 if($percentwounded == 0){ $routechance = 0; }
 if($routechance > 0){
@@ -1881,14 +1883,14 @@ $cur_weath = $cw->fields;
 $modify = $terrain[terrain];
 $hownow = $cur_weath[weather_id];
 
-if($definfo[sector1] < 0){
-$definfo[sector1] = 0;
+if($definfo['sector1'] < 0){
+$definfo['sector1'] = 0;
 }
-if($definfo[sector2] < 0){
-$definfo[sector2] = 0;
+if($definfo['sector2'] < 0){
+$definfo['sector2'] = 0;
 }
-if($definfo[sector3] < 0){
-$definfo[sector3] = 0;
+if($definfo['sector3'] < 0){
+$definfo['sector3'] = 0;
 }
 
 
@@ -2143,38 +2145,38 @@ else {
 $weaponeffect3 = $weapon[cav_arc];
 }
 
-if($target1[sector1] > 0 && $definfo[sector1] > 0){
+if($target1['sector1'] > 0 && $definfo['sector1'] > 0){
 $random6 = rand(1,8);
-$chargeattack1 = round(($weaponeffect1 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $definfo[sector1]);
+$chargeattack1 = round(($weaponeffect1 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $definfo['sector1']);
 }
-if($target2[sector2] > 0 && $definfo[sector2] > 0){
+if($target2['sector2'] > 0 && $definfo['sector2'] > 0){
 $random6 = rand(1,8);
-$chargeattack2 = round(($weaponeffect2 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $definfo[sector2]);
+$chargeattack2 = round(($weaponeffect2 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $definfo['sector2']);
 }
-if($target3[sector3] > 0 && $definfo[sector3] > 0){
+if($target3['sector3'] > 0 && $definfo['sector3'] > 0){
 $random6 = rand(1,8);
-$chargeattack3 = round(($weaponeffect3 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $definfo[sector3]);
+$chargeattack3 = round(($weaponeffect3 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $definfo['sector3']);
 }
 echo "<TR><TD>Force: $definfo[sector1] from Garrison $definfo[garid]</TD><TD>Force: $definfo[sector2] from Garrison $definfo[garid]</TD><TD>Force: $definfo[sector3] from Garrison $definfo[garid]</TD></TR>";
-if($target1[sector1] > 0){
+if($target1['sector1'] > 0){
 echo "<TR><TD>Attacking: $target1[sector1] from Garrison $target1[garid]</TD>";
 }
 else{
 echo "<TR><TD>Looting</TD>";
 }
-if($target2[sector2] > 0){
+if($target2['sector2'] > 0){
 echo "<TD>Attacking: $target2[sector2] from Garrison $target2[garid]</TD>";
 }
 else{
 echo "<TD>Looting</TD>";
 }
-if($target3[sector3] > 0){
+if($target3['sector3'] > 0){
 echo "<TD>Attacking: $target3[sector3] from Garrison $target3[garid]</TD></TR>";
 }
 else{
 echo "<TD>Looting</TD></TR>";
 }
-if($target1[sector1] > 0){
+if($target1['sector1'] > 0){
 $work1 = $chargeattack1 - round($armormod1 * ($chargeattack1/10));
 while($work1 > 10){
 $random10 = rand(1,10);
@@ -2182,12 +2184,12 @@ $actual1 += $random10;
 $work1 -= 10;
 }
 $actual1 = round($actual1/10);
-if($target1[sector1] <= 0 | $definfo[sector1] <= 0){
+if($target1['sector1'] <= 0 | $definfo['sector1'] <= 0){
 $actual1 = 0;
 }
 $total1sectoratt += $actual1;
 }
-if($target2[sector2] > 0){
+if($target2['sector2'] > 0){
 $work2 = $chargeattack2 - round($armormod2 * ($chargeattack2/10));
 while($work2 > 10){
 $random10 = rand(1,10);
@@ -2195,12 +2197,12 @@ $actual2 += $random10;
 $work2 -= 10;
 }
 $actual2 = round($actual2/10);
-if($target2[sector2] <= 0 | $definfo[sector2] <= 0 ){
+if($target2['sector2'] <= 0 | $definfo['sector2'] <= 0 ){
 $actual2 = 0;
 }
 $total2sectoratt += $actual2;
 }
-if($target3[sector3] > 0){
+if($target3['sector3'] > 0){
 $work3 = $chargeattack3 - round($armormod3 * ($chargeattack3/10));
 while($work3 > 10){
 $random10 = rand(1,10);
@@ -2208,18 +2210,18 @@ $actual3 += $random10;
 $work3 -= 10;
 }
 $actual3 = round($actual3/10);
-if($target3[sector3] <= 0 | $definfo[sector3] <= 0){
+if($target3['sector3'] <= 0 | $definfo['sector3'] <= 0){
 $actual3 = 0;
 }
 $total3sectoratt += $actual3;
 }
-if(!$actual1 | $definfo[sector1] < 1){
+if(!$actual1 | $definfo['sector1'] < 1){
 $actual1 = 0;
 }
-if(!$actual2 | $definfo[sector2] < 1){
+if(!$actual2 | $definfo['sector2'] < 1){
 $actual2 = 0;
 }
-if(!$actual3 | $definfo[sector3] < 1){
+if(!$actual3 | $definfo['sector3'] < 1){
 $actual3 = 0;
 }
 echo "<TR><TD><FONT COLOR=RED>Casualties: $actual1</FONT></TD><TD><FONT COLOR=RED>Casualties: $actual2</FONT></TD><TD><FONT COLOR=RED>Casualties: $actual3</FONT></TD></TR>";
@@ -2275,14 +2277,14 @@ echo "<TR BGCOLOR=$color_header><TD ALIGN=CENTER><FONT SIZE=+1>Sector One</FONT>
 }
 
 
-if($attinfo[sector1] < 0){
-$attinfo[sector1] = 0;
+if($attinfo['sector1'] < 0){
+$attinfo['sector1'] = 0;
 }
-if($attinfo[sector2] < 0){
-$attinfo[sector2] = 0;
+if($attinfo['sector2'] < 0){
+$attinfo['sector2'] = 0;
 }
-if($attinfo[sector3] < 0){
-$attinfo[sector3] = 0;
+if($attinfo['sector3'] < 0){
+$attinfo['sector3'] = 0;
 }
 
 
@@ -2566,38 +2568,38 @@ else {
 $weaponeffect3 = $weapon[cav_arc];
 }
 
-if($target1[sector1] > 0 && $attinfo[sector1] > 0){
+if($target1['sector1'] > 0 && $attinfo['sector1'] > 0){
 $random6 = rand(1,8);
-$chargeattack1 = round(($weaponeffect1 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $attinfo[sector1]);
+$chargeattack1 = round(($weaponeffect1 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $attinfo['sector1']);
 }
-if($target2[sector2] > 0 && $attinfo[sector2] > 0){
+if($target2['sector2'] > 0 && $attinfo['sector2'] > 0){
 $random6 = rand(1,8);
-$chargeattack2 = round(($weaponeffect2 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $attinfo[sector2]);
+$chargeattack2 = round(($weaponeffect2 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $attinfo['sector2']);
 }
-if($target3[sector3] > 0 && $attinfo[sector3] > 0){
+if($target3['sector3'] > 0 && $attinfo['sector3'] > 0){
 $random6 = rand(1,8);
-$chargeattack3 = round(($weaponeffect3 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $attinfo[sector3]);
+$chargeattack3 = round(($weaponeffect3 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * ($leadership[level] + ($horsemanship[level] + $combat[level])/2) + 6 + $random6)/7 * $attinfo['sector3']);
 }
 echo "<TR><TD>Force: $attinfo[sector1] from Garrison $attinfo[garid]</TD><TD>Force: $attinfo[sector2] from Garrison $attinfo[garid]</TD><TD>Force: $attinfo[sector3] from Garrison $attinfo[garid]</TD></TR>";
-if($target1[sector1] > 0){
+if($target1['sector1'] > 0){
 echo "<TR><TD>Attacking: $target1[sector1] from Garrison $target1[garid]</TD>";
 }
 else{
 echo "<TR><TD>Looting</TD>";
 }
-if($target2[sector2] > 0){
+if($target2['sector2'] > 0){
 echo "<TD>Attacking: $target2[sector2] from Garrison $target2[garid]</TD>";
 }
 else{
 echo "<TD>Looting</TD>";
 }
-if($target3[sector3] > 0){
+if($target3['sector3'] > 0){
 echo "<TD>Attacking: $target3[sector3] from Garrison $target3[garid]</TD></TR>";
 }
 else{
 echo "<TD>Looting</TD></TR>";
 }
-if($target1[sector1] > 0){
+if($target1['sector1'] > 0){
 $work1 = $chargeattack1 - round($armormod1 * ($chargeattack1/10));
 while($work1 > 9){
 $random10 = rand(1,10);
@@ -2605,12 +2607,12 @@ $actual1 += $random10;
 $work1 -= 10;
 }
 $actual1 = round($actual1/10);
-if($attinfo[sector1] <= 0 | $target1[sector1] <= 0){
+if($attinfo['sector1'] <= 0 | $target1['sector1'] <= 0){
 $actual1 = 0;
 }
 $total1sectordef += $actual1;
 }
-if($target2[sector2] > 0){
+if($target2['sector2'] > 0){
 $work2 = $chargeattack2 - round($armormod2 * ($chargeattack2/10));
 while($work2 > 9){
 $random10 = rand(1,10);
@@ -2618,12 +2620,12 @@ $actual2 += $random10;
 $work2 -= 10;
 }
 $actual2 = round($actual2/10);
-if($attinfo[sector2] <= 0 | $target2[sector2] <= 0){
+if($attinfo['sector2'] <= 0 | $target2['sector2'] <= 0){
 $actual2 = 0;
 }
 $total2sectordef += $actual2;
 }
-if($target3[sector3] > 0){
+if($target3['sector3'] > 0){
 $work3 = $chargeattack3 - round($armormod3 * ($chargeattack3/10));
 while($work3 > 9){
 
@@ -2632,18 +2634,18 @@ $actual3 += $random10;
 $work3 -= 10;
 }
 $actual3 = round($actual3/10);
-if($attinfo[sector3] <= 0 | $target3[sector3] <= 0){
+if($attinfo['sector3'] <= 0 | $target3['sector3'] <= 0){
 $actual3 = 0;
 }
 $total3sectordef += $actual3;
 }
-if(!$actual1 | $attinfo[sector1] < 1 ){
+if(!$actual1 | $attinfo['sector1'] < 1 ){
 $actual1 = 0;
 }
-if(!$actual2 | $attinfo[sector2] < 1){
+if(!$actual2 | $attinfo['sector2'] < 1){
 $actual2 = 0;
 }
-if(!$actual3 | $attinfo[sector3] < 1){
+if(!$actual3 | $attinfo['sector3'] < 1){
 $actual3 = 0;
 }
 echo "<TR><TD><FONT COLOR=RED>Casualties: $actual1</FONT></TD><TD><FONT COLOR=RED>Casualties: $actual2</FONT></TD><TD><FONT COLOR=RED>Casualties: $actual3</FONT></TD></TR>";
@@ -2689,32 +2691,32 @@ $skldr = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$moralei
 $leadership = $skldr->fields;
 $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$moraleinfo[tribeid]'");
 $tribeinfo = $tribe->fields;
-if($moraleinfo[sector1] < 0){
+if($moraleinfo['sector1'] < 0){
 $db->Execute("UPDATE $dbtables[combats] "
             ."set sector1 = 0 "
             ."WHERE tribeid = '$moraleinfo[tribeid]' "
             ."AND garid = '$moraleinfo[garid]' "
             ."AND combat_id = '$uniqueid'");
-$moraleinfo[sector1] = 0;
+$moraleinfo['sector1'] = 0;
 }
-if($moraleinfo[sector2] < 0){
+if($moraleinfo['sector2'] < 0){
 $db->Execute("UPDATE $dbtables[combats] "
             ."set sector2 = 0 "
             ."WHERE tribeid = '$moraleinfo[tribeid]' "
             ."AND combat_id = '$uniqueid' "
             ."AND garid = '$moraleinfo[garid]'");
-$moraleinfo[sector2] = 0;
+$moraleinfo['sector2'] = 0;
 }
-if($moraleinfo[sector3] < 0){
+if($moraleinfo['sector3'] < 0){
 $db->Execute("UPDATE $dbtables[combats] "
             ."set sector3 = 0 "
             ."WHERE tribeid = '$moraleinfo[tribeid]' "
             ."AND combat_id = '$uniqueid' "
             ."AND garid = '$moraleinfo[garid]'");
-$moraleinfo[sector3] = 0;
+$moraleinfo['sector3'] = 0;
 }
 //////////////////////////////sector1 cleanup///////////////////////////////////////////////////////
-$percentwounded = round(1 - ($moraleinfo[sector1]/$moraleinfo[startsector1]), 2);
+$percentwounded = round(1 - ($moraleinfo['sector1']/$moraleinfo['startsector1']), 2);
 $survivors = round((1 - $percentwounded), 2);
 $percentwounded = explode('.', $percentwounded);
 $percentwounded = $percentwounded[1];
@@ -2726,7 +2728,7 @@ $survivors = 0;
 if($percentwounded < 0 | !$percentwounded){
 $percentwounded = 0;
 }
-$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo[morale]);
+$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo['morale']);
 if($percentwounded == 0){
 $routechance = 0;
 }
@@ -2786,7 +2788,7 @@ echo "<TR BGCOLOR=$line_color ALIGN=CENTER><TD>$moraleinfo[garid]</TD><TD>$moral
 /////////////////////////////////////Sector 2 Cleanup////////////////////////////////////////////////////
 
 
-$percentwounded = round(1 - ($moraleinfo[sector2]/$moraleinfo[startsector2]), 2);
+$percentwounded = round(1 - ($moraleinfo['sector2']/$moraleinfo['startsector2']), 2);
 $survivors = round((1 - $percentwounded), 2);
 $percentwounded = explode('.', $percentwounded);
 $percentwounded = $percentwounded[1];
@@ -2794,7 +2796,7 @@ $survivors = explode('.', $survivors);
 $survivors = $survivors[1];
 if($survivors < 0 | !$survivors){ $survivors = 0; }
 if($percentwounded < 0 | !$percentwounded){ $percentwounded = 0; }
-$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo[morale]);
+$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo['morale']);
 if($routechance < 0){ $routechance = 0; }
 if($percentwounded == 0){ $routechance = 0; }
 if($routechance > 0){
@@ -2838,7 +2840,7 @@ echo "<TR BGCOLOR=$line_color ALIGN=CENTER><TD>$moraleinfo[garid]</TD><TD>$moral
 
 ///////////////////////////////////Sector3 Cleanup//////////////////////////////////////////////////////////////////////////
 
-$percentwounded = round(1 - ($moraleinfo[sector3]/$moraleinfo[startsector3]), 2);
+$percentwounded = round(1 - ($moraleinfo['sector3']/$moraleinfo['startsector3']), 2);
 $survivors = round((1 - $percentwounded), 2);
 $percentwounded = explode('.', $percentwounded);
 $percentwounded = $percentwounded[1];
@@ -2846,7 +2848,7 @@ $survivors = explode('.', $survivors);
 $survivors = $survivors[1];
 if($survivors < 0 | !$survivors){ $survivors = 0; }
 if($percentwounded < 0 | !$percentwounded){ $percentwounded = 0; }
-$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo[morale]);
+$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo['morale']);
 if($routechance < 0){ $routechance = 0; }
 if($percentwounded == 0){ $routechance = 0; }
 if($routechance > 0){
@@ -3178,47 +3180,47 @@ else {
 $weaponeffect3 = $weapon[inf_arc];
 }
 
-if($target1[sector1] > 0 && $definfo[sector1] > 0){
+if($target1['sector1'] > 0 && $definfo['sector1'] > 0){
 $random6 = rand(1,8);
-$meleeattack1 = round(($weaponeffect1 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * $leadership[level] + $definfo[exp] + 6 + $random6)/7 * $definfo[sector1]);
+$meleeattack1 = round(($weaponeffect1 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * $leadership[level] + $definfo[exp] + 6 + $random6)/7 * $definfo['sector1']);
 }
-if($target2[sector2] > 0 && $definfo[sector2] > 0){
+if($target2['sector2'] > 0 && $definfo['sector2'] > 0){
 $random6 = rand(1,8);
-$meleeattack2 = round(($weaponeffect2 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * $leadership[level] + $definfo[exp] + 6 + $random6)/7 * $definfo[sector2]);
+$meleeattack2 = round(($weaponeffect2 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * $leadership[level] + $definfo[exp] + 6 + $random6)/7 * $definfo['sector2']);
 }
-if($target3[sector3] > 0 && $definfo[sector3] > 0){
+if($target3['sector3'] > 0 && $definfo['sector3'] > 0){
 $random6 = rand(1,8);
-$meleeattack3 = round(($weaponeffect3 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * $leadership[level] + $definfo[exp] + 6 + $random6)/7 * $definfo[sector3]);
+$meleeattack3 = round(($weaponeffect3 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * $leadership[level] + $definfo[exp] + 6 + $random6)/7 * $definfo['sector3']);
 }
-if($definfo[sector1] < 0){
-$definfo[sector1] = 0;
+if($definfo['sector1'] < 0){
+$definfo['sector1'] = 0;
 }
-if($definfo[sector2] < 0){
-$definfo[sector2] = 0;
+if($definfo['sector2'] < 0){
+$definfo['sector2'] = 0;
 }
-if($definfo[sector3] < 0){
-$definfo[sector3] = 0;
+if($definfo['sector3'] < 0){
+$definfo['sector3'] = 0;
 }
 echo "<TR><TD>Force: $definfo[sector1] from Garrison $definfo[garid]</TD><TD>Force: $definfo[sector2] from Garrison $definfo[garid]</TD><TD>Force: $definfo[sector3] from Garrison $definfo[garid]</TD></TR>";
-if($target1[sector1] > 0){
+if($target1['sector1'] > 0){
 echo "<TR><TD>Attacking: $target1[sector1] from Garrison $target1[garid]</TD>";
 }
 else{
 echo "<TR><TD>Looting</TD>";
 }
-if($target2[sector2] > 0){
+if($target2['sector2'] > 0){
 echo "<TD>Attacking: $target2[sector2] from Garrison $target2[garid]</TD>";
 }
 else{
 echo "<TD>Looting</TD>";
 }
-if($target3[sector3] > 0){
+if($target3['sector3'] > 0){
 echo "<TD>Attacking: $target3[sector3] from Garrison $target3[garid]</TD></TR>";
 }
 else{
 echo "<TD>Looting</TD></TR>";
 }
-if($target1[sector1] > 0 | $definfo[sector1] > 0){
+if($target1['sector1'] > 0 | $definfo['sector1'] > 0){
 $work1 = $meleeattack1 - round($armormod1 * ($meleeattack1/10));
 while($work1 > 9){
 $random10 = rand(1,10);
@@ -3226,12 +3228,12 @@ $actual1 += $random10;
 $work1 -= 10;
 }
 $actual1 = round($actual1/10);
-if($definfo[sector1] <= 0 | $target1[sector1] <= 0){
+if($definfo['sector1'] <= 0 | $target1['sector1'] <= 0){
 $actual1 = 0;
 }
 $total1sectoratt += $actual1;
 }
-if($target2[sector2] > 0 | $definfo[sector2] > 0){
+if($target2['sector2'] > 0 | $definfo['sector2'] > 0){
 $work2 = $meleeattack2 - round($armormod2 * ($meleeattack2/10));
 while($work2 > 9){
 $random10 = rand(1,10);
@@ -3239,12 +3241,12 @@ $actual2 += $random10;
 $work2 -= 10;
 }
 $actual2 = round($actual2/10);
-if($definfo[sector2] <= 0 | $target2[sector2] <= 0){
+if($definfo['sector2'] <= 0 | $target2['sector2'] <= 0){
 $actual2 = 0;
 }
 $total2sectoratt += $actual2;
 }
-if($target3[sector3] > 0 | $definfo[sector3] > 0){
+if($target3['sector3'] > 0 | $definfo['sector3'] > 0){
 $work3 = $meleeattack3 - round($armormod3 * ($meleeattack3/10));
 while($work3 > 9){
 
@@ -3253,7 +3255,7 @@ $actual3 += $random10;
 $work3 -= 10;
 }
 $actual3 = round($actual3/10);
-if($definfo[sector3] <= 0 | $target3[sector3] <= 0){
+if($definfo['sector3'] <= 0 | $target3['sector3'] <= 0){
 $actual3 = 0;
 }
 $total3sectoratt += $actual3;
@@ -3584,38 +3586,38 @@ else {
 $weaponeffect3 = $weapon[inf_arc];
 }
 
-if($target1[sector1] > 0){
+if($target1['sector1'] > 0){
 $random6 = rand(1,8);
-$meleeattack1 = round(($weaponeffect1 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * $leadership[level] + $attinfo[exp] + 6 + $random6)/7 * $attinfo[sector1]);
+$meleeattack1 = round(($weaponeffect1 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * $leadership[level] + $attinfo[exp] + 6 + $random6)/7 * $attinfo['sector1']);
 }
-if($target2[sector2] > 0){
+if($target2['sector2'] > 0){
 $random6 = rand(1,8);
-$meleeattack2 = round(($weaponeffect2 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * $leadership[level] + $attinfo[exp] + 6 + $random6)/7 * $attinfo[sector2]);
+$meleeattack2 = round(($weaponeffect2 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * $leadership[level] + $attinfo[exp] + 6 + $random6)/7 * $attinfo['sector2']);
 }
-if($target3[sector3] > 0){
+if($target3['sector3'] > 0){
 $random6 = rand(1,8);
-$meleeattack3 = round(($weaponeffect3 * $weather[$hownow] * $terrain_effect[$modify] * $morale[morale] * $leadership[level] + $attinfo[exp] + 6 + $random6)/7 * $attinfo[sector3]);
+$meleeattack3 = round(($weaponeffect3 * $weather[$hownow] * $terrain_effect[$modify] * $morale['morale'] * $leadership[level] + $attinfo[exp] + 6 + $random6)/7 * $attinfo['sector3']);
 }
 echo "<TR><TD>Force: $attinfo[sector1] from Garrison $attinfo[garid]</TD><TD>Force: $attinfo[sector2] from Garrison $attinfo[garid]</TD><TD>Force: $attinfo[sector3] from Garrison $attinfo[garid]</TD></TR>";
-if($target1[sector1] > 0){
+if($target1['sector1'] > 0){
 echo "<TR><TD>Attacking: $target1[sector1] from Garrison $target1[garid]</TD>";
 }
 else{
 echo "<TR><TD>Looting</TD>";
 }
-if($target2[sector2] > 0){
+if($target2['sector2'] > 0){
 echo "<TD>Attacking: $target2[sector2] from Garrison $target2[garid]</TD>";
 }
 else{
 echo "<TD>Looting</TD>";
 }
-if($target3[sector3] > 0){
+if($target3['sector3'] > 0){
 echo "<TD>Attacking: $target3[sector3] from Garrison $target3[garid]</TD></TR>";
 }
 else{
 echo "<TD>Looting</TD></TR>";
 }
-if($target1[sector1] > 0 && $attinfo[sector1] > 0){
+if($target1['sector1'] > 0 && $attinfo['sector1'] > 0){
 $work1 = $meleeattack1 - round($armormod1 * ($meleeattack1/10));
 while($work1 > 9){
 $random10 = rand(1,10);
@@ -3623,12 +3625,12 @@ $actual1 += $random10;
 $work1 -= 10;
 }
 $actual1 = round($actual1/10);
-if($attinfo[sector1] <= 0 | $target1[sector1] <= 0){
+if($attinfo['sector1'] <= 0 | $target1['sector1'] <= 0){
 $actual1 = 0;
 }
 $total1sectordef += $actual1;
 }
-if($target2[sector2] > 0 && $attinfo[sector2] > 0){
+if($target2['sector2'] > 0 && $attinfo['sector2'] > 0){
 $work2 = $meleeattack2 - round($armormod2 * ($meleeattack2/10));
 while($work2 > 9){
 $random10 = rand(1,10);
@@ -3636,12 +3638,12 @@ $actual2 += $random10;
 $work2 -= 10;
 }
 $actual2 = round($actual2/10);
-if($attinfo[sector2] <= 0 | $target2[sector2] <= 0){
+if($attinfo['sector2'] <= 0 | $target2['sector2'] <= 0){
 $actual2 = 0;
 }
 $total2sectordef += $actual2;
 }
-if($target3[sector3] > 0 && $attinfo[sector3] > 0){
+if($target3['sector3'] > 0 && $attinfo['sector3'] > 0){
 $work3 = $meleeattack3 - round($armormod3 * ($meleeattack3/10));
 while($work3 > 9){
 
@@ -3650,7 +3652,7 @@ $actual3 += $random10;
 $work3 -= 10;
 }
 $actual3 = round($actual3/10);
-if($attinfo[sector3] <= 0  | $target3[sector3] <= 0){
+if($attinfo['sector3'] <= 0  | $target3['sector3'] <= 0){
 $actual3 = 0;
 }
 $total3sectordef += $actual3;
@@ -3705,32 +3707,32 @@ $skldr = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$moralei
 $leadership = $skldr->fields;
 $tribe = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$moraleinfo[tribeid]'");
 $tribeinfo = $tribe->fields;
-if($moraleinfo[sector1] < 0){
+if($moraleinfo['sector1'] < 0){
 $db->Execute("UPDATE $dbtables[combats] "
             ."set sector1 = 0 "
             ."WHERE tribeid = '$moraleinfo[tribeid]' "
             ."AND combat_id = '$uniqueid' "
             ."AND garid = '$moraleinfo[garid]'");
-$moraleinfo[sector1] = 0;
+$moraleinfo['sector1'] = 0;
 }
-if($moraleinfo[sector2] < 0){
+if($moraleinfo['sector2'] < 0){
 $db->Execute("UPDATE $dbtables[combats] "
             ."set sector2 = 0 "
             ."WHERE tribeid = '$moraleinfo[tribeid]' "
             ."AND combat_id = '$uniqueid' "
             ."AND garid = '$moraleinfo[garid]'");
-$moraleinfo[sector2] = 0;
+$moraleinfo['sector2'] = 0;
 }
-if($moraleinfo[sector3] < 0){
+if($moraleinfo['sector3'] < 0){
 $db->Execute("UPDATE $dbtables[combats] "
             ."set sector3 = 0 "
             ."WHERE tribeid = '$moraleinfo[tribeid]' "
             ."AND combat_id = '$uniqueid' "
             ."AND garid = '$moraleinfo[garid]'");
-$moraleinfo[sector3] = 0;
+$moraleinfo['sector3'] = 0;
 }
 //////////////////////////////sector1 cleanup///////////////////////////////////////////////////////
-$percentwounded = round(1 - ($moraleinfo[sector1]/$moraleinfo[startsector1]), 2);
+$percentwounded = round(1 - ($moraleinfo['sector1']/$moraleinfo['startsector1']), 2);
 $survivors = round((1 - $percentwounded), 2);
 $percentwounded = explode('.', $percentwounded);
 $percentwounded = $percentwounded[1];
@@ -3742,7 +3744,7 @@ $survivors = 0;
 if($percentwounded < 0 | !$percentwounded){
 $percentwounded = 0;
 }
-$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo[morale]);
+$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo['morale']);
 if($routechance < 0){
 $routechance = 0;
 }
@@ -3806,7 +3808,7 @@ echo "<TR BGCOLOR=$line_color ALIGN=CENTER><TD>$moraleinfo[garid]</TD><TD>$moral
 /////////////////////////////////////Sector 2 Cleanup////////////////////////////////////////////////////
 
 
-$percentwounded = round(1 - ($moraleinfo[sector2]/$moraleinfo[startsector2]), 2);
+$percentwounded = round(1 - ($moraleinfo['sector2']/$moraleinfo['startsector2']), 2);
 $survivors = round((1 - $percentwounded), 2);
 $percentwounded = explode('.', $percentwounded);
 $percentwounded = $percentwounded[1];
@@ -3814,7 +3816,7 @@ $survivors = explode('.', $survivors);
 $survivors = $survivors[1];
 if($survivors < 0 | !$survivors){ $survivors = 0; }
 if($percentwounded < 0 | !$percentwounded){ $percentwounded = 0; }
-$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo[morale]);
+$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo['morale']);
 if($routechance < 0){ $routechance = 0; }
 if($percentwounded == 0){ $routechance = 0; }
 if($routechance > 0){
@@ -3858,7 +3860,7 @@ echo "<TR BGCOLOR=$line_color ALIGN=CENTER><TD>$moraleinfo[garid]</TD><TD>$moral
 
 ///////////////////////////////////Sector3 Cleanup//////////////////////////////////////////////////////////////////////////
 
-$percentwounded = round(1 - ($moraleinfo[sector3]/$moraleinfo[startsector3]), 2);
+$percentwounded = round(1 - ($moraleinfo['sector3']/$moraleinfo['startsector3']), 2);
 $survivors = round((1 - $percentwounded), 2);
 $percentwounded = explode('.', $percentwounded);
 $percentwounded = $percentwounded[1];
@@ -3866,7 +3868,7 @@ $survivors = explode('.', $survivors);
 $survivors = $survivors[1];
 if($survivors < 0 | !$survivors){ $survivors = 0; }
 if($percentwounded < 0 | !$percentwounded){ $percentwounded = 0; }
-$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo[morale]);
+$routechance = 100 - ($survivors + $leadership[level] + $tribeinfo['morale']);
 if($routechance < 0){ $routechance = 0; }
 if($percentwounded == 0){ $routechance = 0; }
 if($routechance > 0){
@@ -3991,29 +3993,39 @@ $atthurt = 0;
 $atthurt = $attforce[startforce] - $attforce[curforce];
 $check = $db->Execute("SELECT * FROM $dbtables[garrisons] WHERE garid = '$attforce[garid]'");
 $checkinfo = $check->fields;
-if($checkinfo[force] < $atthurt){
-$atthurt = $checkinfo[force];
+if($checkinfo['force'] < $atthurt)
+{
+$atthurt = $checkinfo['force'];
 }
-$db->Execute("UPDATE $dbtables[garrisons] SET force = force - $atthurt where garid = '$attforce[garid]' and tribeid = '$attforce[tribeid]'");
-if($healers > $atthurt){ $healers = $atthurt; }
-while($healers > 0){
-$randomheal = rand(1,10);
-if($randomheal < 3){
-$patchedatt += 1;
+$query = $db->Execute("UPDATE $dbtables[garrisons] SET `force` = `force` - '$atthurt' where garid = '$attforce[garid]' and tribeid = '$attforce[tribeid]'");
+db_op_result($query,__LINE__,__FILE__);
+if($healers > $atthurt)
+{
+    $healers = $atthurt;
 }
-$healers -= 1;
+$patchedatt = 0;
+while($healers > 0)
+{
+    $randomheal = rand(1,10);
+    if($randomheal < 3)
+    {
+        $patchedatt += 1;
+    }
+    $healers -= 1;
 }
-$db->Execute("UPDATE $dbtables[tribes] SET actives = actives + $patchedatt where tribeid = '$attforce[tribeid]'");
-$endtotalatt1 += $attforce[sector1];
-$endtotalatt2 += $attforce[sector2];
-$endtotalatt3 += $attforce[sector3];
-$totalhorseatt += $attforce[horses];
+$query = $db->Execute("UPDATE $dbtables[tribes] SET activepop = activepop + $patchedatt where tribeid = '$attforce[tribeid]'");
+db_op_result($query,__LINE__,__FILE__);
+$endtotalatt1 += $attforce['sector1'];
+$endtotalatt2 += $attforce['sector2'];
+$endtotalatt3 += $attforce['sector3'];
+$totalhorseatt += $attforce['horses'];
 $attfor->MoveNext();
 }
 $deffor = $db->Execute("SELECT * FROM $dbtables[combats] "
                       ."WHERE side = 'D' "
                       ."AND combat_id = '$uniqueid'");
-while(!$deffor->EOF){
+while(!$deffor->EOF)
+{
 $defforce = $deffor->fields;
 $heal = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$defforce[tribeid]' AND abbr = 'heal'");
 $healinfo = $heal->fields;
@@ -4022,36 +4034,71 @@ $defhurt = 0;
 $defhurt = $defforce[startforce] - $defforce[curforce];
 $check = $db->Execute("SELECT * FROM $dbtables[garrisons] WHERE garid = '$defforce[garid]'");
 $checkinfo = $check->fields;
-if($checkinfo[force] < $defhurt){
-$defhurt = $checkinfo[force];
+if($checkinfo['force'] < $defhurt)
+{
+$defhurt = $checkinfo['force'];
 }
-$db->Execute("UPDATE $dbtables[garrisons] SET force = force - $defhurt where garid = '$defforce[garid]' and tribeid = '$defforce[tribeid]'");
-if($healers > $defhurt){ $healers = $defhurt; }
-while($healers > 0){
-$randomheal = rand(1,10);
-if($randomheal < 3){
-$patcheddef += 1;
+$db->Execute("UPDATE $dbtables[garrisons] SET `force` = `force` - '$defhurt' where garid = '$defforce[garid]' and tribeid = '$defforce[tribeid]'");
+if($healers > $defhurt)
+{
+    $healers = $defhurt;
 }
-$healers -= 1;
+$patcheddef = 0;
+while($healers > 0)
+{
+    $randomheal = rand(1,10);
+    if($randomheal < 3)
+    {
+        $patcheddef += 1;
+    }
+    $healers -= 1;
 }
-$db->Execute("UPDATE $dbtables[tribes] SET actives = actives + $patcheddef where tribeid = '$defforce[tribeid]'");
-$endtotaldef1 += $defforce[sector1];
-$endtotaldef2 += $defforce[sector2];
-$endtotaldef3 += $defforce[sector3];
-$totalhorsedef += $defforce[horses];
+$query = $db->Execute("UPDATE $dbtables[tribes] SET activepop = activepop + $patcheddef where tribeid = '$defforce[tribeid]'");
+db_op_result($query,__LINE__,__FILE__);
+$endtotaldef1 += $defforce['sector1'];
+$endtotaldef2 += $defforce['sector2'];
+$endtotaldef3 += $defforce['sector3'];
+$totalhorsedef += $defforce['horses'];
 $deffor->MoveNext();
 }
-if(!$patchedatt){ $patchedatt = 0; }
-if(!$patcheddef){ $patcheddef = 0; }
-if(!$endtotaldef1){ $endtotaldef1 = 0; }
-if(!$endtotaldef2){ $endtotaldef2 = 0; }
-if(!$endtotaldef3){ $endtotaldef3 = 0; }
-if(!$endtotalatt1){ $endtotalatt1 = 0; }
-if(!$endtotalatt2){ $endtotalatt2 = 0; }
-if(!$endtotalatt3){ $endtotalatt3 = 0; }
-$db->Execute("UPDATE $dbtables[tribes] SET move_pts = 0 WHERE tribeid = '$_SESSION[current_unit]'");
-$db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$_SESSION[current_unit]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp','$_SESSION[clanid]')");
-$db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$_SESSION[clanid]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp')");
+if(!$patchedatt)
+{
+    $patchedatt = 0;
+}
+if(!$patcheddef)
+{
+$patcheddef = 0;
+}
+if(!$endtotaldef1)
+{
+$endtotaldef1 = 0;
+}
+if(!$endtotaldef2)
+{
+$endtotaldef2 = 0;
+}
+if(!$endtotaldef3)
+{
+$endtotaldef3 = 0;
+}
+if(!$endtotalatt1)
+{
+$endtotalatt1 = 0;
+}
+if(!$endtotalatt2)
+{
+$endtotalatt2 = 0;
+}
+if(!$endtotalatt3)
+{
+$endtotalatt3 = 0;
+}
+$query = $db->Execute("UPDATE $dbtables[tribes] SET move_pts = 0 WHERE tribeid = '$_SESSION[current_unit]'");
+db_op_result($query,__LINE__,__FILE__);
+//$db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$_SESSION[current_unit]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp','$_SESSION[clanid]')");
+//map_table no longer exists - it's mapping
+//$db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$_SESSION[clanid]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp')");
+//movement_log no longer exists
 echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD COLSPAN=6><FONT SIZE=+2>After Action Report</FONT></TD></TR>";
 echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD COLSPAN=3><FONT SIZE=+1>Total Attacking Forces:</FONT></TD><TD COLSPAN=3><FONT SIZE=+1>Total Defending Forces:</FONT></TD></TR>";
 echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD><FONT SIZE=+1>Sector1</FONT></TD><TD><FONT SIZE=+1>Sector2</FONT></TD><TD><FONT SIZE=+1>Sector3</TD><TD><FONT SIZE=+1>Sector1</FONT></TD><TD><FONT SIZE=+1>Sector2</FONT></TD><TD><FONT SIZE=+1>Sector3</FONT></TD></TR>";
@@ -4060,12 +4107,30 @@ echo "<TR BGCOLOR=$color_line2 ALIGN=CENTER><TD COLSPAN=3>$totalhorseatt (horses
 echo "<TR BGCOLOR=$color_line1 ALIGN=CENTER><TD COLSPAN=3>$patchedatt (healed)</TD><TD COLSPAN=3>$patcheddef (healed)</TD></TR>";
 $attwin = 0;
 $defwin = 0;
-if($endtotaldef1 < 1){ $attwin++; }
-if($endtotaldef2 < 1){ $attwin++; }
-if($endtotaldef3 < 1){ $attwin++; }
-if($endtotalatt1 < 1){ $defwin++; }
-if($endtotalatt2 < 1){ $defwin++; }
-if($endtotalatt3 < 1){ $defwin++; }
+if($endtotaldef1 < 1)
+{
+$attwin++;
+}
+if($endtotaldef2 < 1)
+{
+$attwin++;
+}
+if($endtotaldef3 < 1)
+{
+$attwin++;
+}
+if($endtotalatt1 < 1)
+{
+$defwin++;
+}
+if($endtotalatt2 < 1)
+{
+$defwin++;
+}
+if($endtotalatt3 < 1)
+{
+$defwin++;
+}
 
 $gy = $db->Execute("SELECT * FROM $dbtables[game_date] WHERE type = 'year'");
 $year = $gy->fields;
@@ -4077,7 +4142,8 @@ $stamp = date("Y-m-d H:i:s");
 $totalattkilled = $totalatt - ($endtotalatt1 + $endtotalatt2 + $endtotalatt3);
 $totaldefkilled = $totaldef - ($endtotaldef1 + $endtotaldef2 + $endtotaldef3);
 
-if($defwin > ($attwin + 1)){
+if($defwin > ($attwin + 1))
+{
 echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD COLSPAN=6><FONT SIZE=+2>Defender Wins!</FONT></TD></TR>";
 $deflog = "Combat Report: We were attacked by $totalatt warriors from $_SESSION[current_unit], but we were victorious, killing or wounding $totalattkilled of them. Our losses were $totaldefkilled.";
 $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$targetinfo[clanid]','$targetinfo[tribeid]','COMBAT','$stamp','$deflog')");
@@ -4099,30 +4165,31 @@ $bty1 = $db->Execute("SELECT * FROM $dbtables[combats] "
                     ."WHERE side = 'A' "
                     ."AND combat_id = '$uniqueid' "
                     ."AND sector1 < 1");
-while(!$bty1->EOF){
+while(!$bty1->EOF)
+{
 $booty = $bty1->fields;
-$randomweapon1 = rand(0, $booty[startsector1]);
+$randomweapon1 = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon1 where proper = '$booty[weapon1]' AND tribeid = '$targetinfo[tribeid]'");
-$randomweapon2 = rand(0, $booty[startsector1]);
+$randomweapon2 = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon2 where proper = '$booty[weapon2]' AND tribeid = '$targetinfo[tribeid]'");
-$randomhead = rand(0, $booty[startsector1]);
+$randomhead = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhead where proper = '$booty[head_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomtorso = rand(0, $booty[startsector1]);
+$randomtorso = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomtorso  where proper = '$booty[torso_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomotorso = rand(0, $booty[startsector1]);
+$randomotorso = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomotorso where proper = '$booty[otorso_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomlegs = rand(0, $booty[startsector1]);
+$randomlegs = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomlegs where proper = '$booty[legs_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomshield = rand(0, $booty[startsector1]);
+$randomshield = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomshield where proper = '$booty[shield]' AND tribeid = '$targetinfo[tribeid]'");
-$randomhorsea = rand(0, $booty[startsector1]);
+$randomhorsea = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhorsea where proper = '$booty[horse_armor]' AND tribeid = '$targetinfo[tribeid]'");
 if($booty[horses] > 0){
-$posshorsegrab = round($booty[startsector1]/5);
+$posshorsegrab = round($booty['startsector1']/5);
 $randomhorse = rand(0, $posshorsegrab);
 $db->Execute("UPDATE $dbtables[livestock] set amount = amount + $randomhorse where type = 'Horses' AND tribeid = '$targetinfo[tribeid]'");
 }
-$potentialpow = $booty[startsector1] - $booty[sector1];
+$potentialpow = $booty['startsector1'] - $booty['sector1'];
 $totalpow = rand(0, $potentialpow);
 $db->Execute("UPDATE $dbtables[tribes] set slavepop = slavepop + $totalpow where tribeid = '$targetinfo[tribeid]'");
 $bty1->MoveNext();
@@ -4131,30 +4198,32 @@ $bty2 = $db->Execute("SELECT * FROM $dbtables[combats] "
                     ."WHERE side = 'A' "
                     ."AND combat_id = '$uniqueid' "
                     ."AND sector2 < 1");
-while(!$bty2->EOF){
+while(!$bty2->EOF)
+{
 $booty = $bty2->fields;
-$randomweapon1 = rand(0, $booty[startsector2]);
+$randomweapon1 = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon1 where proper = '$booty[weapon1]' AND tribeid = '$targetinfo[tribeid]'");
-$randomweapon2 = rand(0, $booty[startsector2]);
+$randomweapon2 = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon2 where proper = '$booty[weapon2]' AND tribeid = '$targetinfo[tribeid]'");
-$randomhead = rand(0, $booty[startsector2]);
+$randomhead = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhead where proper = '$booty[head_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomtorso = rand(0, $booty[startsector2]);
+$randomtorso = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomtorso  where proper = '$booty[torso_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomotorso = rand(0, $booty[startsector2]);
+$randomotorso = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomotorso where proper = '$booty[otorso_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomlegs = rand(0, $booty[startsector2]);
+$randomlegs = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomlegs where proper = '$booty[legs_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomshield = rand(0, $booty[startsector2]);
+$randomshield = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomshield where proper = '$booty[shield]' AND tribeid = '$targetinfo[tribeid]'");
-$randomhorsea = rand(0, $booty[startsector2]);
+$randomhorsea = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhorsea where proper = '$booty[horse_armor]' AND tribeid = '$targetinfo[tribeid]'");
-if($booty[horses] > 0){
-$posshorsegrab = round($booty[startsector2]/5);
+if($booty[horses] > 0)
+{
+$posshorsegrab = round($booty['startsector2']/5);
 $randomhorse = rand(0, $posshorsegrab);
 $db->Execute("UPDATE $dbtables[livestock] set amount = amount + $randomhorse where type = 'Horses' AND tribeid = '$targetinfo[tribeid]'");
 }
-$potentialpow = $booty[startsector2] - $booty[sector2];
+$potentialpow = $booty['startsector2'] - $booty['sector2'];
 $totalpow = rand(0, $potentialpow);
 $db->Execute("UPDATE $dbtables[tribes] set slavepop = slavepop + $totalpow where tribeid = '$targetinfo[tribeid]'");
 $bty2->MoveNext();
@@ -4163,30 +4232,32 @@ $bty3 = $db->Execute("SELECT * FROM $dbtables[combats] "
                     ."WHERE side = 'A' "
                     ."AND combat_id = '$uniqueid' "
                     ."AND sector3 < 1");
-while(!$bty3->EOF){
+while(!$bty3->EOF)
+{
 $booty = $bty3->fields;
-$randomweapon1 = rand(0, $booty[startsector3]);
+$randomweapon1 = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon1 where proper = '$booty[weapon1]' AND tribeid = '$targetinfo[tribeid]'");
-$randomweapon2 = rand(0, $booty[startsector3]);
+$randomweapon2 = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon2 where proper = '$booty[weapon2]' AND tribeid = '$targetinfo[tribeid]'");
-$randomhead = rand(0, $booty[startsector3]);
+$randomhead = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhead where proper = '$booty[head_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomtorso = rand(0, $booty[startsector3]);
+$randomtorso = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomtorso  where proper = '$booty[torso_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomotorso = rand(0, $booty[startsector3]);
+$randomotorso = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomotorso where proper = '$booty[otorso_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomlegs = rand(0, $booty[startsector3]);
+$randomlegs = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomlegs where proper = '$booty[legs_armor]' AND tribeid = '$targetinfo[tribeid]'");
-$randomshield = rand(0, $booty[startsector3]);
+$randomshield = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomshield where proper = '$booty[shield]' AND tribeid = '$targetinfo[tribeid]'");
-$randomhorsea = rand(0, $booty[startsector3]);
+$randomhorsea = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhorsea where proper = '$booty[horse_armor]' AND tribeid = '$targetinfo[tribeid]'");
-if($booty[horses] > 0){
-$posshorsegrab = round($booty[startsector3]/5);
+if($booty[horses] > 0)
+{
+$posshorsegrab = round($booty['startsector3']/5);
 $randomhorse = rand(0, $posshorsegrab);
 $db->Execute("UPDATE $dbtables[livestock] set amount = amount + $randomhorse where type = 'Horses' AND tribeid = '$targetinfo[tribeid]'");
 }
-$potentialpow = $booty[startsector3] - $booty[sector3];
+$potentialpow = $booty['startsector3'] - $booty['sector3'];
 $totalpow = rand(0, $potentialpow);
 $db->Execute("UPDATE $dbtables[tribes] set slavepop = slavepop + $totalpow where tribeid = '$targetinfo[tribeid]'");
 $bty3->MoveNext();
@@ -4196,13 +4267,14 @@ $db->Execute("UPDATE $dbtables[tribes] SET morale = morale + .04 WHERE tribeid =
 $db->Execute("UPDATE $dbtables[garrisons] SET exp = exp + '.02', experience = experience + 2 WHERE tribeid = '$_SESSION[current_unit]'");
 $db->Execute("UPDATE $dbtables[tribes] SET morale = morale - .04 WHERE tribeid = '$_SESSION[current_unit]'");
 $db->Execute("UPDATE $dbtables[tribes] SET move_pts = 0 WHERE tribeid = '$_SESSION[current_unit]'");
-$db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$_SESSION[current_unit]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp','$_SESSION[clanid]')");
-$db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$_SESSION[clanid]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp')");
+//$db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$_SESSION[current_unit]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp','$_SESSION[clanid]')");
+//$db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$_SESSION[clanid]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp')");
 }
 
 
 
-elseif($attwin > ($defwin + 1)){
+elseif($attwin > ($defwin + 1))
+{
 echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD COLSPAN=6><FONT SIZE=+2>Attacker Wins!</FONT></TD></TR>";
 $deflog = "Combat Report: We were attacked by $totalatt warriors from $_SESSION[current_unit], and they overran us. We did manage to kill or wound $totalattkilled of them, but they also killed or wounded $totaldefkilled of our warriors.";
 $db->Execute("INSERT INTO $dbtables[logs] VALUES('','$month[count]','$year[count]','$targetinfo[clanid]','$targetinfo[tribeid]','COMBAT','$stamp','$deflog')");
@@ -4214,30 +4286,32 @@ $bty1 = $db->Execute("SELECT * FROM $dbtables[combats] "
                     ."WHERE side = 'D' "
                     ."AND combat_id = '$uniqueid' "
                     ."AND sector1 < 1");
-while(!$bty1->EOF){
+while(!$bty1->EOF)
+{
 $booty = $bty1->fields;
-$randomweapon1 = rand(0, $booty[startsector1]);
+$randomweapon1 = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon1 where proper = '$booty[weapon1]' AND tribeid = '$_SESSION[current_unit]'");
-$randomweapon2 = rand(0, $booty[startsector1]);
+$randomweapon2 = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon2 where proper = '$booty[weapon2]' AND tribeid = '$_SESSION[current_unit]'");
-$randomhead = rand(0, $booty[startsector1]);
+$randomhead = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhead where proper = '$booty[head_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomtorso = rand(0, $booty[startsector1]);
+$randomtorso = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomtorso  where proper = '$booty[torso_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomotorso = rand(0, $booty[startsector1]);
+$randomotorso = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomotorso where proper = '$booty[otorso_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomlegs = rand(0, $booty[startsector1]);
+$randomlegs = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomlegs where proper = '$booty[legs_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomshield = rand(0, $booty[startsector1]);
+$randomshield = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomshield where proper = '$booty[shield]' AND tribeid = '$_SESSION[current_unit]'");
-$randomhorsea = rand(0, $booty[startsector1]);
+$randomhorsea = rand(0, $booty['startsector1']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhorsea where proper = '$booty[horse_armor]' AND tribeid = '$_SESSION[current_unit]'");
-if($booty[horses] > 0){
-$posshorsegrab = round($booty[startsector1]/5);
+if($booty[horses] > 0)
+{
+$posshorsegrab = round($booty['startsector1']/5);
 $randomhorse = rand(0, $posshorsegrab);
 $db->Execute("UPDATE $dbtables[livestock] set amount = amount + $randomhorse where type = 'Horses' AND tribeid = '$_SESSION[current_unit]'");
 }
-$potentialpow = $booty[startsector1] - $booty[sector1];
+$potentialpow = $booty['startsector1'] - $booty['sector1'];
 $totalpow = rand(0, $potentialpow);
 $db->Execute("UPDATE $dbtables[tribes] set slavepop = slavepop + $totalpow where tribeid = '$_SESSION[current_unit]'");
 $bty1->MoveNext();
@@ -4246,30 +4320,32 @@ $bty2 = $db->Execute("SELECT * FROM $dbtables[combats] "
                     ."WHERE side = 'D' "
                     ."AND combat_id = '$uniqueid' "
                     ."AND sector2 < 1");
-while(!$bty2->EOF){
+while(!$bty2->EOF)
+{
 $booty = $bty2->fields;
-$randomweapon1 = rand(0, $booty[startsector2]);
+$randomweapon1 = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon1 where proper = '$booty[weapon1]' AND tribeid = '$_SESSION[current_unit]'");
-$randomweapon2 = rand(0, $booty[startsector2]);
+$randomweapon2 = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon2 where proper = '$booty[weapon2]' AND tribeid = '$_SESSION[current_unit]'");
-$randomhead = rand(0, $booty[startsector2]);
+$randomhead = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhead where proper = '$booty[head_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomtorso = rand(0, $booty[startsector2]);
+$randomtorso = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomtorso  where proper = '$booty[torso_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomotorso = rand(0, $booty[startsector2]);
+$randomotorso = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomotorso where proper = '$booty[otorso_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomlegs = rand(0, $booty[startsector2]);
+$randomlegs = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomlegs where proper = '$booty[legs_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomshield = rand(0, $booty[startsector2]);
+$randomshield = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomshield where proper = '$booty[shield]' AND tribeid = '$_SESSION[current_unit]'");
-$randomhorsea = rand(0, $booty[startsector2]);
+$randomhorsea = rand(0, $booty['startsector2']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhorsea where proper = '$booty[horse_armor]' AND tribeid = '$_SESSION[current_unit]'");
-if($booty[horses] > 0){
-$posshorsegrab = round($booty[startsector2]/5);
+if($booty[horses] > 0)
+{
+$posshorsegrab = round($booty['startsector2']/5);
 $randomhorse = rand(0, $posshorsegrab);
 $db->Execute("UPDATE $dbtables[livestock] set amount = amount + $randomhorse where type = 'Horses' AND tribeid = '$_SESSION[current_unit]'");
 }
-$potentialpow = $booty[startsector2] - $booty[sector2];
+$potentialpow = $booty['startsector2'] - $booty['sector2'];
 $totalpow = rand(0, $potentialpow);
 $db->Execute("UPDATE $dbtables[tribes] set slavepop = slavepop + $totalpow where tribeid = '$_SESSION[current_unit]'");
 $bty2->MoveNext();
@@ -4278,30 +4354,32 @@ $bty3 = $db->Execute("SELECT * FROM $dbtables[combats] "
                     ."WHERE side = 'D' "
                     ."AND combat_id = '$uniqueid' "
                     ."AND sector3 < 1");
-while(!$bty3->EOF){
+while(!$bty3->EOF)
+{
 $booty = $bty3->fields;
-$randomweapon1 = rand(0, $booty[startsector3]);
+$randomweapon1 = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon1 where proper = '$booty[weapon1]' AND tribeid = '$_SESSION[current_unit]'");
-$randomweapon2 = rand(0, $booty[startsector3]);
+$randomweapon2 = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomweapon2 where proper = '$booty[weapon2]' AND tribeid = '$_SESSION[current_unit]'");
-$randomhead = rand(0, $booty[startsector3]);
+$randomhead = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhead where proper = '$booty[head_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomtorso = rand(0, $booty[startsector3]);
+$randomtorso = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomtorso  where proper = '$booty[torso_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomotorso = rand(0, $booty[startsector3]);
+$randomotorso = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomotorso where proper = '$booty[otorso_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomlegs = rand(0, $booty[startsector3]);
+$randomlegs = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomlegs where proper = '$booty[legs_armor]' AND tribeid = '$_SESSION[current_unit]'");
-$randomshield = rand(0, $booty[startsector3]);
+$randomshield = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomshield where proper = '$booty[shield]' AND tribeid = '$_SESSION[current_unit]'");
-$randomhorsea = rand(0, $booty[startsector3]);
+$randomhorsea = rand(0, $booty['startsector3']);
 $db->Execute("UPDATE $dbtables[products] set amount = amount + $randomhorsea where proper = '$booty[horse_armor]' AND tribeid = '$_SESSION[current_unit]'");
-if($booty[horses] > 0){
-$posshorsegrab = round($booty[startsector3]/5);
+if($booty[horses] > 0)
+{
+$posshorsegrab = round($booty['startsector3']/5);
 $randomhorse = rand(0, $posshorsegrab);
 $db->Execute("UPDATE $dbtables[livestock] set amount = amount + $randomhorse where type = 'Horses' AND tribeid = '$_SESSION[current_unit]'");
 }
-$potentialpow = $booty[startsector3] - $booty[sector3];
+$potentialpow = $booty['startsector3'] - $booty['sector3'];
 $totalpow = rand(0, $potentialpow);
 $db->Execute("UPDATE $dbtables[tribes] set slavepop = slavepop + $totalpow where tribeid = '$_SESSION[current_unit]'");
 $bty3->MoveNext();
@@ -4314,7 +4392,8 @@ $db->Execute("UPDATE $dbtables[tribes] SET morale = morale - .04 WHERE tribeid =
 
 //////////////////////////////////////////////Now, Loot the village!!!///////////////////////////////////////////////
 
-if($attwin > 2){
+if($attwin > 2)
+{
 $slskl = $db->Execute("SELECT * FROM $dbtables[skills] WHERE tribeid = '$_SESSION[current_unit]' AND abbr = 'slv'");
 $slavery = $slskl->fields;
 $shack = $db->Execute("SELECT * FROM $dbtables[products] WHERE proper = 'Shackles' and tribeid = '$_SESSION[current_unit]'");
@@ -4323,34 +4402,41 @@ $endtotalatt = $endtotalatt1 + $endtotalatt2 + $endtotalatt3;
 if($shackles[amount] > $endtotalatt){
 $shackles[amount] = $endtotalatt;
 }
-while($targetinfo[slavepop] > 0 && $slavetakers > 0){
+while($targetinfo[slavepop] > 0 && $slavetakers > 0)
+{
 $targetinfo[slavepop] -= 1;
 $totalslavestaken += 1;
 $slavetakers -= 1;
 }
 $slavetakers = $endtotalatt + $shackles[amount];
-while($targetinfo[inactivepop] > 0 && $slavetakers > 0){
+while($targetinfo[inactivepop] > 0 && $slavetakers > 0)
+{
 $targetinfo[inactivepop] -= 1;
 $totalslavestaken += 1;
 $slavetakers -= 1;
 }
-while($targetinfo[activepop] > 0 && $slavetakers > 0 ){
+while($targetinfo[activepop] > 0 && $slavetakers > 0 )
+{
 $targetinfo[activepop] -= 1;
 $totalslavestaken += 1;
 $slavetakers -= 1;
 }
 $db->Execute("UPDATE $dbtables[tribes] set inactivepop = '$targetinfo[inactivepop]', slavepop = '$targetinfo[slavepop]', activepop = '$targetinfo[activepop]' WHERE tribeid = '$targetinfo[tribeid]'");
 $db->Execute("UPDATE $dbtables[tribes] set slavepop = slavepop + '$totalslavestaken' where tribeid = '$_SESSION[current_unit]'");
-if($totalslavestaken > 0){
+if($totalslavestaken > 0)
+{
 echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD COLSPAN=6>We captured $totalslavestaken villagers as slaves!</TD></TR>";
 }
-else {
+else
+{
 echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD COLSPAN=6>We took no villagers during the looting.</TD></TR>";
 }
 
-while($endtotalatt > 0){
+while($endtotalatt > 0)
+{
 $randloot = rand(1,3);
-if($randloot == 1){
+if($randloot == 1)
+{
 $prodchance = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[products] WHERE tribeid = '$targetinfo[tribeid]' AND amount > 0");
 $chance = $prodchance->fields;
 $chance[count] -= 1;
@@ -4360,7 +4446,8 @@ $product = $prod->fields;
 $db->Execute("UPDATE $dbtables[products] SET amount = amount - 1 WHERE tribeid = '$targetinfo[tribeid]' AND proper = '$product[proper]'");
 $db->Execute("UPDATE $dbtables[products] SET amount = amount + 1 WHERE tribeid = '$_SESSION[current_unit]' AND proper = '$product[proper]'");
 }
-elseif($randloot == 2){
+elseif($randloot == 2)
+{
 $livchance = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[livestock] WHERE tribeid = '$targetinfo[tribeid]' AND amount > 0");
 $chance = $livchance->fields;
 $chance[count] -= 1;
@@ -4370,7 +4457,8 @@ $livestock = $liv->fields;
 $db->Execute("UPDATE $dbtables[livestock] SET amount = amount - 1 WHERE tribeid = '$targetinfo[tribeid]' AND type = '$livestock[type]'");
 $db->Execute("UPDATE $dbtables[livestock] SET amount = amount + 1 WHERE tribeid = '$_SESSION[current_unit]' AND type = '$livestock[type]'");
 }
-else{
+else
+{
 $reschance = $db->Execute("SELECT COUNT(*) as count FROM $dbtables[resources] WHERE tribeid = '$targetinfo[tribeid]' AND amount > 0");
 $chance = $reschance->fields;
 $chance[count] -= 1;
@@ -4384,14 +4472,15 @@ $endtotalatt -= 1;
 }
 }
 $db->Execute("UPDATE $dbtables[tribes] SET move_pts = 0 WHERE tribeid = '$_SESSION[current_unit]'");
-$db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$_SESSION[current_unit]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp','$_SESSION[clanid]')");
-$db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$_SESSION[clanid]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp')");
+//$db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$_SESSION[current_unit]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp','$_SESSION[clanid]')");
+//$db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$_SESSION[clanid]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp')");
 }
-else{
+else
+{
 echo "<TR BGCOLOR=$color_header ALIGN=CENTER><TD COLSPAN=6><FONT SIZE=+2>No Winner. Both sides withdraw.</FONT></TD></TR>";
 $db->Execute("UPDATE $dbtables[tribes] SET move_pts = 0 WHERE tribeid = '$_SESSION[current_unit]'");
-$db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$_SESSION[current_unit]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp','$_SESSION[clanid]')");
-$db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$_SESSION[clanid]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp')");
+//$db->Execute("INSERT INTO $dbtables[map_table] VALUES('','$_SESSION[current_unit]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp','$_SESSION[clanid]')");
+//$db->Execute("INSERT INTO $dbtables[movement_log] VALUES('','$_SESSION[clanid]','$_SESSION[clanid]','$hexinfo[hex_id]','$stamp')");
 }
 
 

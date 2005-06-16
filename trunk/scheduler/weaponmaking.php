@@ -436,7 +436,7 @@ if( $act_do['product'] == 'crossbow' )
         $metalinfo['amount'] -= 5;
         $coal['amount'] -= 40;
     }
-    $deltalmetal = $startmetal - $metalinfo['amount'];
+    $deltalmetal = round($startmetal - $metalinfo['amount']);
     $deltacoal = $startcoal - $coal['amount'];
     $deltastring = $startstring - $string['amount'];
     $query = $db->Execute("UPDATE $dbtables[resources] "
@@ -444,10 +444,7 @@ if( $act_do['product'] == 'crossbow' )
                 ."WHERE tribeid = '$tribe[goods_tribe]' "
                 ."AND long_name = 'Coal'");
     db_op_result($query,__LINE__,__FILE__);
-    $query = $db->Execute("UPDATE $dbtables[resources] "
-                ."SET amount = amount - $deltametal "
-                ."WHERE tribeid = '$tribe[goods_tribe]' "
-                ."AND long_name = '$metalinfo[long_name]'");
+    $query = $db->Execute("UPDATE $dbtables[resources] SET amount = amount - '$deltametal' WHERE tribeid = '$tribe[goods_tribe]' AND long_name = '$metalinfo[long_name]'");
     db_op_result($query,__LINE__,__FILE__);
    $query = $db->Execute("UPDATE $dbtables[products] "
                 ."SET amount = amount - $deltastring "

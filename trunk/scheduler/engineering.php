@@ -11,40 +11,45 @@ if ($pos !== false)
     die("You cannot access this page directly!");
 }
 
-$res = $db->Execute("SELECT * FROM $dbtables[tribes]");
-    db_op_result($res,__LINE__,__FILE__);
-while( !$res->EOF )
-{
-    $tribe = $res->fields;
-    $act = $db->Execute("SELECT * FROM $dbtables[activities] "
-                        ."WHERE tribeid = '$tribe[tribeid]'");
-              db_op_result($act,__LINE__,__FILE__);
+
+    $act = $db->Execute("SELECT * FROM $dbtables[activities] WHERE skill_abbr = 'eng'");
+    db_op_result($act,__LINE__,__FILE__);
+    //select activities for this tribe
     while( !$act->EOF )
     {
+
         $act_do = $act->fields;
-        if( $act_do['skill_abbr'] == 'eng' )
-        {
-            $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
+         $tribeid = $act_do['tribeid'];
+         $res = $db->Execute("SELECT clanid,hex_id,goods_tribe FROM $dbtables[tribes] where tribeid = '$tribeid'");
+        db_op_result($res,__LINE__,__FILE__);
+        $tribe = $res->fields;
+        $clanid = $tribe['clanid'];
+        $hex_id = $tribe['hex_id'];
+        $goods_tribe = $tribe['goods_tribe'];
+
+            $mhp = $db->Execute("SELECT count(*) as count FROM $dbtables[structures] "
                                 ."WHERE complete = 'Y' "
                                 ."AND long_name = 'meetinghouse' "
-                                ."AND clanid = '$tribe[clanid]' "
-                                ."AND hex_id = '$tribe[hex_id]'");
+                                ."AND clanid = '$clanid' "
+                                ."AND hex_id = '$hex_id'");
                db_op_result($mhp,__LINE__,__FILE__);
-            $tpp = $db->Execute("SELECT * FROM $dbtables[structures] "
+            $has_meethouse = $mhp->fields['count'];
+            $tpp = $db->Execute("SELECT count(*) as count FROM $dbtables[structures] "
                                 ."WHERE complete = 'Y' "
                                 ."AND long_name = 'tradepost' "
-                                ."AND clanid = '$tribe[clanid]' "
-                                ."AND hex_id = '$tribe[hex_id]'");
+                                ."AND clanid = '$clanid' "
+                                ."AND hex_id = '$hex_id'");
                  db_op_result($tpp,__LINE__,__FILE__);
+            $has_tradepost = $tpp->fields['count'];
 
             if( $act_do['product'] == 'tradepost' )
             {
 
-                if( !$mhp->EOF && $tpp->EOF )
+                if( $has_meethouse > 0 && $has_tradepost < 1 )
                 {
                     $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                         ."WHERE long_name = 'logs' "
-                                        ."AND tribeid = '$tribe[goods_tribe]'");
+                                        ."AND tribeid = '$goods_tribe'");
                           db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
@@ -57,9 +62,9 @@ while( !$res->EOF )
 
                     $tradepost = $db->Execute("SELECT * FROM $dbtables[structures] "
                                               ."WHERE long_name = 'tradepost' "
-                                              ."AND clanid = '$tribe[clanid]' "
-                                              ."AND tribeid = '$tribe[goods_tribe]' "
-                                              ."AND hex_id = '$tribe[hex_id]'");
+                                              ."AND clanid = '$clanid' "
+                                              ."AND tribeid = '$goods_tribe' "
+                                              ."AND hex_id = '$hex_id'");
                           db_op_result($tradepost,__LINE__,__FILE__);
                     if( !$tradepost->EOF )
                     {
@@ -69,8 +74,8 @@ while( !$res->EOF )
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET complete = 'Y',"
                                          ."struct_pts = '100' "
-                                         ."WHERE clanid = '$tribe[clanid]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE clanid = '$clanid' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'tradepost' "
                                          ."AND struct_id = '$tradepostinfo[struct_id]'");
                                 db_op_result($query,__LINE__,__FILE__);
@@ -81,8 +86,8 @@ while( !$res->EOF )
                                          ."SET "
                                          ."  struct_pts = struct_pts + '$logs_installed', "
                                          ."  used='Y' "
-                                         ."WHERE clanid = '$tribe[clanid]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE clanid = '$clanid' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'tradepost' "
                                          ."AND struct_id = '$tradepostinfo[struct_id]'");
                                db_op_result($query,__LINE__,__FILE__);
@@ -97,9 +102,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'tradepost',"
                                          ."'Trade Post',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'Y',"
                                          ."'100',"
                                          ."'100',"
@@ -107,6 +112,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'N')");
                            db_op_result($query,__LINE__,__FILE__);
+                           $log_type = "ENG::TRADE";
+                            $logtext = "Engineering: Tradepost Construction completed using $logs_installed logs.";
+
                         }
                         elseif( $logs_installed < 100 && $logs_installed > 1 )
                         {
@@ -115,9 +123,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'tradepost',"
                                          ."'Trade Post',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'N',"
                                          ."'$logs_installed',"
                                          ."'100',"
@@ -125,89 +133,112 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'Y')");
                            db_op_result($query,__LINE__,__FILE__);
+                            $log_type = "ENG::TRADE";
+                            $logtext = "Engineering: Tradepost Construction in progress using $logs_installed logs.";
+
+                        }
+                        else
+                        {
+                          $log_type = "ENG::TRADE";
+                       $logtext = "Engineering: Could not build trading post- Insufficient logs ";
+
                         }
                     }
+
                 }
+                else
+                {
+                    $log_type = "ENG::TRADE";
+                    $logtext = "Engineering: Could not build trading post- either you have no meeting house or you already ahve a trading post here";
+                }
+           playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = 'tradepost'");
                     db_op_result($query,__LINE__,__FILE__);
                 $query = $db->Execute("UPDATE $dbtables[products] "
                              ."SET amount = amount - '$logs_installed' "
-                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                             ."WHERE tribeid = '$goods_tribe' "
                              ."AND long_name = 'logs'");
                      db_op_result($query,__LINE__,__FILE__);
-                $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                             ."VALUES("
-                             ."'',"
-                             ."'$month[count]',"
-                             ."'$year[count]',"
-                             ."'$tribe[clanid]',"
-                             ."'$tribe[tribeid]',"
-                             ."'UPDATE',"
-                             ."'$stamp',"
-                             ."'Engineering: Tradepost Construction using "
-                             ."$logs_installed logs.')");
-                      db_op_result($query,__LINE__,__FILE__);
+
             }
 
             if( $act_do['product'] == 'meetinghouse' )
             {
-                if( $mhp->EOF )
+                if( $has_meethouse == 0 )
                 {
-                    $log = $db->Execute("SELECT * FROM $dbtables[products] "
-                                        ."WHERE long_name = 'logs' "
-                                        ."AND tribeid = '$tribe[goods_tribe]'");
+                      $log = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'logs' AND tribeid = '$goods_tribe'");
                             db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
-                    while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 100 )
-                    {
-                        $logs_installed += 2;
-                        $act_do['actives'] -= 1;
-                        $loginfo['amount'] -= 2;
-                    }
+                   //ok we know how many logs we have
 
-                    $meetinghouse = $db->Execute("SELECT * FROM $dbtables[structures] "
+                     $meetinghouse = $db->Execute("SELECT struct_id,struct_pts FROM $dbtables[structures] "
                                                  ."WHERE long_name = 'meetinghouse' "
-                                                 ."AND tribeid = '$tribe[goods_tribe]' "
-                                                 ."AND hex_id = '$tribe[hex_id]'");
+                                                 ."AND tribeid = '$goods_tribe' "
+                                                 ."AND hex_id = '$hex_id'");
                            db_op_result($meetinghouse,__LINE__,__FILE__);
                     if( !$meetinghouse->EOF )
                     {
-                        $meetinghouseinfo = $meetinghouse->fields;
+                      //we have an incomplete structure, let's finish it
+                        $logs_installed = $meetinghouse->fields['struct_pts'];
+                        $struct_id = $meetinghouse->fields['struct_id'];
+                        while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 100 )
+                        {
+                            $logs_installed += 2;
+                            $act_do['actives'] -= 1;
+                            $loginfo['amount'] -= 2;
+                        }
+
                         if( $logs_installed + $meetinghouseinfo['struct_pts'] > 99 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET complete = 'Y', "
                                          ."struct_pts = '100' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'meetinghouse'");
                               db_op_result($query,__LINE__,__FILE__);
+                              $log_type = "UPDATE";
+                            $logtext =  "Engineering: Meetinghouse construction finished, used $logs_installed logs.";
+                            playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
                         }
                         elseif( $logs_installed + $meetinghouseinfo['struct_pts'] < 100 )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'meetinghouse'");
                                db_op_result($query,__LINE__,__FILE__);
+                           $log_type = "UPDATE";
+                            $logtext =  "Engineering: Meetinghouse construction started, not complete, used $logs_installed logs.";
+                            playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
                         }
+
                     }
                     else
                     {
-                        if( $logs_installed >= 100 && $logs_installed > 1 )
+                        //we start or build a new structure.
+                        while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 100 )
+                        {
+                            $logs_installed += 2;
+                            $act_do['actives'] -= 1;
+                            $loginfo['amount'] -= 2;
+                        }
+                        if( $logs_installed >= 100 )
                         {
                             $query = $db->Execute("INSERT INTO $dbtables[structures] "
                                          ."VALUES("
                                          ."'',"
                                          ."'meetinghouse',"
                                          ."'Meeting House',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'Y',"
                                          ."'100',"
                                          ."'100',"
@@ -215,6 +246,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'N')");
                              db_op_result($query,__LINE__,__FILE__);
+                            $log_type = "UPDATE";
+                            $logtext =  "Engineering: Meetinghouse constructed using $logs_installed logs.";
+                            playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
                         }
                         else
                         {
@@ -223,9 +257,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'meetinghouse',"
                                          ."'Meeting House',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'N',"
                                          ."'$logs_installed',"
                                          ."'100',"
@@ -233,39 +267,41 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'N')");
                             db_op_result($query,__LINE__,__FILE__);
+                            $log_type = "UPDATE";
+                            $logtext =  "Engineering: Meetinghouse construction started, not complete, used $logs_installed logs.";
+                            playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
                         }
                     }
                 }
+                else
+                {
+                    $log_type = "UPDATE";
+                    $logtext =  "Engineering: You already have a meeting house, so it was not built.";
+                    playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
+
+                }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = 'meetinghouse'");
                     db_op_result($query,__LINE__,__FILE__);
                 $query = $db->Execute("UPDATE $dbtables[products] "
                              ."SET amount = amount - '$logs_installed' "
-                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                             ."WHERE tribeid = '$goods_tribe' "
                              ."AND long_name = 'logs'");
                     db_op_result($query,__LINE__,__FILE__);
-                $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                             ."VALUES("
-                             ."'',"
-                             ."'$month[count]',"
-                             ."'$year[count]',"
-                             ."'$tribe[clanid]',"
-                             ."'$tribe[tribeid]',"
-                             ."'UPDATE',"
-                             ."'$stamp',"
-                             ."'Engineering: Meetinghouse construction using $logs_installed logs.')");
-                     db_op_result($query,__LINE__,__FILE__);
+
             }
 
             if( $act_do['product'] == 'sq. yards moat' )
             {
-                if( !$mhp->EOF )
+                if( $has_meethouse > 0 )
                 {
                     $moat = $db->Execute("SELECT * FROM $dbtables[structures] "
                                          ."WHERE long_name = 'sq. yards moat' "
-                                         ."AND clanid = '$tribe[clanid]' "
-                                         ."AND hex_id = '$tribe[hex_id]'");
+                                         ."AND clanid = '$clanid' "
+                                         ."AND hex_id = '$hex_id'");
                          db_op_result($moat,__LINE__,__FILE__);
                     $moat_length = 0;
                     while( $act_do['actives'] > 1 )
@@ -279,20 +315,14 @@ while( !$res->EOF )
                                      ."SET number = number + '$moat_length', "
                                      ."struct_pts = struct_pts + '$moat_length', "
                                      ."max_struct_pts = max_struct_pts + '$moat_length' "
-                                     ."WHERE tribeid = '$tribe[tribeid]' "
+                                     ."WHERE tribeid = '$tribeid' "
                                      ."AND long_name = 'sq. yards moat'");
                              db_op_result($query,__LINE__,__FILE__);
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                     ."VALUES("
-                                     ."'',"
-                                     ."'$month[count]',"
-                                     ."'$year[count]',"
-                                     ."'$tribe[clanid]',"
-                                     ."'$tribe[tribeid]',"
-                                     ."'UPDATE',"
-                                     ."'$stamp',"
-                                     ."'Engineering: $moat_length sq yards added to Moat.')");
-                            db_op_result($query,__LINE__,__FILE__);
+            $log_type="UPDATE";
+            $logtext = "Engineering: $moat_length sq yards added to Moat.";
+ playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
+
                     }
                     else
                     {
@@ -301,9 +331,9 @@ while( !$res->EOF )
                                      ."'',"
                                      ."'sq. yards moat',"
                                      ."'Moat',"
-                                     ."'$tribe[hex_id]',"
-                                     ."'$tribe[tribeid]',"
-                                     ."'$tribe[clanid]',"
+                                     ."'$hex_id',"
+                                     ."'$tribeid',"
+                                     ."'$clanid',"
                                      ."'Y',"
                                      ."'$moat_length',"
                                      ."'$moat_length',"
@@ -311,48 +341,41 @@ while( !$res->EOF )
                                      ."'$moat_length',"
                                      ."'N')");
                         db_op_result($query,__LINE__,__FILE__);
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                     ."VALUES("
-                                     ."'',"
-                                     ."'$month[count]',"
-                                     ."'$year[count]',"
-                                     ."'$tribe[clanid]',"
-                                     ."'$tribe[tribeid]',"
-                                     ."'UPDATE',"
-                                     ."'$stamp',"
-                                     ."'Engineering: $moat_length sq yards added to Moat.')");
-                              db_op_result($query,__LINE__,__FILE__);
+             $log_type="UPDATE";
+            $logtext = "Engineering: $moat_length sq yards added to Moat.";
+ playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = 'sq. yards moat'");
                      db_op_result($query,__LINE__,__FILE__);
             }
 
             if( $act_do['product'] == 'gate' )
             {
-                if( !$mhp->EOF )
+                if( $has_meethouse > 0 )
                 {
                     $wall = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                         ."WHERE tribeid = '$tribe[tribeid]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$tribeid' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'stonewalls10' "
                                          ."OR long_name = 'stonewalls15' "
-                                         ."AND tribeid = '$tribe[tribeid]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."AND tribeid = '$tribeid' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."OR long_name = 'stonewalls20' "
-                                         ."AND tribeid = '$tribe[tribeid]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."AND tribeid = '$tribeid' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."OR long_name = 'palisade' "
-                                         ."AND tribeid = '$tribe[tribeid]' "
-                                         ."AND hex_id = '$tribe[hex_id]'");
+                                         ."AND tribeid = '$tribeid' "
+                                         ."AND hex_id = '$hex_id'");
                                    db_op_result($wall,__LINE__,__FILE__);
                     if( !$wall->EOF )
                     {
                         $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                             ."WHERE long_name = 'logs' "
-                                            ."AND tribeid = '$tribe[goods_tribe]'");
+                                            ."AND tribeid = '$goods_tribe'");
                                 db_op_result($log,__LINE__,__FILE__);
                         $loginfo = $log->fields;
                         if( $loginfo['amount'] >= 10 && $act_do['actives'] >= 5 )
@@ -362,9 +385,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'gate',"
                                          ."'Gate',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[tribeid]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$tribeid',"
+                                         ."'$clanid',"
                                          ."'Y',"
                                          ."'10',"
                                          ."'10',"
@@ -374,14 +397,14 @@ while( !$res->EOF )
                               db_op_result($query,__LINE__,__FILE__);
                             $query = $db->Execute("UPDATE $dbtables[products] "
                                          ."SET amount = amount - 10 "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
                                          ."AND long_name = 'logs'");
                               db_op_result($query,__LINE__,__FILE__);
                         }
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = 'gate'");
                     db_op_result($query,__LINE__,__FILE__);
             }
@@ -389,12 +412,10 @@ while( !$res->EOF )
             if( $act_do['product'] == 'refinery' )
             {
 
-                if( !$mhp->EOF )
+                if( $has_meethouse > 0 )
                 {
-                    $log = $db->Execute("SELECT * FROM $dbtables[products] "
-                                        ."WHERE long_name = 'logs' "
-                                        ."AND tribeid = '$tribe[goods_tribe]'");
-                       db_op_result($log,__LINE__,__FILE__);
+                    $log = $db->Execute("SELECT * FROM $dbtables[products] WHERE long_name = 'logs' AND tribeid = '$goods_tribe'");
+                    db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
                     while( $loginfo['amount'] > 0 && $act_do['actives'] > 0 && $logs_installed < 100 )
@@ -403,33 +424,19 @@ while( !$res->EOF )
                         $act_do['actives'] -= 1;
                         $loginfo['amount'] -= 2;
                     }
-                    $refine = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                           ."WHERE long_name = 'refinery' "
-                                           ."AND tribeid = '$tribe[goods_tribe]' "
-                                           ."AND complete = 'N' "
-                                           ."AND hex_id = '$tribe[hex_id]'");
-                          db_op_result($refine,__LINE__,__FILE__);
+                    $refine = $db->Execute("SELECT * FROM $dbtables[structures] WHERE long_name = 'refinery' AND tribeid = '$goods_tribe' AND complete = 'N' AND hex_id = '$hex_id'");
+                    db_op_result($refine,__LINE__,__FILE__);
                     if( !$refine->EOF )
                     {
                         $refineinfo = $refine->fields;
                         if( $logs_installed + $refineinfo['struct_pts'] >= 100 )
                         {
-                            $query = $db->Execute("UPDATE $dbtables[structures] "
-                                         ."SET complete = 'Y',"
-                                         ."struct_pts = '100',"
-                                         ."subunit = 'smelters' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
-                                         ."AND long_name = 'refinery'");
-                                db_op_result($query,__LINE__,__FILE__);
+                            $query = $db->Execute("UPDATE $dbtables[structures] SET complete = 'Y', struct_pts = '100', subunit = 'smelter' WHERE tribeid = '$goods_tribe' AND hex_id = '$hex_id' AND long_name = 'refinery'");
+                            db_op_result($query,__LINE__,__FILE__);
                         }
                         elseif( $logs_installed + $refineinfo['struct_pts'] < 100 && $logs_installed > 1 )
                         {
-                            $query = $db->Execute("UPDATE $dbtables[structures] "
-                                         ."SET struct_pts = struct_pts + '$logs_installed' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
-                                         ."AND long_name = 'refinery'");
+                            $query = $db->Execute("UPDATE $dbtables[structures] SET struct_pts = struct_pts + '$logs_installed' WHERE tribeid = '$goods_tribe' AND hex_id = '$hex_id' AND long_name = 'refinery'");
                                 db_op_result($query,__LINE__,__FILE__);
                         }
                     }
@@ -437,21 +444,9 @@ while( !$res->EOF )
                     {
                         if( $logs_installed >= 100 )
                         {
-                            $query = $db->Execute("INSERT INTO $dbtables[structures] "
-                                         ."VALUES("
-                                         ."'',"
-                                         ."'refinery',"
-                                         ."'Refinery',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
-                                         ."'Y',"
-                                         ."'$logs_installed',"
-                                         ."'100',"
-                                         ."'smelters',"
-                                         ."'',"
-                                         ."'N')");
-                               db_op_result($query,__LINE__,__FILE__);
+                            $query = $db->Execute("INSERT INTO $dbtables[structures]
+                                VALUES( '', 'refinery', 'Refinery', '$hex_id', '$goods_tribe', '$clanid', 'Y', '$logs_installed', '100', 'smelter', '','N')");
+                            db_op_result($query,__LINE__,__FILE__);
                         }
                         elseif( $logs_installed < 100 && $logs_installed > 1 )
                         {
@@ -460,13 +455,13 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'refinery',"
                                          ."'Refinery',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'N',"
                                          ."'$logs_installed',"
                                          ."'100',"
-                                         ."'smelters',"
+                                         ."'smelter',"
                                          ."'',"
                                          ."'N')");
                              db_op_result($query,__LINE__,__FILE__);
@@ -474,35 +469,29 @@ while( !$res->EOF )
 
                     }
 
-                $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
-                             ."AND product = 'refinery'");
-                   db_op_result($query,__LINE__,__FILE__);
-                $query = $db->Execute("UPDATE $dbtables[products] "
-                             ."SET amount = amount - '$logs_installed' "
-                             ."WHERE tribeid = '$tribe[goods_tribe]' "
-                             ."AND long_name = 'logs'");
-                  db_op_result($query,__LINE__,__FILE__);
-                $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                             ."VALUES("
-                             ."'',"
-                             ."'$month[count]',"
-                             ."'$year[count]',"
-                             ."'$tribe[clanid]',"
-                             ."'$tribe[tribeid]',"
-                             ."'UPDATE',"
-                             ."'$stamp',"
-                             ."'Engineering: Refinery Construction using $logs_installed logs.')");
-                  db_op_result($query,__LINE__,__FILE__);
+                    $query = $db->Execute("DELETE FROM $dbtables[activities] WHERE tribeid = '$tribeid' AND product = 'refinery'");
+                    db_op_result($query,__LINE__,__FILE__);
+                    $query = $db->Execute("UPDATE $dbtables[products] SET amount = amount - '$logs_installed' WHERE tribeid = '$goods_tribe' AND long_name = 'logs'");
+                    db_op_result($query,__LINE__,__FILE__);
+                    $log_type='UPDATE';
+                    $logtext = "Engineering: Refinery Construction using $logs_installed logs.";
+                    playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
+                  }
+                  else
+                  {
+                      $log_type='UPDATE';
+                      $logtext = "Refinery construction failed - no meeting house (Hex: $hex_id Tribe: $tribeid Clan: $clanid Logs: $loginfo[amount] Debug Number: $has_meethouse)";
+                      playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
                   }
             }
 
-            if( $act_do['product'] == 'smelters' )
+            if( $act_do['product'] == 'smelter' )
             {
                 $refine = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                       ."WHERE clanid = '$tribe[clanid]' "
+                                       ."WHERE clanid = '$clanid' "
                                        ."AND long_name = 'refinery' "
-                                       ."AND hex_id = '$tribe[hex_id]' "
+                                       ."AND hex_id = '$hex_id' "
                                        ."AND complete = 'Y' "
                                        ."AND number < 100");
                                db_op_result($refine,__LINE__,__FILE__);
@@ -511,26 +500,22 @@ while( !$res->EOF )
                 if( !$refine->EOF )
                 {
                     $maxsmelt = 100 - $refineinfo['number'];
-                    $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                        ."WHERE clanid = '$tribe[clanid]' "
-                                        ."AND long_name = 'meetinghouse' "
-                                        ."AND hex_id = '$tribe[hex_id]'");
-                          db_op_result($mhp,__LINE__,__FILE__);
-                    if( !$mhp->EOF && !$refine->EOF )
+
+                    if( $has_meethouse > 0 && !$refine->EOF )
                     {
                         $coal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                             ."WHERE tribeid = '$goods_tribe' "
                                              ."AND long_name = 'Coal'");
                              db_op_result($coal,__LINE__,__FILE__);
                         $metal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                              ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                              ."WHERE tribeid = '$goods_tribe' "
                                               ."AND long_name = 'Iron' "
                                               ."AND amount > 49");
                                db_op_result($metal,__LINE__,__FILE__);
                         if( $metal->EOF )
                         {
                             $metal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                                  ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                                  ."WHERE tribeid = '$goods_tribe' "
                                                   ."AND long_name = 'Bronze'");
                              db_op_result($metal,__LINE__,__FILE__);
                         }
@@ -558,23 +543,23 @@ while( !$res->EOF )
                         }
                         $query = $db->Execute("UPDATE $dbtables[structures] "
                                      ."SET number = number + '$smelters', "
-                                     ."subunit = 'smelters' "
+                                     ."subunit = 'smelter' "
                                      ."WHERE struct_id = '$refineinfo[struct_id]' "
-                                     ."AND clanid = '$tribe[clanid]'");
+                                     ."AND clanid = '$clanid'");
                            db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - '$deltametal' "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = '$metalinfo[long_name]'");
                             db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - '$deltacoal' "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = 'Coal'");
                           db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                                     ."WHERE tribeid = '$tribe[tribeid]' "
-                                     ."AND product = 'smelters'");
+                                     ."WHERE tribeid = '$tribeid' "
+                                     ."AND product = 'smelter'");
                           db_op_result($query,__LINE__,__FILE__);
                        $log_info = "Smelter construction completed Built $smelters smelters using $deltacoal coal and $deltametal $metalinfo[long_name].";
 
@@ -586,22 +571,22 @@ while( !$res->EOF )
                 }
                 else
                 {
-                       $log_info = "Smelter construction failed- scheduler found no Refinery!";
+                       $log_info = "Smelter construction failed- scheduler found no empty refineries.";
                 }
           playerlog($tribe['tribeid'],$tribe['clanid'],'Smelter',$month['count'],$year['count'],$log_info,$dbtables);
 
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
-                             ."AND product = 'smelters'");
+                             ."WHERE tribeid = '$tribeid' "
+                             ."AND product = 'smelter'");
                    db_op_result($query,__LINE__,__FILE__);
             }
 
             if( $act_do['product'] == 'ovens' )
             {
                 $bake = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                     ."WHERE clanid = '$tribe[clanid]' "
+                                     ."WHERE clanid = '$clanid' "
                                      ."AND long_name = 'bakery' "
-                                     ."AND hex_id = '$tribe[hex_id]' "
+                                     ."AND hex_id = '$hex_id' "
                                      ."AND complete = 'Y' "
                                      ."AND number < 101");
                      db_op_result($bake,__LINE__,__FILE__);
@@ -610,26 +595,22 @@ while( !$res->EOF )
                 if( !$bake->EOF )
                 {
                     $maxoven = 100 - $bakeinfo['number'];
-                    $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                        ."WHERE clanid = '$tribe[clanid]' "
-                                        ."AND long_name = 'meetinghouse' "
-                                        ."AND hex_id = '$tribe[hex_id]'");
-                         db_op_result($mhp,__LINE__,__FILE__);
-                    if( !$mhp->EOF && !$bake->EOF )
+
+                    if( $has_meethouse > 0 && !$bake->EOF )
                     {
                         $coal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                             ."WHERE tribeid = '$goods_tribe' "
                                              ."AND long_name = 'Coal'");
                                db_op_result($coal,__LINE__,__FILE__);
                         $metal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                              ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                              ."WHERE tribeid = '$goods_tribe' "
                                               ."AND long_name = 'Iron' "
                                               ."AND amount > 99");
                               db_op_result($metal,__LINE__,__FILE__);
                         if( $metal->EOF )
                         {
                             $metal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                                  ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                                  ."WHERE tribeid = '$goods_tribe' "
                                                   ."AND long_name = 'Bronze'");
                               db_op_result($metal,__LINE__,__FILE__);
                         }
@@ -658,38 +639,30 @@ while( !$res->EOF )
                                      ."SET number = number + '$ovens', "
                                      ."subunit = 'ovens' "
                                      ."WHERE struct_id = '$bakeinfo[struct_id]' "
-                                     ."AND clanid = '$tribe[clanid]'");
+                                     ."AND clanid = '$clanid'");
                             db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - '$deltametal' "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = '$metalinfo[long_name]'");
                              db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - '$deltacoal' "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = 'Coal'");
                             db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                                     ."WHERE tribeid = '$tribe[tribeid]' "
+                                     ."WHERE tribeid = '$tribeid' "
                                      ."AND product = 'ovens'");
                             db_op_result($query,__LINE__,__FILE__);
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                     ."VALUES("
-                                     ."'',"
-                                     ."'$month[count]',"
-                                     ."'$year[count]',"
-                                     ."'$tribe[clanid]',"
-                                     ."'$tribe[tribeid]',"
-                                     ."'UPDATE',"
-                                     ."'$stamp',"
-                                     ."'Engineering: $ovens ovens constructed using "
-                                     ."$deltacoal coal and $deltametal $metalinfo[long_name].')");
-                            db_op_result($query,__LINE__,__FILE__);
+   $log_type='UPDATE';
+  $logtext = "Engineering: $ovens ovens constructed using $deltacoal coal and $deltametal $metalinfo[long_name].";
+  playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = 'ovens'");
                    db_op_result($query,__LINE__,__FILE__);
             }
@@ -697,9 +670,9 @@ while( !$res->EOF )
             if( $act_do['product'] == 'stills' )
             {
                 $distill = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                        ."WHERE clanid = '$tribe[clanid]' "
+                                        ."WHERE clanid = '$clanid' "
                                         ."AND long_name = 'distillery' "
-                                        ."AND hex_id = '$tribe[hex_id]' "
+                                        ."AND hex_id = '$hex_id' "
                                         ."AND complete = 'Y' "
                                         ."AND number < 100");
                          db_op_result($distill,__LINE__,__FILE__);
@@ -708,19 +681,15 @@ while( !$res->EOF )
                 if( !$distill->EOF )
                 {
                     $maxstill = 100 - $distillinfo['number'];
-                    $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                        ."WHERE clanid = '$tribe[clanid]' "
-                                        ."AND long_name = 'meetinghouse' "
-                                        ."AND hex_id = '$tribe[hex_id]'");
-                          db_op_result($mhp,__LINE__,__FILE__);
-                    if( !$mhp->EOF && !$distill->EOF )
+
+                    if( $has_meethouse > 0 && !$distill->EOF )
                     {
                         $coal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                             ."WHERE tribeid = '$goods_tribe' "
                                              ."AND long_name = 'Coal'");
                              db_op_result($coal,__LINE__,__FILE__);
                         $metal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                              ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                              ."WHERE tribeid = '$goods_tribe' "
                                               ."AND long_name = 'Copper' "
                                               ."AND amount > 99");
                             db_op_result($metal,__LINE__,__FILE__);
@@ -748,39 +717,30 @@ while( !$res->EOF )
                                      ."SET number = number + '$stills', "
                                      ."subunit = 'stills' "
                                      ."WHERE struct_id = '$distillinfo[struct_id]' "
-                                     ."AND clanid = '$tribe[clanid]'");
+                                     ."AND clanid = '$clanid'");
                             db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - '$deltametal' "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = '$metalinfo[long_name]'");
                               db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - '$deltacoal' "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = 'Coal'");
                            db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                                     ."WHERE tribeid = '$tribe[tribeid]' "
+                                     ."WHERE tribeid = '$tribeid' "
                                      ."AND product = 'stills'");
                            db_op_result($query,__LINE__,__FILE__);
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                     ."VALUES("
-                                     ."'',"
-                                     ."'$month[count]',"
-                                     ."'$year[count]',"
-                                     ."'$tribe[clanid]',"
-                                     ."'$tribe[tribeid]',"
-                                     ."'UPDATE',"
-                                     ."'$stamp',"
-                                     ."'Engineering: $stills stills constructed "
-                                     ."using $deltacoal coal and $deltametal "
-                                     ."$metalinfo[long_name].')");
-                            db_op_result($query,__LINE__,__FILE__);
+     $log_type='UPDATE';
+  $logtext = "Engineering: $stills stills constructed using $deltacoal coal and $deltametal $metalinfo[long_name].";
+  playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = 'stills'");
                     db_op_result($query,__LINE__,__FILE__);
             }
@@ -789,24 +749,24 @@ while( !$res->EOF )
             if( $act_do['product'] == 'apiary' )
             {
                 $sec = $db->Execute("SELECT * FROM $dbtables[skills] "
-                                    ."WHERE tribeid = '$tribe[tribeid]' "
+                                    ."WHERE tribeid = '$tribeid' "
                                     ."AND abbr = 'mtl' "
                                     ."AND level > 2");
                     db_op_result($sec,__LINE__,__FILE__);
                 $coal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = 'Coal' "
                                      ."AND amount > 99");
                      db_op_result($coal,__LINE__,__FILE__);
                 $mtl = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                    ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                    ."WHERE tribeid = '$goods_tribe' "
                                     ."AND long_name = 'Iron' "
                                     ."AND amount > 19");
                       db_op_result($mtl,__LINE__,__FILE__);
                 if( $mtl->EOF )
                 {
                     $mtl = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                        ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                        ."WHERE tribeid = '$goods_tribe' "
                                         ."AND long_name = 'Bronze' "
                                         ."AND amount > 19");
                        db_op_result($mtl,__LINE__,__FILE__);
@@ -816,7 +776,7 @@ while( !$res->EOF )
                     }
                 }
                 $soft = $db->Execute("SELECT * FROM $dbtables[products] "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = 'cloth' "
                                      ."AND amount > 1");
                     db_op_result($soft,__LINE__,__FILE__);
@@ -824,7 +784,7 @@ while( !$res->EOF )
                 if( $soft->EOF )
                 {
                     $soft = $db->Execute("SELECT * FROM $dbtables[products] "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
                                          ."AND long_name = 'leather'"
                                          ."AND amount > 19");
                        db_op_result($soft,__LINE__,__FILE__);
@@ -838,13 +798,13 @@ while( !$res->EOF )
                 if( $sec->EOF )
                 {
                     $sec = $db->Execute("SELECT * FROM $dbtables[skills] "
-                                        ."WHERE tribeid = '$tribe[tribeid]' "
+                                        ."WHERE tribeid = '$tribeid' "
                                         ."AND abbr = 'wd' "
                                         ."AND level > 3");
                       db_op_result($sec,__LINE__,__FILE__);
                 }
                 $secinfo = $sec->fields;
-                if( $secinfo[abbr] == 'mtl' )
+                if( $secinfo['abbr'] == 'mtl' )
                 {
                     if( !$coal->EOF && !$mtl->EOF && !$soft->EOF )
                     {
@@ -858,15 +818,15 @@ while( !$res->EOF )
                         $wood = true;
                     }
                 }
-                if( $wood | $metal )
+                if( $wood || $metal )
                 {
                     $good = true;
                 }
-                if( !$mhp->EOF && $good && !ISSET($softbail) && !ISSET($mtlbail) )
+                if( $has_meethouse > 0 && $good && !ISSET($softbail) && !ISSET($mtlbail) )
                 {
                     $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                         ."WHERE long_name = 'logs' "
-                                        ."AND tribeid = '$tribe[goods_tribe]'");
+                                        ."AND tribeid = '$goods_tribe'");
                        db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
@@ -882,7 +842,7 @@ while( !$res->EOF )
                         $softinfo = $soft->fields;
                         $query = $db->Execute("UPDATE $dbtables[products] "
                                      ."SET amount = amount - $softamount "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = '$softinfo[long_name]'");
                              db_op_result($query,__LINE__,__FILE__);
                         $mtlinfo = $mtl->fields;
@@ -890,14 +850,14 @@ while( !$res->EOF )
                         $mtlamount = 20;
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - $mtlamount "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = '$mtlinfo[long_name]'");
                             db_op_result($query,__LINE__,__FILE__);
                         $coalinfo = $coal->fields;
                         $coalamount = 100;
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - $coalamount "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = '$coalinfo[long_name]'");
                             db_op_result($query,__LINE__,__FILE__);
                     }
@@ -913,15 +873,15 @@ while( !$res->EOF )
                         $softinfo = $soft->fields;
                         $query = $db->Execute("UPDATE $dbtables[products] "
                                      ."SET amount = amount - $softamount "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = '$softinfo[long_name]'");
                           db_op_result($query,__LINE__,__FILE__);
                     }
                     $apiary = $db->Execute("SELECT * FROM $dbtables[structures] "
                                            ."WHERE long_name = 'apiary' "
-                                           ."AND tribeid = '$tribe[goods_tribe]' "
+                                           ."AND tribeid = '$goods_tribe' "
                                            ."AND complete = 'N' "
-                                           ."AND hex_id = '$tribe[hex_id]'");
+                                           ."AND hex_id = '$hex_id'");
                           db_op_result($apiary,__LINE__,__FILE__);
                     if( !$apiary->EOF )
                     {
@@ -932,8 +892,8 @@ while( !$res->EOF )
                                          ."SET complete = 'Y',"
                                          ."struct_pts = '100',"
                                          ."subunit = 'hives' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'apiary'");
                                db_op_result($query,__LINE__,__FILE__);
                         }
@@ -941,8 +901,8 @@ while( !$res->EOF )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$struct_points' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'apiary'");
                               db_op_result($query,__LINE__,__FILE__);
                         }
@@ -956,9 +916,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'apiary',"
                                          ."'Apiary',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'Y',"
                                          ."'$struct_points',"
                                          ."'100',"
@@ -968,7 +928,7 @@ while( !$res->EOF )
                                  db_op_result($query,__LINE__,__FILE__);
                             $hiv = $db->Execute("SELECT * FROM $dbtables[products] "
                                                 ."WHERE long_name = 'hives' "
-                                                ."AND tribeid = '$tribe[goods_tribe]'");
+                                                ."AND tribeid = '$goods_tribe'");
                                  db_op_result($hiv,__LINE__,__FILE__);
                             if( !$hiv->EOF )
                             {
@@ -978,15 +938,15 @@ while( !$res->EOF )
                                     $query = $db->Execute("UPDATE $dbtables[structures] "
                                                  ."SET number = 20 "
                                                  ."WHERE long_name = 'apiary' "
-                                                 ."AND hex_id = '$tribe[hex_id]' "
-                                                 ."AND clanid = '$tribe[clanid]' "
-                                                 ."AND tribeid = '$tribe[goods_tribe]' "
+                                                 ."AND hex_id = '$hex_id' "
+                                                 ."AND clanid = '$clanid' "
+                                                 ."AND tribeid = '$goods_tribe' "
                                                  ."AND complete = 'Y' "
                                                  ."AND subunit = 'hives'");
                                        db_op_result($query,__LINE__,__FILE__);
                                     $query = $db->Execute("UPDATE $dbtables[products] "
                                                  ."SET amount = amount - 20 "
-                                                 ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                                 ."WHERE tribeid = '$goods_tribe' "
                                                  ."AND long_name = 'hives'");
                                         db_op_result($query,__LINE__,__FILE__);
                                 }
@@ -995,15 +955,15 @@ while( !$res->EOF )
                                     $query = $db->Execute("UPDATE $dbtables[structures] "
                                                  ."SET number = $hive[amount] "
                                                  ."WHERE long_name = 'apiary' "
-                                                 ."AND hex_id = '$tribe[hex_id]' "
-                                                 ."AND clanid = '$tribe[clanid]' "
-                                                 ."AND tribeid = '$tribe[goods_tribe]' "
+                                                 ."AND hex_id = '$hex_id' "
+                                                 ."AND clanid = '$clanid' "
+                                                 ."AND tribeid = '$goods_tribe' "
                                                  ."AND complete = 'Y' "
                                                  ."AND subunit = 'hives'");
                                       db_op_result($query,__LINE__,__FILE__);
                                     $query = $db->Execute("UPDATE $dbtables[products] "
                                                  ."SET amount = 0 "
-                                                 ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                                 ."WHERE tribeid = '$goods_tribe' "
                                                  ."AND long_name = 'hives'");
                                       db_op_result($query,__LINE__,__FILE__);
                                 }
@@ -1016,9 +976,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'apiary',"
                                          ."'Apiary',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'N',"
                                          ."'$struct_points',"
                                          ."'100',"
@@ -1030,37 +990,27 @@ while( !$res->EOF )
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = 'apiary'");
                     db_op_result($query,__LINE__,__FILE__);
                 $query = $db->Execute("UPDATE $dbtables[products] "
                              ."SET amount = amount - '$logs_installed' "
-                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                             ."WHERE tribeid = '$goods_tribe' "
                              ."AND long_name = 'logs'");
                     db_op_result($query,__LINE__,__FILE__);
-                $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                             ."VALUES("
-                             ."'',"
-                             ."'$month[count]',"
-                             ."'$year[count]',"
-                             ."'$tribe[clanid]',"
-                             ."'$tribe[tribeid]',"
-                             ."'UPDATE',"
-                             ."'$stamp',"
-                             ."'Engineering: Apiary Construction using "
-                             ."$logs_installed logs $softamount $softinfo[proper] "
-                             ."$mtlamount $mtlinfo[long_name] $coalamount "
-                             ."$coalinfo[long_name] installed.')");
-                 db_op_result($query,__LINE__,__FILE__);
+   $log_type='UPDATE';
+  $logtext = "Engineering: Apiary Construction using $logs_installed logs $softamount $softinfo[proper] $mtlamount $mtlinfo[long_name] $coalamount $coalinfo[long_name] installed.";
+  playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
             }
 
             if( $act_do['product'] == 'bakery' )
             {
-                if( !$mhp->EOF )
+                if( $has_meethouse > 0 )
                 {
                     $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                         ."WHERE long_name = 'logs' "
-                                        ."AND tribeid = '$tribe[goods_tribe]'");
+                                        ."AND tribeid = '$goods_tribe'");
                        db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
@@ -1072,9 +1022,9 @@ while( !$res->EOF )
                     }
                     $bakery = $db->Execute("SELECT * FROM $dbtables[structures] "
                                            ."WHERE long_name = 'bakery' "
-                                           ."AND tribeid = '$tribe[goods_tribe]' "
+                                           ."AND tribeid = '$goods_tribe' "
                                            ."AND complete = 'N' "
-                                           ."AND hex_id = '$tribe[hex_id]'");
+                                           ."AND hex_id = '$hex_id'");
                           db_op_result($bakery,__LINE__,__FILE__);
                     if( !$bakery->EOF )
                     {
@@ -1085,8 +1035,8 @@ while( !$res->EOF )
                                          ."SET complete = 'Y',"
                                          ."struct_pts = '40',"
                                          ."subunit = 'ovens' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'bakery'");
                                db_op_result($query,__LINE__,__FILE__);
                         }
@@ -1094,8 +1044,8 @@ while( !$res->EOF )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'bakery'");
                                db_op_result($query,__LINE__,__FILE__);
                         }
@@ -1109,9 +1059,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'bakery',"
                                          ."'Bakery',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'Y',"
                                          ."'$logs_installed',"
                                          ."'40',"
@@ -1127,9 +1077,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'bakery',"
                                          ."'Bakery',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'N',"
                                          ."'$logs_installed',"
                                          ."'40',"
@@ -1141,34 +1091,27 @@ while( !$res->EOF )
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = 'bakery'");
                     db_op_result($query,__LINE__,__FILE__);
                 $query = $db->Execute("UPDATE $dbtables[products] "
                              ."SET amount = amount - '$logs_installed' "
-                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                             ."WHERE tribeid = '$goods_tribe' "
                              ."AND long_name = 'logs'");
                    db_op_result($query,__LINE__,__FILE__);
-                $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                             ."VALUES("
-                             ."'',"
-                             ."'$month[count]',"
-                             ."'$year[count]',"
-                             ."'$tribe[clanid]',"
-                             ."'$tribe[tribeid]',"
-                             ."'UPDATE',"
-                             ."'$stamp',"
-                             ."'Engineering: Bakery Construction using $logs_installed logs.')");
-                  db_op_result($query,__LINE__,__FILE__);
+ $log_type='UPDATE';
+  $logtext = "Engineering: Bakery Construction using $logs_installed logs.";
+  playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
             }
 
             if( $act_do['product'] == 'distillery' )
             {
-                if( !$mhp->EOF )
+                if( $has_meethouse > 0 )
                 {
                     $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                         ."WHERE long_name = 'logs' "
-                                        ."AND tribeid = '$tribe[goods_tribe]'");
+                                        ."AND tribeid = '$goods_tribe'");
                         db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
@@ -1180,9 +1123,9 @@ while( !$res->EOF )
                     }
                     $distillery = $db->Execute("SELECT * FROM $dbtables[structures] "
                                                ."WHERE long_name = 'distillery' "
-                                               ."AND tribeid = '$tribe[goods_tribe]' "
+                                               ."AND tribeid = '$goods_tribe' "
                                                ."AND complete = 'N' "
-                                               ."AND hex_id = '$tribe[hex_id]'");
+                                               ."AND hex_id = '$hex_id'");
                            db_op_result($distillery,__LINE__,__FILE__);
                     if( !$distillery->EOF )
                     {
@@ -1193,8 +1136,8 @@ while( !$res->EOF )
                                          ."SET complete = 'Y',"
                                          ."struct_pts = '80',"
                                          ."subunit = 'stills' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'distillery'");
                                db_op_result($query,__LINE__,__FILE__);
                         }
@@ -1202,8 +1145,8 @@ while( !$res->EOF )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'distillery'");
                               db_op_result($query,__LINE__,__FILE__);
                         }
@@ -1217,9 +1160,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'distillery',"
                                          ."'Distillery',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'Y',"
                                          ."'$logs_installed',"
                                          ."'80',"
@@ -1235,9 +1178,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'distillery',"
                                          ."'Distillery',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'N',"
                                          ."'$logs_installed',"
                                          ."'80',"
@@ -1249,33 +1192,26 @@ while( !$res->EOF )
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = 'distillery'");
                      db_op_result($query,__LINE__,__FILE__);
                 $query = $db->Execute("UPDATE $dbtables[products] "
                              ."SET amount = amount - '$logs_installed' "
-                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                             ."WHERE tribeid = '$goods_tribe' "
                              ."AND long_name = 'logs'");
                    db_op_result($query,__LINE__,__FILE__);
-                $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                             ."VALUES("
-                             ."'',"
-                             ."'$month[count]',"
-                             ."'$year[count]',"
-                             ."'$tribe[clanid]',"
-                             ."'$tribe[tribeid]',"
-                             ."'UPDATE',"
-                             ."'$stamp',"
-                             ."'Engineering: Distillery Construction using $logs_installed logs.')");
-                  db_op_result($query,__LINE__,__FILE__);
+  $log_type='UPDATE';
+  $logtext = "Engineering: Distillery Construction using $logs_installed logs.";
+  playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
             }
             if( $act_do['product'] == 'brickworks' )
             {
-                if( !$mhp->EOF )
+                if( $has_meethouse > 0 )
                 {
                     $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                         ."WHERE long_name = 'logs' "
-                                        ."AND tribeid = '$tribe[goods_tribe]'");
+                                        ."AND tribeid = '$goods_tribe'");
                          db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
@@ -1287,9 +1223,9 @@ while( !$res->EOF )
                     }
                     $bricked = $db->Execute("SELECT * FROM $dbtables[structures] "
                                             ."WHERE long_name = 'brickworks' "
-                                            ."AND tribeid = '$tribe[goods_tribe]' "
+                                            ."AND tribeid = '$goods_tribe' "
                                             ."AND complete = 'N' "
-                                            ."AND hex_id = '$tribe[hex_id]'");
+                                            ."AND hex_id = '$hex_id'");
                         db_op_result($bricked,__LINE__,__FILE__);
                     if( !$bricked->EOF )
                     {
@@ -1300,8 +1236,8 @@ while( !$res->EOF )
                                          ."SET complete = 'Y',"
                                          ."struct_pts = '100',"
                                          ."subunit = 'ovens' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'brickworks'");
                                db_op_result($query,__LINE__,__FILE__);
                         }
@@ -1309,8 +1245,8 @@ while( !$res->EOF )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'brickworks'");
                              db_op_result($query,__LINE__,__FILE__);
                         }
@@ -1324,9 +1260,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'brickworks',"
                                          ."'Brickworks',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'Y',"
                                          ."'$logs_installed',"
                                          ."'100',"
@@ -1342,9 +1278,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'brickworks',"
                                          ."'Brickworks',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'N',"
                                          ."'$logs_installed',"
                                          ."'100',"
@@ -1357,33 +1293,26 @@ while( !$res->EOF )
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = '$act_do[product]'");
                    db_op_result($query,__LINE__,__FILE__);
                 $query = $db->Execute("UPDATE $dbtables[products] "
                              ."SET amount = amount - '$logs_installed' "
-                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                             ."WHERE tribeid = '$goods_tribe' "
                              ."AND long_name = 'logs'");
                    db_op_result($query,__LINE__,__FILE__);
-                $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                             ."VALUES("
-                             ."'',"
-                             ."'$month[count]',"
-                             ."'$year[count]',"
-                             ."'$tribe[clanid]',"
-                             ."'$tribe[tribeid]',"
-                             ."'UPDATE',"
-                             ."'$stamp',"
-                             ."'Engineering: Brickworks Constructed using $logs_installed logs.')");
-                 db_op_result($query,__LINE__,__FILE__);
+     $log_type='UPDATE';
+  $logtext = "Engineering: Brickworks Construction using $logs_installed logs.";
+  playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
             }
 
             if( $act_do['product'] == 'brickworkoven' )
             {
                 $bricked = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                        ."WHERE clanid = '$tribe[clanid]' "
+                                        ."WHERE clanid = '$clanid' "
                                         ."AND long_name = 'brickworks' "
-                                        ."AND hex_id = '$tribe[hex_id]' "
+                                        ."AND hex_id = '$hex_id' "
                                         ."AND complete = 'Y' "
                                         ."AND number < 100");
                     db_op_result($bricked,__LINE__,__FILE__);
@@ -1392,26 +1321,22 @@ while( !$res->EOF )
                 if( !$bricked->EOF )
                 {
                     $maxoven = 100 - $brickinfo['number'];
-                    $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                        ."WHERE clanid = '$tribe[clanid]' "
-                                        ."AND long_name = 'meetinghouse' "
-                                        ."AND hex_id = '$tribe[hex_id]'");
-                        db_op_result($mhp,__LINE__,__FILE__);
-                    if( !$mhp->EOF && !$bricked->EOF )
+
+                    if( $has_meethouse > 0 && !$bricked->EOF )
                     {
                         $coal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                             ."WHERE tribeid = '$goods_tribe' "
                                              ."AND long_name = 'Coal'");
                          db_op_result($coal,__LINE__,__FILE__);
                         $metal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                              ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                              ."WHERE tribeid = '$goods_tribe' "
                                               ."AND long_name = 'Iron' "
                                               ."AND amount > 3");
                            db_op_result($metal,__LINE__,__FILE__);
                         if( $metal->EOF )
                         {
                             $metal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                                  ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                                  ."WHERE tribeid = '$goods_tribe' "
                                                   ."AND long_name = 'Bronze'");
                               db_op_result($metal,__LINE__,__FILE__);
                         }
@@ -1441,50 +1366,41 @@ while( !$res->EOF )
                                      ."SET number = number + '$ovens', "
                                      ."subunit = 'ovens' "
                                      ."WHERE struct_id = '$brickinfo[struct_id]' "
-                                     ."AND clanid = '$tribe[clanid]'");
+                                     ."AND clanid = '$clanid'");
                             db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - '$deltametal' "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = '$metalinfo[long_name]'");
                              db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - '$deltacoal' "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = 'Coal'");
                            db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                                     ."WHERE tribeid = '$tribe[tribeid]' "
+                                     ."WHERE tribeid = '$tribeid' "
                                      ."AND product = '$act_do[product]'");
                            db_op_result($query,__LINE__,__FILE__);
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                     ."VALUES("
-                                     ."'',"
-                                     ."'$month[count]',"
-                                     ."'$year[count]',"
-                                     ."'$tribe[clanid]',"
-                                     ."'$tribe[tribeid]',"
-                                     ."'UPDATE',"
-                                     ."'$stamp',"
-                                     ."'Engineering: $ovens Brickworking Ovens "
-                                     ."constructed using $deltacoal coal "
-                                     ."and $deltametal $metalinfo[long_name].')");
-                         db_op_result($query,__LINE__,__FILE__);
+  $log_type='UPDATE';
+  $logtext = "Engineering: $ovens Brickworking Ovens constructed using $deltacoal coal and $deltametal $metalinfo[long_name].";
+  playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = '$act_do[product]'");
                   db_op_result($query,__LINE__,__FILE__);
             }
 
             if( $act_do['product'] == 'charhouse' )
             {
-                if( !$mhp->EOF )
+                if( $has_meethouse > 0 )
                 {
                     $log = $db->Execute("SELECT * FROM $dbtables[products] "
                                         ."WHERE long_name = 'logs' "
-                                        ."AND tribeid = '$tribe[goods_tribe]'");
+                                        ."AND tribeid = '$goods_tribe'");
                        db_op_result($log,__LINE__,__FILE__);
                     $loginfo = $log->fields;
                     $logs_installed = 0;
@@ -1496,9 +1412,9 @@ while( !$res->EOF )
                     }
                     $charred = $db->Execute("SELECT * FROM $dbtables[structures] "
                                             ."WHERE long_name = 'charhouse' "
-                                            ."AND tribeid = '$tribe[goods_tribe]' "
+                                            ."AND tribeid = '$goods_tribe' "
                                             ."AND complete = 'N' "
-                                            ."AND hex_id = '$tribe[hex_id]'");
+                                            ."AND hex_id = '$hex_id'");
                          db_op_result($charred,__LINE__,__FILE__);
                     if( !$charred->EOF )
                     {
@@ -1509,8 +1425,8 @@ while( !$res->EOF )
                                          ."SET complete = 'Y',"
                                          ."struct_pts = '100',"
                                          ."subunit = 'burners' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'charhouse'");
                               db_op_result($query,__LINE__,__FILE__);
                         }
@@ -1518,8 +1434,8 @@ while( !$res->EOF )
                         {
                             $query = $db->Execute("UPDATE $dbtables[structures] "
                                          ."SET struct_pts = struct_pts + '$logs_installed' "
-                                         ."WHERE tribeid = '$tribe[goods_tribe]' "
-                                         ."AND hex_id = '$tribe[hex_id]' "
+                                         ."WHERE tribeid = '$goods_tribe' "
+                                         ."AND hex_id = '$hex_id' "
                                          ."AND long_name = 'charhouse'");
                              db_op_result($query,__LINE__,__FILE__);
                         }
@@ -1533,9 +1449,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'charhouse',"
                                          ."'Char House',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'Y',"
                                          ."'$logs_installed',"
                                          ."'100',"
@@ -1551,9 +1467,9 @@ while( !$res->EOF )
                                          ."'',"
                                          ."'charhouse',"
                                          ."'Char House',"
-                                         ."'$tribe[hex_id]',"
-                                         ."'$tribe[goods_tribe]',"
-                                         ."'$tribe[clanid]',"
+                                         ."'$hex_id',"
+                                         ."'$goods_tribe',"
+                                         ."'$clanid',"
                                          ."'N',"
                                          ."'$logs_installed',"
                                          ."'100',"
@@ -1566,33 +1482,26 @@ while( !$res->EOF )
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = '$act_do[product]'");
                    db_op_result($query,__LINE__,__FILE__);
                 $query = $db->Execute("UPDATE $dbtables[products] "
                              ."SET amount = amount - '$logs_installed' "
-                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                             ."WHERE tribeid = '$goods_tribe' "
                              ."AND long_name = 'logs'");
                   db_op_result($query,__LINE__,__FILE__);
-                $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                             ."VALUES("
-                             ."'',"
-                             ."'$month[count]',"
-                             ."'$year[count]',"
-                             ."'$tribe[clanid]',"
-                             ."'$tribe[tribeid]',"
-                             ."'UPDATE',"
-                             ."'$stamp',"
-                             ."'Engineering: Char House Constructed using $logs_installed logs.')");
-                db_op_result($query,__LINE__,__FILE__);
+  $log_type='UPDATE';
+  $logtext = "Engineering: Char House Constructed using $logs_installed logs.";
+  playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
             }
 
             if( $act_do['product'] == 'burner' )
             {
                 $charred = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                        ."WHERE clanid = '$tribe[clanid]' "
+                                        ."WHERE clanid = '$clanid' "
                                         ."AND long_name = 'charhouse' "
-                                        ."AND hex_id = '$tribe[hex_id]' "
+                                        ."AND hex_id = '$hex_id' "
                                         ."AND complete = 'Y' "
                                         ."AND number < 100");
                   db_op_result($charred,__LINE__,__FILE__);
@@ -1601,26 +1510,22 @@ while( !$res->EOF )
                 if( !$charred->EOF )
                 {
                     $maxburn = 100 - $charinfo['number'];
-                    $mhp = $db->Execute("SELECT * FROM $dbtables[structures] "
-                                        ."WHERE clanid = '$tribe[clanid]' "
-                                        ."AND long_name = 'meetinghouse' "
-                                        ."AND hex_id = '$tribe[hex_id]'");
-                      db_op_result($mhp,__LINE__,__FILE__);
-                    if( !$mhp->EOF && !$charred->EOF )
+
+                    if( $has_meethouse > 0 && !$charred->EOF )
                     {
                         $coal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                             ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                             ."WHERE tribeid = '$goods_tribe' "
                                              ."AND long_name = 'Coal'");
                           db_op_result($coal,__LINE__,__FILE__);
                         $metal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                              ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                              ."WHERE tribeid = '$goods_tribe' "
                                               ."AND long_name = 'Iron' "
                                               ."AND amount > 3");
                            db_op_result($metal,__LINE__,__FILE__);
                         if( $metal->EOF )
                         {
                             $metal = $db->Execute("SELECT * FROM $dbtables[resources] "
-                                                  ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                                  ."WHERE tribeid = '$goods_tribe' "
                                                   ."AND long_name = 'Bronze'");
                               db_op_result($metal,__LINE__,__FILE__);
                         }
@@ -1650,48 +1555,37 @@ while( !$res->EOF )
                                      ."SET number = number + '$burners', "
                                      ."subunit = 'burners' "
                                      ."WHERE struct_id = '$charinfo[struct_id]' "
-                                     ."AND clanid = '$tribe[clanid]'");
+                                     ."AND clanid = '$clanid'");
                            db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - '$deltametal' "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = '$metalinfo[long_name]'");
                             db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("UPDATE $dbtables[resources] "
                                      ."SET amount = amount - '$deltacoal' "
-                                     ."WHERE tribeid = '$tribe[goods_tribe]' "
+                                     ."WHERE tribeid = '$goods_tribe' "
                                      ."AND long_name = 'Coal'");
                            db_op_result($query,__LINE__,__FILE__);
                         $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                                     ."WHERE tribeid = '$tribe[tribeid]' "
+                                     ."WHERE tribeid = '$tribeid' "
                                      ."AND product = '$act_do[product]'");
                           db_op_result($query,__LINE__,__FILE__);
-                        $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                                     ."VALUES("
-                                     ."'',"
-                                     ."'$month[count]',"
-                                     ."'$year[count]',"
-                                     ."'$tribe[clanid]',"
-                                     ."'$tribe[tribeid]',"
-                                     ."'UPDATE',"
-                                     ."'$stamp',"
-                                     ."'Engineering: $burners Burners "
-                                     ."constructed using $deltacoal coal "
-                                     ."and $deltametal $metalinfo[long_name].')");
-                          db_op_result($query,__LINE__,__FILE__);
+    $log_type='UPDATE';
+  $logtext = "Engineering: $burners Burners constructed using $deltacoal coal and $deltametal $metalinfo[long_name].";
+  playerlog($tribeid,$clanid,$log_type,$month['count'],$year['count'],$logtext,$dbtables);
+
                     }
                 }
                 $query = $db->Execute("DELETE FROM $dbtables[activities] "
-                             ."WHERE tribeid = '$tribe[tribeid]' "
+                             ."WHERE tribeid = '$tribeid' "
                              ."AND product = '$act_do[product]'");
                   db_op_result($query,__LINE__,__FILE__);
             }
 
-        }
+
         $act->MoveNext();
     }
-    $res->MoveNext();
-}
 
 
 ?>

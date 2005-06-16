@@ -1,4 +1,4 @@
-<?
+<?php
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2 of the License, or (at your
@@ -11,7 +11,7 @@ $admincheck = $_SESSION['username'];
 //here we should query the db to get admin's username or id or some such to auth
 if($admincheck !== 'admin')
 {
-die("You Do Not	Have permissions to view this page!");
+die("You Do Not Have permissions to view this page!");
 }
 include("config.php");
 include("game_time.php");
@@ -24,12 +24,13 @@ bigtitle();
 
 $username = $_SESSION['username'];
 $admin = $db->Execute("SELECT * FROM $dbtables[chiefs] WHERE username = '$username'");
+db_op_result($admin,__LINE__,__FILE__);
 $admininfo = $admin->fields;
 
 
-$module = $_REQUEST[menu];
+$module = $_POST['menu'];
 
-if( !$admininfo[admin] >= '2' )
+if( !$admininfo['admin'] >= '2' )
 {
     echo "You must be an administrator to use this tool.<BR>\n";
     TEXT_GOTOMAIN();
@@ -37,11 +38,12 @@ if( !$admininfo[admin] >= '2' )
 }
 
 ////////////////////////////////////First, display a list of tribes to move.//////////////////
-if( $_REQUEST[newhex] == '' && $_REQUEST[tribe] == '' )
+if( $_POST['newhex'] == '' && $_POST['tribe'] == '' )
 {
     $res = $db->Execute("SELECT * FROM $dbtables[tribes] "
                        ."WHERE tribeid = goods_tribe "
                        ."ORDER BY tribeid");
+                       db_op_result($res,__LINE__,__FILE__);
     echo '<CENTER><FONT SIZE=+2 COLOR=WHITE>Move which tribe?</FONT>';
     echo '<CENTER><TABLE BORDER=0 CELLPADDING=0 WIDTH=60%><TR ALIGN=CENTER><TD>';
     echo '<BR>Select a Tribe:</TD><TD>';
@@ -52,6 +54,7 @@ if( $_REQUEST[newhex] == '' && $_REQUEST[tribe] == '' )
         $tribe = $res->fields;
         $hx = $db->Execute("SELECT * FROM $dbtables[hexes] "
                           ."WHERE hex_id = '$tribe[hex_id]'");
+        db_op_result($hx,__LINE__,__FILE__);
         $hex = $hx->fields;
         echo "<OPTION VALUE=$tribe[tribeid]>$tribe[tribeid] ($hex[terrain])</OPTION>";
 
@@ -63,29 +66,33 @@ if( $_REQUEST[newhex] == '' && $_REQUEST[tribe] == '' )
     echo "<TR><TD COLSPAN=2 ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=Move></FORM></TD></TR></TABLE>";
 }
 
-if( !$_REQUEST[newhex] == '' && !$_REQUEST[tribe] == '' )
+if( !$_POST['newhex'] == '' && !$_POST['tribe'] == '' )
 {
-    if( $_REQUEST[newhex] > 1 && $_REQUEST[newhex] < 37501 )
+    if( $_POST['newhex'] > 1 && $_POST['newhex'] < 37501 )
     {
         $gt = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                          ."WHERE goods_tribe = '$_REQUEST[tribe]'");
+                          ."WHERE goods_tribe = '$_POST[tribe]'");
+         db_op_result($gt,__LINE__,__FILE__);
         while( !$gt->EOF)
         {
             $subtribe = $gt->fields;
-            $db->Execute("UPDATE $dbtables[garrisons] "
-                        ."SET hex_id = '$_REQUEST[newhex]' "
+            $qry = $db->Execute("UPDATE $dbtables[garrisons] "
+                        ."SET hex_id = '$_POST[newhex]' "
                         ."WHERE tribeid = '$subtribe[tribeid]'");
-            $db->Execute("UPDATE $dbtables[structures] "
-                        ."SET hex_id = '$_REQUEST[newhex]' "
+            db_op_result($qry,__LINE__,__FILE__);
+            $qry = $db->Execute("UPDATE $dbtables[structures] "
+                        ."SET hex_id = '$_POST[newhex]' "
                         ."WHERE tribeid = '$subtribe[tribeid]' "
                         ."AND hex_id = '$subtribe[hex_id]'");
-            echo "<CENTER>Tribe $subtribe[tribeid] moved to $_REQUEST[newhex].<BR></CENTER>";
+            db_op_result($qry,__LINE__,__FILE__);
+            echo "<CENTER>Tribe $subtribe[tribeid] moved to $_POST[newhex].<BR></CENTER>";
             $gt->MoveNext();
         }
-        $db->Execute("UPDATE $dbtables[tribes] "
-                    ."SET hex_id = '$_REQUEST[newhex]' "
-                    ."WHERE goods_tribe = '$_REQUEST[tribe]'");
-    $db->Execute("INSERT INTO $dbtables[logs] "
+        $qry = $db->Execute("UPDATE $dbtables[tribes] "
+                    ."SET hex_id = '$_POST[newhex]' "
+                    ."WHERE goods_tribe = '$_POST[tribe]'");
+        db_op_result($qry,__LINE__,__FILE__);
+    $qry = $db->Execute("INSERT INTO $dbtables[logs] "
                 ."VALUES("
                 ."'',"
                 ."'$month[count]',"
@@ -94,8 +101,8 @@ if( !$_REQUEST[newhex] == '' && !$_REQUEST[tribe] == '' )
                 ."'0000.00',"
                 ."'ADMINMOVED',"
                 ."'$stamp',"
-                ."'Admin: $_REQUEST[tribe] moved to $_REQUEST[newhex] by $_SESSION[clanid].')");
-
+                ."'Admin: $_POST[tribe] moved to $_POST[newhex] by $_SESSION[clanid].')");
+     db_op_result($qry,__LINE__,__FILE__);
     }
 }
 

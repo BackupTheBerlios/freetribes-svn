@@ -31,9 +31,11 @@ $clanid = $_SESSION['clanid'];
 $curr_unit = $_SESSION['current_unit'];
 
 $ch = $db->Execute("SELECT * FROM $dbtables[chiefs] WHERE clanid = '$clanid'");
+db_op_result($ch,__LINE__,__FILE__);
 $chiefinfo = $ch->fields;
 
 $res = $db->Execute("SELECT clanname FROM $dbtables[clans] WHERE clanid = '$clanid'");
+db_op_result($res,__LINE__,__FILE__);
 $resclan = $res->fields;
 
 $_SESSION['clanname'] = $resclan['clanname'];
@@ -41,6 +43,7 @@ if(!empty($_GET['id']))
 {
     $tribe_id=$_GET['id'];
     $restrib = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE clanid = '$clanid' AND tribeid = '$tribe_id'");
+    db_op_result($restrib,__LINE__,__FILE__);
     $tribeinfo = $restrib->fields;
     if($tribeinfo['clanid'] == $clanid)
     {
@@ -49,6 +52,7 @@ if(!empty($_GET['id']))
     else
     {
         $res2 = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE clanid = '$clanid'");
+        db_op_result($res2,__LINE__,__FILE__);
         $tribeinfo = $res2->fields;
         $_SESSION['current_unit'] = $tribeinfo['tribeid'];
 
@@ -57,12 +61,14 @@ if(!empty($_GET['id']))
 if(!empty($_SESSION['current_unit']))
 {
     $res2 = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE tribeid = '$_SESSION[current_unit]'");
+    db_op_result($res2,__LINE__,__FILE__);
     $tribeinfo = $res2->fields;
     $_SESSION['current_unit'] = $tribeinfo['tribeid'];
 }
 else
 {
     $res2 = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE clanid = '$clanid'");
+     db_op_result($res2,__LINE__,__FILE__);
     $tribeinfo = $res2->fields;
     $_SESSION['current_unit'] = $tribeinfo['tribeid'];
 }
@@ -73,28 +79,24 @@ $_SESSION['hex_id'] = $tribeinfo['hex_id'];
 $_SESSION['clanid'] = $tribeinfo['clanid'];
 
 
-$res4 = $db->Execute("SELECT * FROM $dbtables[hexes] "
-                    ."WHERE hex_id = '$tribeinfo[hex_id]'");
+$res4 = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$tribeinfo[hex_id]'");
+db_op_result($res4,__LINE__,__FILE__);
 $hexinfo = $res4->fields;
 
-$db->Execute("UPDATE $dbtables[mapping] "
-            ."SET `clanid_$_SESSION[clanid]` = '1'"
-            ."WHERE hex_id = '$tribeinfo[hex_id]'"
-            ."AND `clanid_$_SESSION[clanid]` = '0'");
-
+$res5 = $db->Execute("UPDATE $dbtables[mapping] SET `clanid_$_SESSION[clanid]` = '1' WHERE hex_id = '$tribeinfo[hex_id]' AND `clanid_$_SESSION[clanid]` = '0'");
+db_op_result($res5,__LINE__,__FILE__);
 $neighbors = array($hexinfo['nw'], $hexinfo['n'], $hexinfo['ne'], $hexinfo['w'], $hexinfo['e'], $hexinfo['sw'], $hexinfo['s'], $hexinfo['se']);
 $mapped = array();
 $hexes = array();
 
 foreach( $neighbors as $map )
 {
-    $result3 = $db->Execute("SELECT hex_id FROM $dbtables[mapping] "
-                           ."WHERE hex_id = '$map' "
-                           ."AND `clanid_$_SESSION[clanid]` > '0'");
+    $result3 = $db->Execute("SELECT hex_id FROM $dbtables[mapping] WHERE hex_id = '$map' AND `clanid_$_SESSION[clanid]` > '0'");
+    db_op_result($result3,__LINE__,__FILE__);
     $row3 = $result3->fields;
 
-    $result4 = $db->Execute("SELECT * FROM $dbtables[hexes] "
-                           ."WHERE hex_id = '$map'");
+    $result4 = $db->Execute("SELECT * FROM $dbtables[hexes] WHERE hex_id = '$map'");
+    db_op_result($result4,__LINE__,__FILE__);
     $row4 = $result4->fields;
 
 
@@ -108,10 +110,8 @@ foreach( $neighbors as $map )
         case 'l':
         case 'hsm':
             $mapped[] = array($map);
-            $db->Execute("UPDATE $dbtables[mapping] "
-                                    ."SET `clanid_$_SESSION[clanid]` = '1' "
-                                    ."WHERE hex_id = '$row4[hex_id]'"
-                                    ."AND `clanid_$_SESSION[clanid]` = '0'");
+            $qery = $db->Execute("UPDATE $dbtables[mapping] SET `clanid_$_SESSION[clanid]` = '1' WHERE hex_id = '$row4[hex_id]' AND `clanid_$_SESSION[clanid]` = '0'");
+            db_op_result($qery,__LINE__,__FILE__);
             break;
         }
 
@@ -125,8 +125,8 @@ foreach( $neighbors as $map )
     }
 }
 
-$messres = $db->Execute("SELECT count(*) as count FROM $dbtables[messages] "
-                       ."WHERE recp_id ='$_SESSION[clanid]' AND notified='N'");
+$messres = $db->Execute("SELECT count(*) as count FROM $dbtables[messages] WHERE recp_id ='$_SESSION[clanid]' AND notified='N'");
+db_op_result($messres,__LINE__,__FILE__);
 $messages = $messres->fields;
 
 if( $messages['count'] > 0 )
@@ -135,10 +135,8 @@ if( $messages['count'] > 0 )
         echo "alert(\"You have $messages[count] messages waiting for you.\")</SCRIPT>";
 }
 
-$db->Execute("UPDATE $dbtables[messages] "
-            ."SET notified='Y' "
-            ."WHERE recp_id = '$_SESSION[clanid]'");
-
+$qery = $db->Execute("UPDATE $dbtables[messages] SET notified='Y' WHERE recp_id = '$_SESSION[clanid]'");
+db_op_result($qery,__LINE__,__FILE__);
 echo "<TABLE BORDER=0 CELLPADDING=0 align=center width=\"40%\">";
 echo "<TR ALIGN=CENTER><TD>";
 if( $_SESSION['tooltip'] == '1' )
@@ -161,21 +159,20 @@ echo "<TR CLASS=color_header>"
         ."</TD></TR>";
 echo "<TR><TD WIDTH=\"33%\">";
 echo "<TABLE BORDER=0 CELLPADDING=0 ALIGN=CENTER><TR><TD>";
-$hextype = $db->Execute("SELECT name FROM $dbtables[gd_terrain] "
-                       ."WHERE abbr ='".$hexinfo['terrain']."'");
+$hextype = $db->Execute("SELECT name FROM $dbtables[gd_terrain] WHERE abbr ='".$hexinfo['terrain']."'");
+db_op_result($hextype,__LINE__,__FILE__);
 $hextype = $hextype->fields['name'];
 
 echo "<FONT COLOR=BLACK SIZE=-2>$hextype</FONT>";
 echo "</TD></TR>";
 echo "<TR><TD>";
 
-$reshex = $db->Execute("SELECT produce, name FROM $dbtables[gd_resources] "
-                       ."WHERE name ='".$hexinfo['res_type']."'");
+$reshex = $db->Execute("SELECT produce, name FROM $dbtables[gd_resources] WHERE name ='".$hexinfo['res_type']."'");
+db_op_result($reshex,__LINE__,__FILE__);
 $reshex = $reshex->fields['produce'];
 $clanmap = "clanid_" . $_SESSION['clanid'];
-$resf = $db->Execute("SELECT * FROM $dbtables[mapping] "
-                       ."WHERE `$clanmap` <= '1' "
-                       ."AND hex_id = '$hexinfo[hex_id]'");
+$resf = $db->Execute("SELECT * FROM $dbtables[mapping] WHERE `$clanmap` <= '1' AND hex_id = '$hexinfo[hex_id]'");
+db_op_result($resf,__LINE__,__FILE__);
 $resfind = $resf->fields[$clanmap];
 
 if( $reshex == '' || !$resf->EOF )
@@ -224,20 +221,20 @@ foreach ($top_dir as $direct)
         $clanmap = "clanid_" . $clanid;
     if( ISSET($map_chief[$direct]) )
     {
-        $res = $db->Execute("SELECT hex_id, res_type, terrain FROM $dbtables[hexes] "
-                           ."WHERE hex_id = '".$hexinfo[$direct]."'");
+        $res = $db->Execute("SELECT hex_id, res_type, terrain FROM $dbtables[hexes] WHERE hex_id = '".$hexinfo[$direct]."'");
+        db_op_result($res,__LINE__,__FILE__);
         $this_hex = $res->fields;
 
-        $res = $db->Execute("SELECT name FROM $dbtables[gd_terrain] "
-                            ."WHERE abbr='".$this_hex['terrain']."'");
+        $res = $db->Execute("SELECT name FROM $dbtables[gd_terrain] WHERE abbr='".$this_hex['terrain']."'");
+        db_op_result($res,__LINE__,__FILE__);
         $terrain = $res->fields['name'];
-                $prosp = $db->Execute("SELECT $clanmap FROM $dbtables[mapping] "
-                                     ."WHERE hex_id = '$this_hex[hex_id]'");
+                $prosp = $db->Execute("SELECT $clanmap FROM $dbtables[mapping] WHERE hex_id = '$this_hex[hex_id]'");
+                db_op_result($prosp,__LINE__,__FILE__);
                 $prospct = $prosp->fields[$clanmap];
         if ($this_hex['res_type'] <> "" && $prospct > 1 )
         {
-            $res = $db->Execute("SELECT produce FROM $dbtables[gd_resources] "
-                                ."WHERE name='".$this_hex['res_type']."'");
+            $res = $db->Execute("SELECT produce FROM $dbtables[gd_resources] WHERE name='".$this_hex['res_type']."'");
+            db_op_result($res,__LINE__,__FILE__);
             $resource = $res->fields['produce'];
                         $resource2 = $this_hex['res_type'];
             $resource = " \n ".$resource;
@@ -276,8 +273,8 @@ foreach ($top_dir as $direct)
     }
     else
     {
-        $res = $db->Execute("SELECT hex_id FROM $dbtables[hexes] "
-                           ."WHERE hex_id = '".$hexinfo[$direct]."'");
+        $res = $db->Execute("SELECT hex_id FROM $dbtables[hexes] WHERE hex_id = '".$hexinfo[$direct]."'");
+        db_op_result($res,__LINE__,__FILE__);
         $this_hex = $res->fields;
             if( $this_hex['hex_id'] )
             {
@@ -310,18 +307,17 @@ foreach ($top_dir as $direct)
 
 $clanmap = "clanid_" . $clanid;
 
-$res = $db->Execute("SELECT name FROM $dbtables[gd_terrain] "
-                    ."WHERE abbr='".$hexinfo['terrain']."'");
+$res = $db->Execute("SELECT name FROM $dbtables[gd_terrain] WHERE abbr='".$hexinfo['terrain']."'");
+db_op_result($res,__LINE__,__FILE__);
 $terrain = $res->fields['name'];
-                $prosp = $db->Execute("SELECT $clanmap, hex_id FROM $dbtables[mapping] "
-                                     ."WHERE hex_id = '$hexinfo[hex_id]' "
-                                     ."AND $clanmap > '1'");
+                $prosp = $db->Execute("SELECT $clanmap, hex_id FROM $dbtables[mapping] WHERE hex_id = '$hexinfo[hex_id]' AND $clanmap > '1'");
+                db_op_result($prosp,__LINE__,__FILE__);
                 $prospct = $prosp->fields[$clanmap];
 
 if ($hexinfo['res_type'] <> "" && $prospct )
 {
-    $res = $db->Execute("SELECT produce, name FROM $dbtables[gd_resources] "
-                        ."WHERE name='".$hexinfo['res_type']."'");
+    $res = $db->Execute("SELECT produce, name FROM $dbtables[gd_resources] WHERE name='".$hexinfo['res_type']."'");
+    db_op_result($res,__LINE__,__FILE__);
     $resource = $res->fields['produce'];
         $resource2 = $hexinfo['res_type'];
     $resource = " \n ".$resource;
@@ -348,22 +344,22 @@ foreach ($top_dir as $direct)
     if( ISSET($map_chief[$direct]) )
     {
                 $clanmap = "clanid_" . $clanid;
-        $res = $db->Execute("SELECT hex_id, res_type, terrain FROM $dbtables[hexes] "
-                           ."WHERE hex_id = '".$hexinfo[$direct]."'");
+        $res = $db->Execute("SELECT hex_id, res_type, terrain FROM $dbtables[hexes] WHERE hex_id = '".$hexinfo[$direct]."'");
+        db_op_result($res,__LINE__,__FILE__);
         $this_hex = $res->fields;
 
-        $res = $db->Execute("SELECT name FROM $dbtables[gd_terrain] "
-                            ."WHERE abbr='".$this_hex[terrain]."'");
-        $terrain = $res->fields[name];
-                $prosp = $db->Execute("SELECT $clanmap FROM $dbtables[mapping] "
-                                     ."WHERE hex_id = '$this_hex[hex_id]'");
+        $res = $db->Execute("SELECT name FROM $dbtables[gd_terrain] WHERE abbr='".$this_hex['terrain']."'");
+        db_op_result($res,__LINE__,__FILE__);
+        $terrain = $res->fields['name'];
+                $prosp = $db->Execute("SELECT $clanmap FROM $dbtables[mapping] WHERE hex_id = '$this_hex[hex_id]'");
+                db_op_result($prosp,__LINE__,__FILE__);
                 $prospct = $prosp->fields;
-        if ($this_hex[res_type] <> "" && $prospct[$clanmap] > 1 )
+        if ($this_hex['res_type'] <> "" && $prospct[$clanmap] > 1 )
         {
-            $res = $db->Execute("SELECT produce FROM $dbtables[gd_resources] "
-                                ."WHERE name='".$this_hex[res_type]."'");
-            $resource = $res->fields[produce];
-                        $resource2 = $this_hex[res_type];
+            $res = $db->Execute("SELECT produce FROM $dbtables[gd_resources] WHERE name='".$this_hex['res_type']."'");
+            db_op_result($res,__LINE__,__FILE__);
+            $resource = $res->fields['produce'];
+                        $resource2 = $this_hex['res_type'];
             $resource = " \n ".$resource;
         }
         else
@@ -394,8 +390,8 @@ foreach ($top_dir as $direct)
     }
     else
     {
-        $res = $db->Execute("SELECT hex_id FROM $dbtables[hexes] "
-                           ."WHERE hex_id = '".$hexinfo[$direct]."'");
+        $res = $db->Execute("SELECT hex_id FROM $dbtables[hexes] WHERE hex_id = '".$hexinfo[$direct]."'");
+        db_op_result($res,__LINE__,__FILE__);
         $this_hex = $res->fields;
                 if( $this_hex['hex_id'] )
                 {
@@ -430,12 +426,8 @@ echo "</TD><TD>";
 echo "<TABLE BORDER=0 CELLPADDING=0 WIDTH=\"100%\"><TR><TD>";
 
 $time = time();
-$db->Execute("UPDATE $dbtables[chiefs] "
-            ."SET lastseen_month = '$month[count]',"
-            ." lastseen_year = '$year[count]',"
-            ." hour = '$time'"
-            ." WHERE clanid = '$_SESSION[clanid]'");
-
+$qery = $db->Execute("UPDATE $dbtables[chiefs] SET lastseen_month = '$month[count]',  lastseen_year = '$year[count]',  hour = '$time'  WHERE clanid = '$_SESSION[clanid]'");
+db_op_result($qery,__LINE__,__FILE__);
 if( $gameseason[count] == '1' )
 {
     $season = 'Spring';
@@ -506,7 +498,7 @@ GUI_menu_option("bugtracker.php", "",  "Report Bug");
 GUI_menu_option("options.php", "", "Options");
 echo "</TD></TR>";
 
-if( $tribeinfo[tribeid] == $tribeinfo[goods_tribe] && $month[count] == '4' | $month[count] == '10' )
+if( $tribeinfo['tribeid'] == $tribeinfo['goods_tribe'] && $month['count'] == '4' | $month['count'] == '10' )
 {
 echo "<TR onmouseover=\"return overlib('The fair is a special event that occurs only twice a year where you can buy and sell items to and from other chiefs.');\" onmouseout=\"nd();\">"
         ."<TD ALIGN=LEFT>"
@@ -523,7 +515,7 @@ GUI_menu_option("logout.php", "", "Logout");
 echo "</TD></TR></TABLE>"
     ."</TD></TR>";
 
-if( $chiefinfo[admin] >= $privilege['adm_access'] )
+if( $chiefinfo['admin'] >= $privilege['adm_access'] )
 {
 echo "<TR><TD ALIGN=LEFT>"
     ."<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=8><TR><TD>";
@@ -595,14 +587,12 @@ echo "<TD COLSPAN=9 valign=top align=right>";
 echo "<TABLE BORDER=0 CELLPADDING=4 valign=top align=right>";
 
 echo "<TR><TD valign=top>";
-$totalpop = $tribeinfo[activepop] + $tribeinfo[inactivepop];
+$totalpop = $tribeinfo['activepop'] + $tribeinfo['inactivepop'];
 if( $totalpop < 200 )
 {
     $skillsunavail = true;
-    $db->Execute("UPDATE $dbtables[tribes] "
-                ."SET pri_skill_att = '',"
-                ."sec_skill_att = '' "
-                ."WHERE tribeid = '$tribeinfo[tribeid]'");
+    $qery = $db->Execute("UPDATE $dbtables[tribes] SET pri_skill_att = '', sec_skill_att = '' WHERE tribeid = '$tribeinfo[tribeid]'");
+    db_op_result($qery,__LINE__,__FILE__);
 }
 
 
@@ -611,27 +601,24 @@ if( $totalpop < 200 )
 
 if( ISSET($_REQUEST['resetp']) )
 {
-    $db->Execute("UPDATE $dbtables[tribes] "
-                ."SET pri_skill_att = '',"
-                ."sec_skill_att = '' "
-                ."WHERE tribeid = '$tribeinfo[tribeid]'");
+    $db->Execute("UPDATE $dbtables[tribes] SET pri_skill_att = '', sec_skill_att = '' WHERE tribeid = '$tribeinfo[tribeid]'");
 
-    unset ($_REQUEST['resetp']);
-    unset ($_REQUEST['attempta']);
-    unset ($_REQUEST['attemptb']);
-    unset ($_REQUEST['pri']);
-    unset ($_REQUEST['sec']);
-    $tribeinfo[pri_skill_att] = "";
-    $tribeinfo[sec_skill_att] = "";
+    unset ($_POST['resetp']);
+    unset ($_POST['attempta']);
+    unset ($_POST['attemptb']);
+    unset ($_POST['pri']);
+    unset ($_POST['sec']);
+    $tribeinfo['pri_skill_att'] = "";
+    $tribeinfo['sec_skill_att'] = "";
 }
 
 
 // DISPLAY PRIMARY SKILL ATTEMPT
 
 
-if( $tribeinfo[pri_skill_att] == '' && !$skillsunavail )
+if( $tribeinfo['pri_skill_att'] == '' && !$skillsunavail )
 {
-    if( !ISSET($_REQUEST[attempta]) )
+    if( !ISSET($_POST['attempta']) )
     {
         echo "<FORM ACTION=main.php METHOD=POST valign=top>";
         echo "<SELECT NAME=pri valign=top>";
@@ -640,7 +627,7 @@ if( $tribeinfo[pri_skill_att] == '' && !$skillsunavail )
         option_skills("c");
         echo "</SELECT></A>";
         echo "<INPUT TYPE=HIDDEN NAME=attempta VALUE=commit>";
-        if( $_SESSION[tooltip] == '1' )
+        if( $_SESSION['tooltip'] == '1' )
         {
             echo "<INPUT TYPE=SUBMIT VALUE=Primary onmouseover=\"return overlib('Select your primary skill attempt for this turn.');\" onmouseout=\"nd();\">";
         }
@@ -652,7 +639,7 @@ if( $tribeinfo[pri_skill_att] == '' && !$skillsunavail )
 
         echo "</TD><TD valign=top>";
     }
-    elseif( $_REQUEST[attempta] == 'commit' )
+    elseif( $_REQUEST['attempta'] == 'commit' )
     {
         $db->Execute("UPDATE $dbtables[tribes] "
                     ."SET pri_skill_att = '$_REQUEST[pri]' "
@@ -698,10 +685,10 @@ else
 // DISPLAY SECONDARY SKILL ATTEMPT
 
 
-if( $tribeinfo[sec_skill_att] == '' && !$skillsunavail | $tribeinfo[sec_skill_att] == $tribeinfo[pri_skill_att] && !$skillsunavail )
+if( $tribeinfo['sec_skill_att'] == '' && !$skillsunavail || $tribeinfo['sec_skill_att'] == $tribeinfo[pri_skill_att] && !$skillsunavail )
 {
-    $tribeinfo[sec_skill_att] = '';
-    if( !ISSET($_REQUEST[attemptb]) )
+    $tribeinfo['sec_skill_att'] = '';
+    if( !ISSET($_REQUEST['attemptb']) )
     {
         echo "<FORM ACTION=main.php METHOD=POST>";
         echo "<SELECT NAME=sec>";
@@ -710,7 +697,7 @@ if( $tribeinfo[sec_skill_att] == '' && !$skillsunavail | $tribeinfo[sec_skill_at
         option_skills("c");
         echo "</SELECT>";
         echo "<INPUT TYPE=HIDDEN NAME=attemptb VALUE=commit>";
-        if( $_SESSION[tooltip] == '1' )
+        if( $_SESSION['tooltip'] == '1' )
         {
             echo "<INPUT TYPE=SUBMIT VALUE=Secondary onmouseover=\"return overlib('Select your secondary skill attempt for this turn.');\" onmouseout=\"nd();\">";
         }
@@ -722,7 +709,7 @@ if( $tribeinfo[sec_skill_att] == '' && !$skillsunavail | $tribeinfo[sec_skill_at
 
         echo "</TD><TD valign=top>";
     }
-    elseif( $_REQUEST[attemptb] == 'commit' )
+    elseif( $_REQUEST['attemptb'] == 'commit' )
     {
         $db->Execute("UPDATE $dbtables[tribes] "
                     ."SET sec_skill_att = '$_REQUEST[sec]' "
@@ -764,11 +751,11 @@ else
     }
 }
 
-if( $tribeinfo['pri_skill_att']<>'' | $tribeinfo['sec_skill_att']<>'' )
+if( $tribeinfo['pri_skill_att'] != '' | $tribeinfo['sec_skill_att'] != '' )
 {
     echo "<FORM ACTION=main.php METHOD=POST align=right>";
     echo "<INPUT TYPE=HIDDEN NAME=resetp VALUE=resetp>";
-    if( $_SESSION[tooltip] == '1' )
+    if( $_SESSION['tooltip'] == '1' )
     {
         echo "<INPUT TYPE=SUBMIT VALUE=CLEAR onmouseover=\"return overlib('Clears out both your skill selections so that you may select new ones.');\" onmouseout=\"nd();\">";
     }
@@ -847,7 +834,7 @@ else
     while( !$res->EOF )
     {
         $row = $res->fields;
-        if( $row[hex_id] == $tribeinfo[hex_id] )
+        if( $row['hex_id'] == $tribeinfo['hex_id'] )
         {
             if ($row['tribeid']==$_SESSION['current_unit'])
             {
@@ -896,15 +883,15 @@ if( $scoutskill['level'] > 7 )
     $farinfo = $far->fields;
 
     $neighbor = array(
-        "NW" => $farinfo[nw],
-        "N" => $farinfo[n],
-        "NE" => $farinfo[ne],
-        "W" => $farinfo[w],
-        "X" => $tribeinfo[hex_id],
-        "E" => $farinfo[e],
-        "SW" => $farinfo[sw],
-        "S" => $farinfo[s],
-        "SE" => $farinfo[se]);
+        "NW" => $farinfo['nw'],
+        "N" => $farinfo['n'],
+        "NE" => $farinfo['ne'],
+        "W" => $farinfo['w'],
+        "X" => $tribeinfo['hex_id'],
+        "E" => $farinfo['e'],
+        "SW" => $farinfo['sw'],
+        "S" => $farinfo['s'],
+        "SE" => $farinfo['se']);
 
     $neigh_info = array();
     foreach ($neighbor AS $key => $value)
@@ -949,7 +936,7 @@ if( $scoutskill['level'] > 7 )
     }
 }
 
-if( !$row[tribeid] && $nearby < 1 )
+if( !$row['tribeid'] && $nearby < 1 )
 {
     if( $_SESSION['tooltip'] == '1' )
     {
@@ -975,7 +962,7 @@ if( !$row[tribeid] && $nearby < 1 )
     echo "</TD></TR>";
 }
 
-elseif( $row[tribeid] && $spyskill[level] > 0 )
+elseif( $row['tribeid'] && $spyskill['level'] > 0 )
 {
     echo "<TR CLASS=color_header>"
         ."<TD CLASS=heading_rounded>&nbsp;Spy On&nbsp;"
@@ -990,7 +977,7 @@ elseif( $row[tribeid] && $spyskill[level] > 0 )
     }
     echo "</TD></TR>";
 }
-elseif( $row[hex_id] == $tribeinfo[hex_id] && $spyskill[level] < 1 )
+elseif( $row['hex_id'] == $tribeinfo['hex_id'] && $spyskill['level'] < 1 )
 {
     echo "<TR CLASS=color_header>"
         ."<TD CLASS=heading_rounded>&nbsp;Attack&nbsp;"
@@ -1039,7 +1026,7 @@ function table_rows ($title, $cols, $data)
 
     echo "<p>";
     echo "<TABLE COLS=$num_cols BORDER=0 CELLPADDING=2 CELLSPACING=0 WIDTH=\"100%\">";
-    if ($title <> "")
+    if ($title !=  "")
     {
         echo "<TR width=\"100%\">"
             ."<TD width=\"100%\" colspan=$num_cols>"
@@ -1058,7 +1045,7 @@ function table_rows ($title, $cols, $data)
         while( $i < $cols && !$data->EOF)
         {
             $data_info = $data->fields;
-            if( $data_info[value] > 0 )
+            if( $data_info['value'] > 0 )
             {
                 echo "<TD NOWRAP><FONT CLASS=rsrc_name2>&nbsp;$data_info[name]&nbsp;</TD>";
                 echo "<TD>"
@@ -1131,10 +1118,8 @@ function table_struct_info ($tribeinfo)
 {
     global $db, $dbtables;
 
-    $struct = $db->Execute("SELECT * FROM $dbtables[structures] "
-                          ."WHERE clanid = '$tribeinfo[clanid]' "
-                          ."AND hex_id = '$tribeinfo[hex_id]'");
-
+    $struct = $db->Execute("SELECT * FROM $dbtables[structures] WHERE clanid = '$tribeinfo[clanid]' AND hex_id = '$tribeinfo[hex_id]'");
+    db_op_result($struct,__LINE__,__FILE__);
     if( !$struct->EOF )
     {
         echo "<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=4 WIDTH=\"100%\">";
@@ -1149,40 +1134,51 @@ function table_struct_info ($tribeinfo)
             while( $i < 5 )
             {
                 $structinfo = $struct->fields;
-                if( !$structinfo[proper] == '' )
+                if( !$structinfo['proper'] == '' )
                 {
                     $trid = "";
-                    echo "<TD VALIGN=TOP><FONT CLASS=rsrc_name2>";
-                    if( $structinfo[struct_pts] < $structinfo[max_struct_pts] )
+                    //is it completed?
+                    if($structinfo['complete'] != "Y")
                     {
-                        if ( $structinfo[tribeid] <>  $tribeinfo[tribeid])
+                        $trid = "<i><small> (Under Construction)</small></i>";
+
+                    }
+                    echo "<TD VALIGN=TOP><FONT CLASS=rsrc_name2>";
+                    if( $structinfo['struct_pts'] < $structinfo['max_struct_pts'] )
+                    {
+                        if ( $structinfo['tribeid'] !=  $tribeinfo['tribeid'])
                         {
                             // Does the Building belong to this tribe?
-                            ereg ("[^.]*.(.*)", $structinfo[tribeid], $tid);
+                            ereg ("[^.]*.(.*)", $structinfo['tribeid'], $tid);
                             $trid = "[$tid[1]]";
                         }
                         echo "<i>$structinfo[proper]$trid ";
-                        if( $structinfo[subunit] <> '' )
+                        if( $structinfo['subunit'] != '' )
                         {
                             echo "<BR>$structinfo[number] $structinfo[subunit]</i>";
                         }
                         else
-                        {}
+                        {
+                           //passthru
+                        }
                     }
                     else
                     {
-                        if ( $structinfo[tribeid] <>  $tribeinfo[tribeid])
+                        if ( $structinfo['tribeid'] !=  $tribeinfo['tribeid'])
                         {
                             // Does the Building belong to this tribe?
-                            ereg ("[^.]*.(.*)", $structinfo[tribeid], $tid);
+                            ereg ("[^.]*.(.*)", $structinfo['tribeid'], $tid);
                             $trid = "[$tid[1]]";
                         }
                         echo "$structinfo[proper]$trid ";
-                        if( $structinfo[subunit] <> '' )
+                        if( $structinfo['subunit'] != '' )
                         {
                             echo "<BR>$structinfo[number] $structinfo[subunit]";
                         }
-                        else {}
+                        else
+                        {
+                          //pass thru
+                        }
                     }
                     echo "&nbsp;&nbsp;</TD>";
                 }
@@ -1208,48 +1204,48 @@ function table_pop_info($tribeinfo)
     echo "</TR>";
 
     echo "<TR>";
-        $totalpop = NUMBER(($tribeinfo[activepop] + $tribeinfo[warpop] + $tribeinfo[inactivepop]),0);
+        $totalpop = NUMBER(($tribeinfo['activepop'] + $tribeinfo['warpop'] + $tribeinfo['inactivepop']),0);
             echo "<TD><FONT CLASS=rsrc_name>Total</FONT></TD>";
             echo "<TD align=right><FONT CLASS=stat_resource>$totalpop</TD>";
 
-        if( $tribeinfo[activepop] > 0 )
+        if( $tribeinfo['activepop'] > 0 )
         {
-            $activepop = NUMBER($tribeinfo[activepop],0);
-            $unassigned = NUMBER($tribeinfo[curam],0);
+            $activepop = NUMBER($tribeinfo['activepop'],0);
+            $unassigned = NUMBER($tribeinfo['curam'],0);
             echo "<TD><FONT CLASS=rsrc_name>Actives</FONT></TD>";
             echo "<TD align=right><FONT CLASS=stat_resource>$activepop ($unassigned)</TD>";
         }
 
-        if( $tribeinfo[inactivepop] > 0 )
+        if( $tribeinfo['inactivepop'] > 0 )
         {
-            $inactivepop = NUMBER($tribeinfo[inactivepop],0);
+            $inactivepop = NUMBER($tribeinfo['inactivepop'],0);
             echo "<TD><FONT CLASS=rsrc_name>Inactives</FONT></TD>";
             echo "<TD align=right><FONT CLASS=stat_resource>$inactivepop</TD>";
         }
 
-        if( $tribeinfo[warpop] > 0 )
+        if( $tribeinfo['warpop'] > 0 )
         {
             $gar = $db->Execute("SELECT count(*) as garrisons FROM $dbtables[garrisons] "
                                ."WHERE tribeid = '$_SESSION[current_unit]'");
             $garinfo = $gar->fields;
-            $warpop = NUMBER($tribeinfo[warpop]);
+            $warpop = NUMBER($tribeinfo['warpop']);
             echo "<TD><FONT CLASS=rsrc_name>Warriors</FONT></TD>";
             echo "<TD align=right><FONT CLASS=stat_resource>$warpop ($garinfo[garrisons])</TD>";
         }
     echo "</TR>";
 
-    if ( $tribeinfo[slavepop] > 0  ||  $tribeinfo[specialpop] > 0 )
+    if ( $tribeinfo['slavepop'] > 0  ||  $tribeinfo['specialpop'] > 0 )
     {
         echo "<TR>";
             $record_pad=8;
-            if( $tribeinfo[slavepop] > 0 )
+            if( $tribeinfo['slavepop'] > 0 )
             {
                 $record_pad=$record_pad-2;
                 echo "<TD><FONT CLASS=rsrc_name>Slaves</FONT></TD>";
                 echo "<TD align=right><FONT CLASS=stat_resource>$tribeinfo[slavepop]</TD>";
             }
 
-            if( $tribeinfo[specialpop] > 0 )
+            if( $tribeinfo['specialpop'] > 0 )
             {
                 $record_pad=$record_pad-2;
                 echo "<TD><FONT CLASS=rsrc_name>Special</FONT></TD>";

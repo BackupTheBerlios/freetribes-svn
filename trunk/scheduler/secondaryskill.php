@@ -11,8 +11,7 @@ if ($pos !== false)
     die("You cannot access this page directly!");
 }
 
-$res = $db->Execute("SELECT * FROM $dbtables[tribes] "
-                   ."WHERE sec_skill_att != ''");
+$res = $db->Execute("SELECT * FROM $dbtables[tribes] WHERE sec_skill_att != ''");
   db_op_result($res,__LINE__,__FILE__);
 while( !$res->EOF )
 {
@@ -20,37 +19,28 @@ while( !$res->EOF )
     if( !$tribe['sec_skill_att'] == "" )
     {
         ////////////////////////////////Get the info needed//////////////////////////////////
-        $cur_sec = $db->Execute("SELECT level,abbr FROM $dbtables[skills] "
-                               ."WHERE abbr = '$tribe[sec_skill_att]' "
-                               ."AND tribeid = '$tribe[tribeid]'");
+        $cur_sec = $db->Execute("SELECT level,abbr FROM $dbtables[skills] WHERE abbr = '$tribe[sec_skill_att]' AND tribeid = '$tribe[tribeid]'");
          db_op_result($cur_sec,__LINE__,__FILE__);
         $current_sec = $cur_sec->fields;
-        $pinfo = $db->Execute("SELECT * FROM $dbtables[skill_table] "
-                             ."WHERE abbr = '$tribe[pri_skill_att]'");
+        $pinfo = $db->Execute("SELECT * FROM $dbtables[skill_table] WHERE abbr = '$tribe[pri_skill_att]'");
            db_op_result($pinfo,__LINE__,__FILE__);
         $pkinfo = $pinfo->fields;
-        $sinfo = $db->Execute("SELECT * FROM $dbtables[skill_table] "
-                             ."WHERE abbr = '$tribe[sec_skill_att]'");
+        $sinfo = $db->Execute("SELECT * FROM $dbtables[skill_table] WHERE abbr = '$tribe[sec_skill_att]'");
             db_op_result($sinfo,__LINE__,__FILE__);
         $skinfo = $sinfo->fields;
-        $lit = $db->Execute("SELECT * FROM $dbtables[skills] "
-                           ."WHERE abbr = 'lit' "
-                           ."AND tribeid = '$tribe[tribeid]'");
+        $lit = $db->Execute("SELECT * FROM $dbtables[skills] WHERE abbr = 'lit' AND tribeid = '$tribe[tribeid]'");
           db_op_result($lit,__LINE__,__FILE__);
         $literacy = $lit->fields;
         if( $current_sec['level'] > 10 )
         {
-            $resk = $db->Execute("SELECT * FROM $dbtables[skills] "
-                                ."WHERE abbr = 'res' "
-                                ."and tribeid = '$tribe[tribeid]'");
+            $resk = $db->Execute("SELECT * FROM $dbtables[skills] WHERE abbr = 'res' and tribeid = '$tribe[tribeid]'");
             db_op_result($resk,__LINE__,__FILE__);
             $research = $resk->fields;
         }
 
     // Queries added to get religious skill bonuses and penalties
 
-    $religion = $db->Execute("SELECT * FROM $dbtables[religions] "
-                ."WHERE clanid='$tribe[clanid]'");
+    $religion = $db->Execute("SELECT * FROM $dbtables[religions] WHERE clanid='$tribe[clanid]'");
        db_op_result($religion,__LINE__,__FILE__);
 
     $rel_bonus = 0;
@@ -83,11 +73,9 @@ while( !$res->EOF )
             $rel_bonus -= $rel['arch_pen2_amount'];
         }
 
-        if ($rel_bonus <> 0)
+        if ($rel_bonus != 0)
         {
-            $rel_level = $db->Execute("SELECT * FROM $dbtables[skills] "
-                        ."WHERE abbr='rel' "
-                        ."AND tribeid='$tribe[tribeid]'");
+            $rel_level = $db->Execute("SELECT * FROM $dbtables[skills] WHERE abbr='rel' AND tribeid='$tribe[tribeid]'");
                db_op_result($rel_level,__LINE__,__FILE__);
             $rel_level = $rel_level->fields['level'];
 
@@ -172,35 +160,14 @@ while( !$res->EOF )
     if( $totalchance >= 0 && $current_sec['level'] < 20 )                 ///bluesman addition
     {
         $current_sec['level'] += 1;
-        if( $game_skill_debug )
-        {
-            $query = $db->Execute("INSERT INTO $dbtables[logs] "
-                        ."VALUES("
-                        ."'',"
-                        ."'$month[count]',"
-                        ."'$year[count]',"
-                        ."'0000',"
-                        ."'0000.00',"
-                        ."'DEBUG',"
-                        ."'$stamp',"
-                        ."'DEBUG: Secondary SUCCESS $tribe[tribeid]<BR>"
-                        ."rolled $skillroll and had total chance "
-                        ."$totalchance = "
-                        ."$basechance - $skillroll + $chancebonus - $totaldeduct + $rel_bonus')");
-             db_op_result($query,__LINE__,__FILE__);
-        }
-        $query = $db->Execute("UPDATE $dbtables[skills] "
-                    ."SET level = '$current_sec[level]' "
-                    ."WHERE tribeid = '$tribe[tribeid]' "
-                    ."AND abbr = '$skinfo[abbr]'");
+
+        $query = $db->Execute("UPDATE $dbtables[skills] SET level = '$current_sec[level]' WHERE tribeid = '$tribe[tribeid]' AND abbr = '$skinfo[abbr]'");
            db_op_result($query,__LINE__,__FILE__);
-        $query = $db->Execute("UPDATE $dbtables[tribes] "
-                    ."SET sec_skill_att = '' "
-                    ."WHERE tribeid = '$tribe[tribeid]'");
+        $query = $db->Execute("UPDATE $dbtables[tribes] SET sec_skill_att = '' WHERE tribeid = '$tribe[tribeid]'");
            db_op_result($query,__LINE__,__FILE__);
-        if( $skinfo['morale'] == 'Y'  || $rel_bonus<>0)
+        if( $skinfo['morale'] == 'Y'  || $rel_bonus != 0)
         {
-            if ($rel_bonus<>0)
+            if ($rel_bonus != 0)
             {
                 $morale_bonus = 0.002;
             }
@@ -208,9 +175,7 @@ while( !$res->EOF )
             {
                 $morale_bonus = 0.01;
             }
-            $query = $db->Execute("UPDATE $dbtables[tribes] "
-                        ."SET morale = morale + '$morale_bonus' "
-                        ."WHERE tribeid = '$tribe[tribeid]'");
+            $query = $db->Execute("UPDATE $dbtables[tribes] SET morale = morale + '$morale_bonus' WHERE tribeid = '$tribe[tribeid]'");
                db_op_result($query,__LINE__,__FILE__);
         }
         if( $current_sec['level'] > 10 )
